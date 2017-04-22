@@ -1,0 +1,1 @@
+langums.exe --src test/test.scx --dst test_processed.scx --lang test/test.l

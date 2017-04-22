@@ -1,0 +1,338 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="libmpq">
+      <UniqueIdentifier>{726e8b48-eeb0-4f29-897d-7e37290e7bcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scomp">
+      <UniqueIdentifier>{4380a9d9-a8c6-4097-ba02-d55e0f4c4c9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{55b282f5-8416-47fc-b8b5-14c4564b9154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bzip2">
+      <UniqueIdentifier>{28f8403c-73a5-40be-8cd7-a157e50c1001}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="libchk">
+      <UniqueIdentifier>{e9c70de5-393c-4ed1-b984-bf42df57162b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ast">
+      <UniqueIdentifier>{df3172f5-a728-47a2-a1f8-a206024b55f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{1380a6a6-54a1-4870-898a-f320cd4932a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="compiler">
+      <UniqueIdentifier>{39ea121c-75e4-4989-a2d2-1b1d66671686}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\MpqBlockTable.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\MpqCrypt.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\MpqHashTable.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\SFmpq_static.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\SFmpqapi.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\SFmpqapi_no-lib.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libmpq\SFUtil.cpp">
+      <Filter>libmpq</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\explode.c">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\huffman.cpp">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\implode.c">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\SComp.cpp">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\SErr.cpp">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\SMem.cpp">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\wave.cpp">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\compress.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\deflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\gzclose.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\gzlib.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\gzread.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\gzwrite.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\infback.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\trees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\uncompr.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\crc32s.c">
+      <Filter>scomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\blocksort.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\bzlib.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\crctable.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\decompress.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\randtable.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\compress_bzip2.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\scomp\bzip2\huffman_bzip2.c">
+      <Filter>bzip2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\log.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\chk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parser\parser.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\compiler\compiler.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\compiler\ir.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\stringschunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\locationschunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parser\preprocessor.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\compiler\ir_optimizer.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\compiler\triggerbuilder.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parser\ast_optimizer.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\MpqCrypt.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\MpqHashTable.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\resource.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\SFmpq_static.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\SFmpqapi.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\SFmpqapi_no-lib.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\SFTypes.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libmpq\SFUtil.h">
+      <Filter>libmpq</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\huffman.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\pklib.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\SComp.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\SErr.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\SMem.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\wave.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\wintypes.h">
+      <Filter>scomp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\crc32.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\deflate.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\gzguts.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\inffast.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\inffixed.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\inflate.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\inftrees.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\trees.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\zconf.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\zlib.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\zlib\zutil.h">
+      <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\bzip2\bzlib.h">
+      <Filter>bzip2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\scomp\bzip2\bzlib_private.h">
+      <Filter>bzip2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\cxxopts.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\chk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\ichunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\verchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\stringschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\triggerschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\constants.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\enums.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parser\parser.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\compiler.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stringhash.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\serialization.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\locationschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parser\preprocessor.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ast\ast.h">
+      <Filter>ast</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stringutil.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir_optimizer.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\triggerbuilder.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parser\ast_optimizer.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

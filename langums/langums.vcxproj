@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E8800F88-1303-4EE5-8479-7767BADF2A69}</ProjectGuid>
+    <RootNamespace>langums</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)\..\</OutDir>
+    <TargetName>langums_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)\..\</OutDir>
+    <TargetName>langums</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\compiler\compiler.cpp" />
+    <ClCompile Include="..\src\compiler\ir.cpp" />
+    <ClCompile Include="..\src\compiler\ir_optimizer.cpp" />
+    <ClCompile Include="..\src\compiler\triggerbuilder.cpp" />
+    <ClCompile Include="..\src\libchk\chk.cpp" />
+    <ClCompile Include="..\src\libchk\locationschunk.cpp" />
+    <ClCompile Include="..\src\libchk\stringschunk.cpp" />
+    <ClCompile Include="..\src\libmpq\MpqBlockTable.cpp" />
+    <ClCompile Include="..\src\libmpq\MpqCrypt.cpp" />
+    <ClCompile Include="..\src\libmpq\MpqHashTable.cpp" />
+    <ClCompile Include="..\src\libmpq\SFmpqapi.cpp" />
+    <ClCompile Include="..\src\libmpq\SFmpqapi_no-lib.cpp" />
+    <ClCompile Include="..\src\libmpq\SFmpq_static.cpp" />
+    <ClCompile Include="..\src\libmpq\SFUtil.cpp" />
+    <ClCompile Include="..\src\log.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\parser\ast_optimizer.cpp" />
+    <ClCompile Include="..\src\parser\parser.cpp" />
+    <ClCompile Include="..\src\parser\preprocessor.cpp" />
+    <ClCompile Include="..\src\scomp\bzip2\blocksort.c" />
+    <ClCompile Include="..\src\scomp\bzip2\bzlib.c" />
+    <ClCompile Include="..\src\scomp\bzip2\compress_bzip2.c" />
+    <ClCompile Include="..\src\scomp\bzip2\crctable.c" />
+    <ClCompile Include="..\src\scomp\bzip2\decompress.c" />
+    <ClCompile Include="..\src\scomp\bzip2\huffman_bzip2.c" />
+    <ClCompile Include="..\src\scomp\bzip2\randtable.c" />
+    <ClCompile Include="..\src\scomp\crc32s.c" />
+    <ClCompile Include="..\src\scomp\explode.c" />
+    <ClCompile Include="..\src\scomp\huffman.cpp" />
+    <ClCompile Include="..\src\scomp\implode.c" />
+    <ClCompile Include="..\src\scomp\SComp.cpp" />
+    <ClCompile Include="..\src\scomp\SErr.cpp" />
+    <ClCompile Include="..\src\scomp\SMem.cpp" />
+    <ClCompile Include="..\src\scomp\wave.cpp" />
+    <ClCompile Include="..\src\scomp\zlib\adler32.c" />
+    <ClCompile Include="..\src\scomp\zlib\compress.c" />
+    <ClCompile Include="..\src\scomp\zlib\crc32.c" />
+    <ClCompile Include="..\src\scomp\zlib\deflate.c" />
+    <ClCompile Include="..\src\scomp\zlib\gzclose.c" />
+    <ClCompile Include="..\src\scomp\zlib\gzlib.c" />
+    <ClCompile Include="..\src\scomp\zlib\gzread.c" />
+    <ClCompile Include="..\src\scomp\zlib\gzwrite.c" />
+    <ClCompile Include="..\src\scomp\zlib\infback.c" />
+    <ClCompile Include="..\src\scomp\zlib\inffast.c" />
+    <ClCompile Include="..\src\scomp\zlib\inflate.c" />
+    <ClCompile Include="..\src\scomp\zlib\inftrees.c" />
+    <ClCompile Include="..\src\scomp\zlib\trees.c" />
+    <ClCompile Include="..\src\scomp\zlib\uncompr.c" />
+    <ClCompile Include="..\src\scomp\zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\ast\ast.h" />
+    <ClInclude Include="..\src\compiler\compiler.h" />
+    <ClInclude Include="..\src\compiler\ir.h" />
+    <ClInclude Include="..\src\compiler\ir_optimizer.h" />
+    <ClInclude Include="..\src\compiler\triggerbuilder.h" />
+    <ClInclude Include="..\src\cxxopts.h" />
+    <ClInclude Include="..\src\libchk\chk.h" />
+    <ClInclude Include="..\src\libchk\constants.h" />
+    <ClInclude Include="..\src\libchk\enums.h" />
+    <ClInclude Include="..\src\libchk\ichunk.h" />
+    <ClInclude Include="..\src\libchk\locationschunk.h" />
+    <ClInclude Include="..\src\libchk\stringschunk.h" />
+    <ClInclude Include="..\src\libchk\triggerschunk.h" />
+    <ClInclude Include="..\src\libchk\verchunk.h" />
+    <ClInclude Include="..\src\libmpq\MpqBlockTable.h" />
+    <ClInclude Include="..\src\libmpq\MpqCrypt.h" />
+    <ClInclude Include="..\src\libmpq\MpqHashTable.h" />
+    <ClInclude Include="..\src\libmpq\resource.h" />
+    <ClInclude Include="..\src\libmpq\SFmpqapi.h" />
+    <ClInclude Include="..\src\libmpq\SFmpqapi_no-lib.h" />
+    <ClInclude Include="..\src\libmpq\SFmpq_static.h" />
+    <ClInclude Include="..\src\libmpq\SFTypes.h" />
+    <ClInclude Include="..\src\libmpq\SFUtil.h" />
+    <ClInclude Include="..\src\log.h" />
+    <ClInclude Include="..\src\parser\ast_optimizer.h" />
+    <ClInclude Include="..\src\parser\parser.h" />
+    <ClInclude Include="..\src\parser\preprocessor.h" />
+    <ClInclude Include="..\src\scomp\bzip2\bzlib.h" />
+    <ClInclude Include="..\src\scomp\bzip2\bzlib_private.h" />
+    <ClInclude Include="..\src\scomp\huffman.h" />
+    <ClInclude Include="..\src\scomp\pklib.h" />
+    <ClInclude Include="..\src\scomp\SComp.h" />
+    <ClInclude Include="..\src\scomp\SErr.h" />
+    <ClInclude Include="..\src\scomp\SMem.h" />
+    <ClInclude Include="..\src\scomp\wave.h" />
+    <ClInclude Include="..\src\scomp\wintypes.h" />
+    <ClInclude Include="..\src\scomp\zlib\crc32.h" />
+    <ClInclude Include="..\src\scomp\zlib\deflate.h" />
+    <ClInclude Include="..\src\scomp\zlib\gzguts.h" />
+    <ClInclude Include="..\src\scomp\zlib\inffast.h" />
+    <ClInclude Include="..\src\scomp\zlib\inffixed.h" />
+    <ClInclude Include="..\src\scomp\zlib\inflate.h" />
+    <ClInclude Include="..\src\scomp\zlib\inftrees.h" />
+    <ClInclude Include="..\src\scomp\zlib\trees.h" />
+    <ClInclude Include="..\src\scomp\zlib\zconf.h" />
+    <ClInclude Include="..\src\scomp\zlib\zlib.h" />
+    <ClInclude Include="..\src\scomp\zlib\zutil.h" />
+    <ClInclude Include="..\src\serialization.h" />
+    <ClInclude Include="..\src\stringhash.h" />
+    <ClInclude Include="..\src\stringutil.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
