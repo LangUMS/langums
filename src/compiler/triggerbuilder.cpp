@@ -306,6 +306,16 @@ namespace Langums
 		m_HasChanges = true;
 	}
 
+	void TriggerBuilder::CodeGen_Ping(unsigned int locationId)
+	{
+		using namespace CHK;
+		auto& action = m_Trigger.m_Actions[m_NextAction++];
+		action.m_ActionType = TriggerActionType::MinimapPing;
+		action.m_Source = locationId;
+		action.m_Flags = 4;
+		m_HasChanges = true;
+	}
+
 	void TriggerBuilder::CodeGen_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState actionType, CHK::ResourceType resourceType)
 	{
 		using namespace CHK;

@@ -35,6 +35,7 @@ namespace Langums
 		void CodeGen_Defeat();
 		void CodeGen_Draw();
 		void CodeGen_CenterView(unsigned int locationId);
+		void CodeGen_Ping(unsigned int locationId);
 		void CodeGen_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ResourceType resourceType);
 
 		const CHK::Trigger& GetTrigger()

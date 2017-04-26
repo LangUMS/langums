@@ -30,16 +30,18 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 ## Language features
 
+- C-like syntax
 - Single primitive type - unsigned 32-bit int
 - Local (block scoped) and global variables
 - Functions with arguments and a return value
 - Expressions with stack-based evaluation e.g. `((foo + 42) - bar)`
-- Unsigned integer arithmetic operators - add, subtract, multiply, divide - with underflow detection
-- Postfix increment/ decrement operators
-- If statements
-- While loops
+- Unsigned integer arithmetic with overflow detection
+- Postfix increment and decrement operators - `x++`, `y--`
+- Arithmetic operators - `+`, `-`, `/`, `*`
+- Comparison operators - `<`, `<=`, `==`, `!=`, `>=`, `>`
+- `if` statement
+- `while` loop
 - Event handlers
-- C++/ JavaScript inspired syntax
 
 ## Language basics
 
@@ -114,7 +116,8 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `set_resource(Player, ResourceType, QuantityExpression)`     | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`     | Gives resources to a player.                             |
 | `take_resource(Player, ResourceType, QuantityExpression)`    | Takes resources from a player.                           |
-| `center_view(LocationName)`                                  | Centers the view on a location.                          |
+| `center_view(Player, LocationName)`                          | Centers the view on a location for a player.             |
+| `ping(Player, LocationName)`                                 | Triggers a minimap ping on a location for a player.      |
 | `print(String, optional: Player)`                            | Prints a message to a player, defaults to Player1.       |
 | `sleep(Quantity)`                                            | Sleeps for milliseconds. (Will freeze the event loop!)   |
 | `spawn(Unit, Player, QuantityExpression, LocationName)`      | Spawns units for player at a location.                   |

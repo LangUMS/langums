@@ -731,7 +731,43 @@ namespace Langums
 			auto locationName = (ASTStringLiteral*)arg1.get();
 			auto locName = locationName->GetValue();
 
-			EmitInstruction(new IRCenterViewInstruction(playerId + 1, locName), instructions);
+			EmitInstruction(new IRCenterViewInstruction(playerId, locName), instructions);
+		}
+		else if (fnName == "ping")
+		{
+			if (!fnCall->HasChildren())
+			{
+				throw IRCompilerException("ping() called without arguments");
+			}
+
+			if (fnCall->GetChildCount() != 2)
+			{
+				throw IRCompilerException("ping() takes exactly two arguments");
+			}
+
+			auto arg0 = fnCall->GetArgument(0);
+			if (arg0->GetType() != ASTNodeType::Identifier)
+			{
+				throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
+			}
+
+			auto playerName = (ASTIdentifier*)arg0.get();
+			auto playerId = PlayerNameToId(playerName->GetName());
+			if (playerId == -1)
+			{
+				throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+			}
+
+			auto arg1 = fnCall->GetArgument(1);
+			if (arg1->GetType() != ASTNodeType::StringLiteral)
+			{
+				throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
+			}
+
+			auto locationName = (ASTStringLiteral*)arg1.get();
+			auto locName = locationName->GetValue();
+
+			EmitInstruction(new IRPingInstruction(playerId, locName), instructions);
 		}
 		else if (fnName == "print")
 		{

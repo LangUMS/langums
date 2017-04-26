@@ -674,13 +674,45 @@ namespace Langums
 				current.CodeGen_JumpTo(address);
 				m_Triggers.push_back(current.GetTrigger());
 
-				auto centerViewTrigger = TriggerBuilder(address, instruction.get(), playerMask);
+				auto centerViewTrigger = TriggerBuilder(address, instruction.get(), playerMask + 1);
 
 				centerViewTrigger.CodeGen_CenterView(locationId + 1);
 
 				auto retAddress = nextAddress++;
 				centerViewTrigger.CodeGen_JumpTo(retAddress);
 				m_Triggers.push_back(centerViewTrigger.GetTrigger());
+
+				current = TriggerBuilder(retAddress, instruction.get());
+			}
+			else if (instruction->GetType() == IRInstructionType::Ping)
+			{
+				auto ping = (IRPingInstruction*)instruction.get();
+				auto playerMask = ping->GetPlayerId();
+
+				auto locName = ping->GetLocationName();
+				if (locName.length() == 0)
+				{
+					throw CompilerException(SafePrintf("Empty location \"%\" in ping instruction!", ping->GetLocationName()));
+				}
+
+				auto locationStringId = m_StringsChunk->FindString(ping->GetLocationName()) + 1;
+				auto locationId = m_LocationsChunk->FindLocation(locationStringId);
+				if (locationId == -1)
+				{
+					throw CompilerException(SafePrintf("Location \"%\" not found!", ping->GetLocationName()));
+				}
+
+				auto address = nextAddress++;
+				current.CodeGen_JumpTo(address);
+				m_Triggers.push_back(current.GetTrigger());
+
+				auto pingTrigger = TriggerBuilder(address, instruction.get(), playerMask + 1);
+
+				pingTrigger.CodeGen_Ping(locationId + 1);
+
+				auto retAddress = nextAddress++;
+				pingTrigger.CodeGen_JumpTo(retAddress);
+				m_Triggers.push_back(pingTrigger.GetTrigger());
 
 				current = TriggerBuilder(retAddress, instruction.get());
 			}

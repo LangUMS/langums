@@ -82,6 +82,7 @@ namespace Langums
 		Kill, // kills a unit
 		EndGame, // ends the game in a victory or defeat for a given player
 		CenterView, // centers the camera on a location for a given player
+		Ping, // Minimap ping at a location
 		SetResource, // sets the resource count for a given resource for a given player
 		IncResource, // increments the resource count for a given resource for a given player
 		DecResource, // decrements the resource count for a given resource for a given player
@@ -884,6 +885,33 @@ namespace Langums
 		std::string DebugDump() const
 		{
 			return SafePrintf("CNTRVIEW % %", CHK::PlayersByName[m_PlayerId], m_LocationName);
+		}
+
+		uint8_t GetPlayerId() const
+		{
+			return m_PlayerId;
+		}
+
+		const std::string& GetLocationName() const
+		{
+			return m_LocationName;
+		}
+
+		private:
+		uint8_t m_PlayerId;
+		std::string m_LocationName;
+	};
+
+	class IRPingInstruction : public IIRInstruction
+	{
+		public:
+		IRPingInstruction(uint8_t playerId, const std::string& locationName) :
+			m_PlayerId(playerId), m_LocationName(locationName),
+			IIRInstruction(IRInstructionType::Ping) {}
+
+		std::string DebugDump() const
+		{
+			return SafePrintf("PING % %", CHK::PlayersByName[m_PlayerId], m_LocationName);
 		}
 
 		uint8_t GetPlayerId() const
