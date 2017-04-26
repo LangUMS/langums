@@ -38,6 +38,7 @@ namespace Langums
         void CodeGen_CenterView(unsigned int locationId);
         void CodeGen_Ping(unsigned int locationId);
         void CodeGen_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ResourceType resourceType);
+        void CodeGen_SetCountdown(unsigned int time, CHK::TriggerActionState action);
 
         const CHK::Trigger& GetTrigger()
         {

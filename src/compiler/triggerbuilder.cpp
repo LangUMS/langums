@@ -345,4 +345,14 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_SetCountdown(unsigned int time, CHK::TriggerActionState actionType)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetCountdownTimer;
+        action.m_Milliseconds = time;
+        action.m_Modifier = (uint8_t)actionType;
+        m_HasChanges = true;
+    }
+
 }

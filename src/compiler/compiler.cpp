@@ -888,10 +888,52 @@ namespace Langums
 
                     for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
                     {
+                        auto sub = TriggerBuilder(address, instruction.get());
+                        sub.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        sub.CodeGen_DecReg(regId, i);
+                        sub.CodeGen_SetResources(playerId, i, TriggerActionState::Subtract, setResource->GetResourceType());
+                        m_Triggers.push_back(sub.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get());
+                    finishAdd.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::SetCountdown)
+            {
+                auto setCountdown = (IRSetCountdownInstruction*)instruction.get();
+
+                if (setCountdown->IsValueLiteral())
+                {
+                    auto time = setCountdown->GetRegisterId();
+                    current.CodeGen_SetCountdown(time, TriggerActionState::SetTo);
+                }
+                else
+                {
+                    auto regId = setCountdown->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! SetCountdown expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_SetCountdown(0, TriggerActionState::SetTo);
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get());
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
                         auto add = TriggerBuilder(address, instruction.get());
                         add.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
                         add.CodeGen_DecReg(regId, i);
-                        add.CodeGen_SetResources(playerId, i, TriggerActionState::Subtract, setResource->GetResourceType());
+                        add.CodeGen_SetCountdown(i, TriggerActionState::Add);
                         m_Triggers.push_back(add.GetTrigger());
                     }
 

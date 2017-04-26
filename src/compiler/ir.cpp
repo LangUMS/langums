@@ -697,6 +697,36 @@ namespace Langums
 
             EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isValueLiteral), instructions);
         }
+        else if (fnName == "set_countdown")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_countdown() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 1)
+            {
+                throw IRCompilerException("set_countdown() takes exactly one argument");
+            }
+
+            auto regId = 0;
+            bool isValueLiteral = false;
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto number = (ASTNumberLiteral*)arg0.get();
+                regId = number->GetValue();
+                isValueLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg0.get(), instructions, aliases);
+                regId = Reg_StackTop;
+            }
+
+            EmitInstruction(new IRSetCountdownInstruction(regId, isValueLiteral), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

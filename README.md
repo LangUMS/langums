@@ -120,6 +120,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `kill(Unit, Player, QuantityExpression, optional: Location)`       | Kills units at an optional location.                     |
 | `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)` | Moves units from one location to another.                |
 | `end(Player, EndCondition)`                                        | Ends the game for Player with EndCondition.              |
+| `set_countdown(Expression)`                                        | Sets the countdown timer.                                |
 | `sleep(Quantity)`                                                  | Sleeps for milliseconds. (Dangerous!)                    |
 | More to be added ...                                               |                                                          |
 

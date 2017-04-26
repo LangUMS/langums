@@ -87,6 +87,7 @@ namespace Langums
         SetResource, // sets the resource count for a given resource for a given player
         IncResource, // increments the resource count for a given resource for a given player
         DecResource, // decrements the resource count for a given resource for a given player
+        SetCountdown, // sets the countdown timer, 
         // conditions
         Event,
         BringCond, // Bring trigger condition
@@ -1130,6 +1131,39 @@ namespace Langums
         uint8_t m_PlayerId;
         CHK::ResourceType m_ResourceType;
         uint32_t m_RegId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRSetCountdownInstruction : public IIRInstruction
+    {
+        public:
+        IRSetCountdownInstruction(uint32_t regId, bool isLiteralValue) :
+            m_RegisterId(regId), m_IsValueLiteral(isLiteralValue), IIRInstruction(IRInstructionType::SetCountdown) {}
+
+        std::string DebugDump() const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf("SETCNDWN %", m_RegisterId);
+            }
+            else
+            {
+                return SafePrintf("SETCNDWN %", RegisterIdToString(m_RegisterId));
+            }
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint32_t m_RegisterId;
         bool m_IsValueLiteral;
     };
 
