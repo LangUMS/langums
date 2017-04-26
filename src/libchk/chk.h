@@ -11,6 +11,7 @@
 #include "stringschunk.h"
 #include "triggerschunk.h"
 #include "locationschunk.h"
+#include "ownrchunk.h"
 
 namespace CHK
 {

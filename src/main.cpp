@@ -312,6 +312,13 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
+	if (ownrChunk.GetPlayerType(7) != PlayerType::Computer)
+	{
+		LOG_F("(!) Warning! Player 8 is not set to type \"Computer\". Overriding.");
+		ownrChunk.SetPlayerType(7, PlayerType::Computer);
+	}
+
 	auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
 	triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
 	LOG_F("Compilation successful! Trigger count: %.", triggersChunk.GetTriggersCount());

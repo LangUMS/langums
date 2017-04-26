@@ -36,6 +36,10 @@ namespace CHK
 			{
 				chunk = std::make_unique<CHKLocationsChunk>(bytes, type);
 			}
+			else if (type == "OWNR")
+			{
+				chunk = std::make_unique<CHKOwnrChunk>(bytes, type);
+			}
 			else if
 			( // skip all non-required chunks to lower file-size
 				type == "TYPE" ||

@@ -182,6 +182,9 @@
     <ClCompile Include="..\src\parser\ast_optimizer.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libchk\ownrchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -333,6 +336,9 @@
     </ClInclude>
     <ClInclude Include="..\src\parser\ast_optimizer.h">
       <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\ownrchunk.h">
+      <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

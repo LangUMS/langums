@@ -620,6 +620,64 @@ namespace Langums
 					m_Triggers.push_back(finishTrigger.GetTrigger());
 				}
 			}
+			else if (instruction->GetType() == IRInstructionType::Move)
+			{
+				auto move = (IRMoveInstruction*)instruction.get();
+
+				auto srcLocName = move->GetSrcLocationName();
+				auto locationStringId = m_StringsChunk->FindString(srcLocName) + 1;
+				auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId);
+
+				if (srcLocationId == -1)
+				{
+					throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
+				}
+
+				auto dstLocName = move->GetDstLocationName();
+				locationStringId = m_StringsChunk->FindString(dstLocName) + 1;
+				auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId);
+
+				if (dstLocationId == -1)
+				{
+					throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
+				}
+
+				if (move->IsValueLiteral())
+				{
+					current.CodeGen_MoveUnit(move->GetPlayerId(), move->GetUnitId(), move->GetRegisterId(), srcLocationId, dstLocationId);
+				}
+				else
+				{
+					auto regId = move->GetRegisterId();
+					if (regId != Reg_StackTop)
+					{
+						throw CompilerException(SafePrintf("Malformed IR! Move expects the quantity on top of the stack."));
+					}
+
+					regId = ++m_StackPointer;
+
+					auto address = nextAddress++;
+					current.CodeGen_JumpTo(address);
+					m_Triggers.push_back(current.GetTrigger());
+
+					auto retAddress = nextAddress++;
+					current = TriggerBuilder(retAddress, instruction.get());
+
+					for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+					{
+						auto moveTrigger = TriggerBuilder(address, instruction.get());
+						moveTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+						moveTrigger.CodeGen_DecReg(regId, i);
+						current.CodeGen_MoveUnit(move->GetPlayerId(), move->GetUnitId(), i, srcLocationId, dstLocationId);
+						m_Triggers.push_back(moveTrigger.GetTrigger());
+					}
+
+					auto finishTrigger = TriggerBuilder(address, instruction.get());
+					finishTrigger.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+					finishTrigger.CodeGen_JumpTo(retAddress);
+					m_Triggers.push_back(finishTrigger.GetTrigger());
+				}
+			}
 			else if (instruction->GetType() == IRInstructionType::EndGame)
 			{
 				auto endGame = (IREndGameInstruction*)instruction.get();

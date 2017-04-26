@@ -26,8 +26,6 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 4. Now you can run `my_map_final.scx` directly in the game or open it with an editor.
 
-(!) Right now you must set Player 8 manually to be a Computer player before giving the map to langums.exe. This will be automated in the future.
-
 ## Language features
 
 - C-like syntax
@@ -109,20 +107,21 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 
 ## Built-in functions
 
-| Function prototype                                           | Description                                              |
-|--------------------------------------------------------------|----------------------------------------------------------|
-| `poll_events()`                                              | Runs any associated event handlers.                      |
-| `end(Player, EndCondition)`                                  | Ends the game for Player with EndCondition.              |
-| `set_resource(Player, ResourceType, QuantityExpression)`     | Sets the resource count for player.                      |
-| `add_resource(Player, ResourceType, QuantityExpression)`     | Gives resources to a player.                             |
-| `take_resource(Player, ResourceType, QuantityExpression)`    | Takes resources from a player.                           |
-| `center_view(Player, LocationName)`                          | Centers the view on a location for a player.             |
-| `ping(Player, LocationName)`                                 | Triggers a minimap ping on a location for a player.      |
-| `print(String, optional: Player)`                            | Prints a message to a player, defaults to Player1.       |
-| `sleep(Quantity)`                                            | Sleeps for milliseconds. (Will freeze the event loop!)   |
-| `spawn(Unit, Player, QuantityExpression, LocationName)`      | Spawns units for player at a location.                   |
-| `kill(Unit, Player, QuantityExpression, optional: Location)` | Kills units for player at an optional location.          |
-| More to be added ...                                         |                                                          |
+| Function prototype                                                 | Description                                              |
+|--------------------------------------------------------------------|----------------------------------------------------------|
+| `poll_events()`                                                    | Runs any associated event handlers.                      |
+| `print(String, optional: Player)`                                  | Prints a message to a player, defaults to Player1.       |
+| `set_resource(Player, ResourceType, QuantityExpression)`           | Sets the resource count for player.                      |
+| `add_resource(Player, ResourceType, QuantityExpression)`           | Gives resources to a player.                             |
+| `take_resource(Player, ResourceType, QuantityExpression)`          | Takes resources from a player.                           |
+| `center_view(Player, LocationName)`                                | Centers the view on a location for a player.             |
+| `ping(Player, LocationName)`                                       | Triggers a minimap ping on a location for a player.      |
+| `spawn(Unit, Player, QuantityExpression, LocationName)`            | Spawns units at a location.                              |
+| `kill(Unit, Player, QuantityExpression, optional: Location)`       | Kills units at an optional location.                     |
+| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)` | Moves units from one location to another.                |
+| `end(Player, EndCondition)`                                        | Ends the game for Player with EndCondition.              |
+| `sleep(Quantity)`                                                  | Sleeps for milliseconds. (Dangerous!)                    |
+| More to be added ...                                               |                                                          |
 
 ## Built-in event conditions
 
@@ -163,7 +162,7 @@ Will happen sometime in the future. You can help.
 
 Yes. Use the `--preserve-triggers` option. Make sure your existing triggers don't mess with Player 8's stuff.
 
-### LangUMS emits way more triggers than I'd like.
+#### The compiler emits way more triggers than I'd like. What can I do?
 
 The biggest culprit for this is the amount of triggers emitted for arithmetic operations.
 By default LangUMS is tweaked for values up to 65535, but if you don't need such large values in your map you can set the `--copy-batch-size` command-line argument to a lower value e.g. 1024.
@@ -176,13 +175,34 @@ No, but thanks for asking.
 
 ## Limitations
 
-- You must set Player 8 to a Computer player. Also Player 8 has to remain untouched for LangUMS to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely. Preplaced units for Player 8 are also not allowed.
+- Player 8 is reserved and must be a Computer player. This is enforced by the compiler. Also Player 8's stuff needs to remain untouched for LangUMS to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely. Preplaced units for Player 8 are also not allowed.
 - There are about 240 registers available for variables and the stack. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue.
 - Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
 - Currently you have can have up to 253 event handlers, this limitation will be lifted in the future.
 - Recursion of any kind is not allowed and leads to undefined behavior.
 - Multiplication and division can take many cycles to complete, especially with very large numbers.
-- In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle.
+- In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
+
+## For programmers
+
+### Parts of LangUMS
+
+#### Frontend
+- [CHK library](https://github.com/AlexanderDzhoganov/langums/tree/master/src/libchk)
+- [Preprocessor](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/preprocessor.cpp)
+- [Parser](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/parser.cpp)
+- [AST](https://github.com/AlexanderDzhoganov/langums/blob/master/src/ast/ast.h)
+- [AST Optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/ast_optimizer.cpp)
+
+#### Backend (IR)
+
+- [IR generation](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.cpp)
+- [IR optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_optimizer.cpp)
+
+#### Backend (codegen)
+
+- [Codegen](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/compiler.cpp)
+- [TriggerBuilder](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/triggerbuilder.cpp)
 
 ## Future plans
 

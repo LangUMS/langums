@@ -125,6 +125,7 @@
     <ClCompile Include="..\src\compiler\triggerbuilder.cpp" />
     <ClCompile Include="..\src\libchk\chk.cpp" />
     <ClCompile Include="..\src\libchk\locationschunk.cpp" />
+    <ClCompile Include="..\src\libchk\ownrchunk.cpp" />
     <ClCompile Include="..\src\libchk\stringschunk.cpp" />
     <ClCompile Include="..\src\libmpq\MpqBlockTable.cpp" />
     <ClCompile Include="..\src\libmpq\MpqCrypt.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="..\src\libchk\enums.h" />
     <ClInclude Include="..\src\libchk\ichunk.h" />
     <ClInclude Include="..\src\libchk\locationschunk.h" />
+    <ClInclude Include="..\src\libchk\ownrchunk.h" />
     <ClInclude Include="..\src\libchk\stringschunk.h" />
     <ClInclude Include="..\src\libchk\triggerschunk.h" />
     <ClInclude Include="..\src\libchk\verchunk.h" />

@@ -80,6 +80,7 @@ namespace Langums
 		DisplayMsg, // displays a text message
 		Spawn, // spawns a unit
 		Kill, // kills a unit
+		Move, // moves a unit
 		EndGame, // ends the game in a victory or defeat for a given player
 		CenterView, // centers the camera on a location for a given player
 		Ping, // Minimap ping at a location
@@ -826,6 +827,62 @@ namespace Langums
 		uint32_t m_RegId;
 		bool m_IsLiteralValue;
 		std::string m_LocationName;
+	};
+
+	class IRMoveInstruction : public IIRInstruction
+	{
+		public:
+		IRMoveInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& srcLocation, const std::string& dstLocation) :
+			m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral),
+			m_SrcLocationName(srcLocation), m_DstLocationName(dstLocation), IIRInstruction(IRInstructionType::Move) {}
+
+		std::string DebugDump() const
+		{
+			if (m_IsLiteralValue)
+			{
+				return SafePrintf("MOVE % % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_SrcLocationName, m_DstLocationName);
+			}
+
+			return SafePrintf("MOVE % % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_SrcLocationName, m_DstLocationName);
+		}
+
+		uint8_t GetPlayerId() const
+		{
+			return m_PlayerId;
+		}
+
+		uint8_t GetUnitId() const
+		{
+			return m_UnitId;
+		}
+
+		uint32_t GetRegisterId() const
+		{
+			return m_RegId;
+		}
+
+		bool IsValueLiteral() const
+		{
+			return m_IsLiteralValue;
+		}
+
+		const std::string& GetSrcLocationName() const
+		{
+			return m_SrcLocationName;
+		}
+
+		const std::string& GetDstLocationName() const
+		{
+			return m_DstLocationName;
+		}
+
+		private:
+		uint8_t m_PlayerId;
+		uint8_t m_UnitId;
+		uint32_t m_RegId;
+		bool m_IsLiteralValue;
+		std::string m_SrcLocationName;
+		std::string m_DstLocationName;
 	};
 
 	enum class EndGameType
