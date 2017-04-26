@@ -192,7 +192,7 @@ No, but thanks for asking.
 - [Preprocessor](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/preprocessor.cpp)
 - [Parser](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/parser.cpp)
 - [AST](https://github.com/AlexanderDzhoganov/langums/blob/master/src/ast/ast.h)
-- [AST Optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/ast_optimizer.cpp)
+- [AST optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/ast_optimizer.cpp)
 
 #### Backend (IR)
 

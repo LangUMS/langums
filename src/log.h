@@ -20,44 +20,44 @@
 namespace Log
 {
 
-	class Log
-	{
+    class Log
+    {
 
-		public:
-		static const std::unique_ptr<Log>& Instance()
-		{
-			if (m_Instance == nullptr)
-			{
-				m_Instance = std::make_unique<Log>();
-			}
+        public:
+        static const std::unique_ptr<Log>& Instance()
+        {
+            if (m_Instance == nullptr)
+            {
+                m_Instance = std::make_unique<Log>();
+            }
 
-			return m_Instance;
-		}
+            return m_Instance;
+        }
 
-		Log();
+        Log();
 
-		~Log()
-		{
-			Destroy();
-		}
+        ~Log()
+        {
+            Destroy();
+        }
 
-		void Destroy();
+        void Destroy();
 
-		void LogMessage(const std::string& message);
+        void LogMessage(const std::string& message);
 
-		private:
-		void LogThread();
-		std::atomic_char m_ShutdownThread;
-		std::condition_variable m_MessageInserted;
-		std::mutex m_Mutex;
-		std::unique_ptr<std::thread> m_LogThread;
+        private:
+        void LogThread();
+        std::atomic_char m_ShutdownThread;
+        std::condition_variable m_MessageInserted;
+        std::mutex m_Mutex;
+        std::unique_ptr<std::thread> m_LogThread;
 
-		static std::unique_ptr<Log> m_Instance;
-		std::vector<std::string> m_Messages;
+        static std::unique_ptr<Log> m_Instance;
+        std::vector<std::string> m_Messages;
 
-		std::unique_ptr<std::ofstream> m_LogFile;
+        std::unique_ptr<std::ofstream> m_LogFile;
 
-	};
+    };
 
 }
 

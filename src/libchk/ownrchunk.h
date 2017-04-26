@@ -10,36 +10,36 @@
 namespace CHK
 {
 
-	enum class PlayerType : uint8_t
-	{
-		Inactive = 0,
-		RescuePassive = 3,
-		Unused = 4,
-		Computer = 5,
-		Human = 6,
-		Neutral = 7
-	};
+    enum class PlayerType : uint8_t
+    {
+        Inactive = 0,
+        RescuePassive = 3,
+        Unused = 4,
+        Computer = 5,
+        Human = 6,
+        Neutral = 7
+    };
 
-	class CHKOwnrChunk : public IChunk
-	{
-		public:
-		CHKOwnrChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
-		{
-			SetBytes(data);
-		}
+    class CHKOwnrChunk : public IChunk
+    {
+        public:
+        CHKOwnrChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
+        {
+            SetBytes(data);
+        }
 
-		void SetBytes(const std::vector<char>& data);
+        void SetBytes(const std::vector<char>& data);
 
-		PlayerType GetPlayerType(int playerId)
-		{
-			return (PlayerType)m_PlayerTypes[playerId];
-		}
+        PlayerType GetPlayerType(int playerId)
+        {
+            return (PlayerType)m_PlayerTypes[playerId];
+        }
 
-		void SetPlayerType(int playerId, PlayerType type);
+        void SetPlayerType(int playerId, PlayerType type);
 
-		private:
-		uint8_t m_PlayerTypes[12];
-	};
+        private:
+        uint8_t m_PlayerTypes[12];
+    };
 
 }
 

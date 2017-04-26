@@ -14,22 +14,22 @@ DWORD dwLastError;
 
 DWORD WINAPI SErrSetLastError(DWORD dwErrorCode)
 {
-	dwLastError = dwErrorCode;
-	SetLastError(dwErrorCode);
-	return dwErrorCode;
+    dwLastError = dwErrorCode;
+    SetLastError(dwErrorCode);
+    return dwErrorCode;
 }
 
 #else
 
 DWORD WINAPI SErrSetLastError(DWORD dwErrorCode)
 {
-	return (dwLastError = dwErrorCode);
+    return (dwLastError = dwErrorCode);
 }
 
 #endif
 
 DWORD WINAPI SErrGetLastError(VOID)
 {
-	return dwLastError;
+    return dwLastError;
 }
 

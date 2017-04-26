@@ -15,33 +15,33 @@ UInt32 dwBlockTableKey;
 // Zezula, but may have been modified somewhat by Quantam or ShadowFlare.
 bool InitCryptTable()
 {
-	UInt32 seed   = 0x00100001;
-	UInt32 index1 = 0;
-	UInt32 index2 = 0;
-	int   i;
-		
-	if (!bCryptTableInit)
-	{
-		 for(index1 = 0; index1 < 0x100; index1++)
-		 {
-			  for(index2 = index1, i = 0; i < 5; i++, index2 += 0x100)
-			  {
-					UInt32 temp1, temp2;
-		
-					seed  = (seed * 125 + 3) % 0x2AAAAB;
-					temp1 = (seed & 0xFFFF) << 0x10;
-		
-					seed  = (seed * 125 + 3) % 0x2AAAAB;
-					temp2 = (seed & 0xFFFF);
-		
-					dwCryptTable[index2] = (temp1 | temp2);
-			  }
-		 }
+    UInt32 seed   = 0x00100001;
+    UInt32 index1 = 0;
+    UInt32 index2 = 0;
+    int   i;
+        
+    if (!bCryptTableInit)
+    {
+         for(index1 = 0; index1 < 0x100; index1++)
+         {
+              for(index2 = index1, i = 0; i < 5; i++, index2 += 0x100)
+              {
+                    UInt32 temp1, temp2;
+        
+                    seed  = (seed * 125 + 3) % 0x2AAAAB;
+                    temp1 = (seed & 0xFFFF) << 0x10;
+        
+                    seed  = (seed * 125 + 3) % 0x2AAAAB;
+                    temp2 = (seed & 0xFFFF);
+        
+                    dwCryptTable[index2] = (temp1 | temp2);
+              }
+         }
 
-		bCryptTableInit = true;
-	}
+        bCryptTableInit = true;
+    }
 
-	return true;
+    return true;
 }
 
 UInt32 HashString(const char *lpszString, UInt32 dwHashType)
@@ -50,12 +50,12 @@ UInt32 HashString(const char *lpszString, UInt32 dwHashType)
     UInt32  seed2 = 0xEEEEEEEE;
     int    ch;
 
-	char szNull = 0;
-	if (!lpszString)
-		lpszString = &szNull;
+    char szNull = 0;
+    if (!lpszString)
+        lpszString = &szNull;
 
-	if (dwHashType==HASH_KEY)
-		while (strchr(lpszString,'\\')!=NULL) lpszString = strchr(lpszString,'\\')+1;
+    if (dwHashType==HASH_KEY)
+        while (strchr(lpszString,'\\')!=NULL) lpszString = strchr(lpszString,'\\')+1;
     while (*lpszString != 0)
     {
         ch = toupper(*lpszString++);
@@ -75,8 +75,8 @@ bool EncryptData(UInt8 *lpbyBuffer, UInt32 dwLength, UInt32 dwKey)
     UInt32 seed = 0xEEEEEEEE;
     UInt32 ch;
 
-	if (!lpbyBuffer)
-		return false;
+    if (!lpbyBuffer)
+        return false;
 
     // Round to DWORDs
     dwLength >>= 2;
@@ -90,20 +90,20 @@ bool EncryptData(UInt8 *lpbyBuffer, UInt32 dwLength, UInt32 dwKey)
         dwKey = ((~dwKey << 0x15) + 0x11111111) | (dwKey >> 0x0B);
         seed = *lpdwBuffer + seed + (seed << 5) + 3;
 
-		*lpdwBuffer++ = ch;
+        *lpdwBuffer++ = ch;
     }
 
-	 return true;
+     return true;
 }
 
 bool DecryptData(UInt8 *lpbyBuffer, UInt32 dwLength, UInt32 dwKey)
 {
-	UInt32 *lpdwBuffer = (UInt32 *)lpbyBuffer;
+    UInt32 *lpdwBuffer = (UInt32 *)lpbyBuffer;
     UInt32 seed = 0xEEEEEEEE;
     UInt32 ch;
 
-	if (!lpbyBuffer)
-		return false;
+    if (!lpbyBuffer)
+        return false;
 
     // Round to DWORDs
     dwLength >>= 2;
@@ -116,10 +116,10 @@ bool DecryptData(UInt8 *lpbyBuffer, UInt32 dwLength, UInt32 dwKey)
         dwKey = ((~dwKey << 0x15) + 0x11111111) | (dwKey >> 0x0B);
         seed = ch + seed + (seed << 5) + 3;
 
-		*lpdwBuffer++ = ch;
+        *lpdwBuffer++ = ch;
     }
 
-	 return true;
+     return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -159,7 +159,7 @@ UInt32 DetectFileSeed(const UInt32 * block, UInt32 decrypted, UInt32 blocksize)
 
         // If OK, continue and test the second value. We don't know exactly the value,
         // but we know that the second one has a value less than or equal to the
-		// size of the block position table plus the block size
+        // size of the block position table plus the block size
         seed1  = ((~seed1 << 0x15) + 0x11111111) | (seed1 >> 0x0B);
         seed2  = ch + seed2 + (seed2 << 5) + 3;
 

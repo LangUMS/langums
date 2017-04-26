@@ -11,32 +11,32 @@
 namespace CHK
 {
 
-	class CHKStringsChunk : public IChunk
-	{
-		public:
-		CHKStringsChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
-		{
-			SetBytes(data);
-		}
+    class CHKStringsChunk : public IChunk
+    {
+        public:
+        CHKStringsChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
+        {
+            SetBytes(data);
+        }
 
-		size_t GetStringCount() const
-		{
-			return m_Offsets.size();
-		}
+        size_t GetStringCount() const
+        {
+            return m_Offsets.size();
+        }
 
-		int FindString(const std::string& s);
+        int FindString(const std::string& s);
 
-		const char* GetString(size_t index) const;
+        const char* GetString(size_t index) const;
 
-		size_t InsertString(const std::string& s);
+        size_t InsertString(const std::string& s);
 
-		void SetBytes(const std::vector<char>& data);
+        void SetBytes(const std::vector<char>& data);
 
-		private:
-		std::vector<uint16_t> m_Offsets;
-		std::vector<std::string> m_Strings;
-		std::unordered_map<size_t, size_t> m_Hashes;
-	};
+        private:
+        std::vector<uint16_t> m_Offsets;
+        std::vector<std::string> m_Strings;
+        std::unordered_map<size_t, size_t> m_Hashes;
+    };
 
 }
 

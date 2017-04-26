@@ -6,16 +6,16 @@
 namespace Langums
 {
 
-	class IROptimizer
-	{
-		public:
-		std::vector<std::unique_ptr<IIRInstruction>> Process(std::vector<std::unique_ptr<IIRInstruction>> instructions);
+    class IROptimizer
+    {
+        public:
+        std::vector<std::unique_ptr<IIRInstruction>> Process(std::vector<std::unique_ptr<IIRInstruction>> instructions);
 
-		private:
-		void EliminateRedundantStores();
+        private:
+        void EliminateRedundantStores();
 
-		std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
-	};
+        std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
+    };
 
 }
 

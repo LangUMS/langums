@@ -11,56 +11,56 @@
 
 LPVOID WINAPI SMemAlloc(DWORD dwSize)
 {
-	LPVOID lpMemory = malloc(dwSize);
-	if (lpMemory) SMemZero(lpMemory,dwSize);
-	return lpMemory;
+    LPVOID lpMemory = malloc(dwSize);
+    if (lpMemory) SMemZero(lpMemory,dwSize);
+    return lpMemory;
 }
 
 void WINAPI SMemFree(LPVOID lpvMemory)
 {
-	if (lpvMemory) free(lpvMemory);
+    if (lpvMemory) free(lpvMemory);
 }
 
 DWORD WINAPI SMemCopy(LPVOID lpDestination, LPCVOID lpSource, DWORD dwLength)
 {
-	DWORD dwPrevLen = dwLength;
-	LPDWORD lpdwDestination = (LPDWORD)lpDestination,lpdwSource = (LPDWORD)lpSource;
-	LPBYTE lpbyDestination,lpbySource;
+    DWORD dwPrevLen = dwLength;
+    LPDWORD lpdwDestination = (LPDWORD)lpDestination,lpdwSource = (LPDWORD)lpSource;
+    LPBYTE lpbyDestination,lpbySource;
 
-	dwLength >>= 2;
+    dwLength >>= 2;
 
-	while (dwLength--)
-		*lpdwDestination++ = *lpdwSource++;
+    while (dwLength--)
+        *lpdwDestination++ = *lpdwSource++;
 
-	lpbyDestination = (LPBYTE)lpdwDestination;
-	lpbySource = (LPBYTE)lpdwSource;
+    lpbyDestination = (LPBYTE)lpdwDestination;
+    lpbySource = (LPBYTE)lpdwSource;
 
-	dwLength = dwPrevLen;
-	dwLength &= 3;
+    dwLength = dwPrevLen;
+    dwLength &= 3;
 
-	while (dwLength--)
-		*lpbyDestination++ = *lpbySource++;
+    while (dwLength--)
+        *lpbyDestination++ = *lpbySource++;
 
-	return dwPrevLen;
+    return dwPrevLen;
 }
 
 void WINAPI SMemZero(LPVOID lpDestination, DWORD dwLength)
 {
-	DWORD dwPrevLen = dwLength;
-	LPDWORD lpdwDestination = (LPDWORD)lpDestination;
-	LPBYTE lpbyDestination;
+    DWORD dwPrevLen = dwLength;
+    LPDWORD lpdwDestination = (LPDWORD)lpDestination;
+    LPBYTE lpbyDestination;
 
-	dwLength >>= 2;
+    dwLength >>= 2;
 
-	while (dwLength--)
-		*lpdwDestination++ = 0;
+    while (dwLength--)
+        *lpdwDestination++ = 0;
 
-	lpbyDestination = (LPBYTE)lpdwDestination;
+    lpbyDestination = (LPBYTE)lpdwDestination;
 
-	dwLength = dwPrevLen;
-	dwLength &= 3;
+    dwLength = dwPrevLen;
+    dwLength &= 3;
 
-	while (dwLength--)
-		*lpbyDestination++ = 0;
+    while (dwLength--)
+        *lpbyDestination++ = 0;
 }
 
