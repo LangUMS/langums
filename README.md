@@ -133,6 +133,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
 | `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.             |
 | `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.           |
+| `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.     |
 | More to be added ...                                            |                                                       |
 
 ## Preprocessor

@@ -99,6 +99,11 @@ namespace Langums
                         auto kill = (IRKillCondInstruction*)condition.get();
                         eventTrigger.CodeGen_Kills(kill->GetPlayerId(), (CHK::TriggerComparisonType)kill->GetComparison(), kill->GetUnitId(), kill->GetQuantity());
                     }
+                    else if (condition->GetType() == IRInstructionType::CountdownCond)
+                    {
+                        auto countdown = (IRCountdownCondInstruction*)condition.get();
+                        eventTrigger.CodeGen_Countdown((CHK::TriggerComparisonType)countdown->GetComparison(), countdown->GetTime());
+                    }
                 }
 
                 m_Triggers.push_back(eventTrigger.GetTrigger());
@@ -989,7 +994,10 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::Event ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||
-                instruction->GetType() == IRInstructionType::TimeCond
+                instruction->GetType() == IRInstructionType::TimeCond ||
+                instruction->GetType() == IRInstructionType::KillCond ||
+                instruction->GetType() == IRInstructionType::CmdCond ||
+                instruction->GetType() == IRInstructionType::CountdownCond
             )
             {
                 continue;

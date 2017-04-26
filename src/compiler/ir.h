@@ -95,6 +95,7 @@ namespace Langums
         TimeCond, // Elapsed time trigger condition
         CmdCond, // Player commands a quantity of units condition
         KillCond, // Player has killed a quantity of units condition
+        CountdownCond, // Countdown timer condition
     };
 
     enum class ConditionComparison
@@ -1375,6 +1376,32 @@ namespace Langums
         uint8_t m_UnitId;
         ConditionComparison m_Comparison;
         uint32_t m_Quantity;
+    };
+
+    class IRCountdownCondInstruction : public IIRInstruction
+    {
+        public:
+        IRCountdownCondInstruction(ConditionComparison comparison, uint32_t time) :
+            m_Comparison(comparison), m_Time(time), IIRInstruction(IRInstructionType::CountdownCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("CNTDWN % %", (int)m_Comparison, (int)m_Time);
+        }
+
+        ConditionComparison GetComparison() const
+        {
+            return m_Comparison;
+        }
+
+        uint32_t GetTime() const
+        {
+            return m_Time;
+        }
+
+        private:
+        ConditionComparison m_Comparison;
+        uint32_t m_Time;
     };
 
     class IRCompilerException : public std::exception

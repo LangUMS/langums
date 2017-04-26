@@ -131,6 +131,17 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_Countdown(CHK::TriggerComparisonType comparison, unsigned int time)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::CountdownTimer;
+        condition.m_Quantity = time;
+        condition.m_Comparison = comparison;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::CodeGen_SetReg(unsigned int regId, int value)
     {
         using namespace CHK;
