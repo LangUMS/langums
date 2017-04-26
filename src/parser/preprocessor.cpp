@@ -1,4 +1,9 @@
 #include <sstream>
+#include <fstream>
+#include <streambuf>
+#include <experimental/filesystem>
+
+#include "../stringutil.h"
 
 #include "preprocessor.h"
 
@@ -25,13 +30,73 @@ namespace Langums
 
 	std::string Preprocessor::ProcessLine(const std::string& line)
 	{
-		auto commentStart = line.find_first_of("//");
-		if (commentStart == std::string::npos)
+		using namespace std::experimental;
+
+		auto trimmed = trim(line);
+		if (trimmed[0] == '#')
 		{
-			return line;
+			auto space = trimmed.find_first_of(' ');
+			auto cmd = trimmed.substr(0, space);
+			if (cmd == "#define")
+			{
+				trimmed = trim(trimmed.substr(space));
+				space = trimmed.find_first_of(' ');
+				auto key = trimmed.substr(0, space);
+				auto value = trim(trimmed.substr(space));
+
+				m_Defines.erase(key);
+				m_Defines.insert(std::make_pair(key, value));
+				return "";
+			}
+			else if (cmd == "#undef")
+			{
+				trimmed = trim(trimmed.substr(space));
+				space = trimmed.find_first_of(' ');
+				auto key = trimmed.substr(0, space);
+				m_Defines.erase(key);
+			}
+			else if (cmd == "#include")
+			{
+				trimmed = trim(trimmed.substr(space));
+				auto path = filesystem::path(m_RootFolder);
+				path.append(trimmed);
+
+				if (!filesystem::is_regular_file(path))
+				{
+					throw new PreprocessorException(SafePrintf("Failed to #include from \"%\"", trimmed));
+				}
+
+				return ReadIncludeFile(path.generic_u8string());
+			}
 		}
 
-		return line.substr(0, commentStart);
+		auto outLine = line;
+
+		for (auto& pair : m_Defines)
+		{
+			auto& search = pair.first;
+			auto& replace = pair.second;
+
+			auto pos = 0u;
+			while ((pos = outLine.find(search, pos)) != std::string::npos)
+			{
+				outLine.replace(pos, search.length(), replace);
+				pos += replace.length();
+			}
+		}
+
+		auto commentStart = outLine.find_first_of("//");
+		if (commentStart == std::string::npos)
+		{
+			return outLine;
+		}
+
+		return outLine.substr(0, commentStart);
+	}
+
+	std::string Preprocessor::ReadIncludeFile(const std::string& path)
+	{
+		return Process(std::string((std::istreambuf_iterator<char>(std::ifstream(path))), std::istreambuf_iterator<char>()));
 	}
 
 }

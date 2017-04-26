@@ -1,4 +1,6 @@
-global allowedSwaps = 3;
+#define MAX_SWAPS 3
+
+global allowedSwaps = MAX_SWAPS;
 
 bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2") => {
   if (allowedSwaps == 0) {

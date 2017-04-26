@@ -6,6 +6,7 @@
 #include "stringutil.h"
 #include "libmpq/SFmpqapi.h"
 #include "libchk/chk.h"
+#include "parser/preprocessor.h"
 #include "parser/parser.h"
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
@@ -181,6 +182,9 @@ int main(int argc, char* argv[])
 
 	script.push_back('\n');
 	
+	Preprocessor preprocessor(langPath.relative_path().remove_filename().generic_u8string());
+	script = preprocessor.Process(script);
+
 	Parser parser;
 	std::shared_ptr<IASTNode> ast;
 	

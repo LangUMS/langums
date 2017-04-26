@@ -130,6 +130,14 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
 | More to be added ...                                            |                                                       |
 
+## Preprocessor
+
+The LangUMS compiler features a simple preprocessor that functions similarly to the one in C/ C++. The preprocessor runs before any actual parsing has occured.
+
+- `#define KEY VALUE` will add a new macro definition, all further occurences of `KEY` will be replaced with `VALUE`. You can override previous definitions by calling `#define` again.
+- `#undef KEY` will remove an already existing macro definition
+- `#include filename` will fetch the contents of `filename` and copy/ paste them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
+
 ## Limitations
 
 - You must set Player 8 to a Computer player. Also Player 8 has to remain untouched for LangUMS to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely. Preplaced units for Player 8 are also not allowed.
@@ -150,27 +158,47 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 
 ### EndCondition
 
+```
 - Victory
 - Defeat
 - Draw
-
-### Player
-
-- Player1, Player2, Player3, Player4, Player5, Player6, Player7, Player8
+```
 
 ### ResourceType
 
+```
 - Minerals
 - Gas
+```
 
 ## Comparison
 
+```
 - AtLeast
 - AtMost
 - Exactly
+```
+
+### Player
+
+```
+- Player1
+- Player2
+- Player3
+- Player4
+- Player5
+- Player6
+- Player7
+- Player8 (Do not use!)
+- Player9
+- Player10
+- Player11
+- Player12
+```
 
 ## Unit
 
+```
 - TerranMarine
 - TerranGhost
 - TerranVulture
@@ -404,6 +432,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 - Men
 - Buildings
 - Factories
+```
 
 ## Examples
 

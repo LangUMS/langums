@@ -7,9 +7,7 @@ namespace Langums
 
 	std::unique_ptr<IASTNode> Parser::Parse(const std::string& input)
 	{
-		Preprocessor preprocessor;
-
-		m_Buffer = preprocessor.Process(input);
+		m_Buffer = input;
 		m_CurrentChar = 0;
 		
 		ASTOptimizer optimizer;
