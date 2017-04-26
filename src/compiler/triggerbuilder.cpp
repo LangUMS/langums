@@ -81,6 +81,19 @@ namespace Langums
 		m_HasChanges = true;
 	}
 
+	void TriggerBuilder::CodeGen_Accumulate(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ResourceType resourceType, unsigned int quantity)
+	{
+		using namespace CHK;
+		auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+		condition.m_Condition = TriggerConditionType::Accumulate;
+		condition.m_Arg0 = (uint8_t)resourceType;
+		condition.m_Quantity = quantity;
+		condition.m_Comparison = comparison;
+		condition.m_Group = playerId;
+		condition.m_Flags = 16;
+		m_HasChanges = true;
+	}
+
 	void TriggerBuilder::CodeGen_SetReg(unsigned int regId, int value)
 	{
 		using namespace CHK;

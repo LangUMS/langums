@@ -143,6 +143,76 @@ namespace Langums
 
 						EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity->GetValue()), m_Instructions);
 					}
+					if (name == "accumulate")
+					{
+						auto arg0 = condition->GetArgument(0);
+						if (arg0->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException("Something other than an identifier passed as first argument to accumulate(), expected player name");
+						}
+
+						auto playerName = (ASTIdentifier*)arg0.get();
+						auto playerId = PlayerNameToId(playerName->GetName());
+
+						auto arg1 = condition->GetArgument(1);
+						if (arg1->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException("Something other than an identifier passed as second argument to accumulate(), expected comparison type");
+						}
+
+						auto comparisonType = (ASTIdentifier*)arg1.get();
+						auto comparisonName = comparisonType->GetName();
+
+						ConditionComparison comparison;
+						if (comparisonName == "AtLeast")
+						{
+							comparison = ConditionComparison::AtLeast;
+						}
+						else if (comparisonName == "AtMost")
+						{
+							comparison = ConditionComparison::AtMost;
+						}
+						else if (comparisonName == "Exactly")
+						{
+							comparison = ConditionComparison::Exactly;
+						}
+						else
+						{
+							throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
+						}
+
+						auto arg2 = condition->GetArgument(2);
+						if (arg2->GetType() != ASTNodeType::NumberLiteral)
+						{
+							throw IRCompilerException("Something other than a number literal passed as third argument to accumulate(), expected quantity");
+						}
+
+						auto quantity = (ASTNumberLiteral*)arg2.get();
+
+						auto arg3 = condition->GetArgument(3);
+						if (arg3->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException("Something other than an identifier passed as fourth argument to accumulate(), expected resource type");
+						}
+
+						auto resourceType = ((ASTIdentifier*)arg3.get())->GetName();
+
+						CHK::ResourceType resType;
+						if (resourceType == "Minerals")
+						{
+							resType = CHK::ResourceType::Ore;
+						}
+						else if (resourceType == "Gas")
+						{
+							resType = CHK::ResourceType::Gas;
+						}
+						else
+						{
+							throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to accumulate(), expected Minerals or Gas", resourceType));
+						}
+
+						EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity->GetValue()), m_Instructions);
+					}
 					else
 					{
 						throw IRCompilerException(SafePrintf("Unknown condition type \"%\"", name));

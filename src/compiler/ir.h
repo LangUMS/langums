@@ -87,7 +87,8 @@ namespace Langums
 		DecResource, // decrements the resource count for a given resource for a given player
 		// conditions
 		Event,
-		BringCond
+		BringCond, // Bring trigger condition
+		AccumCond, // Accumulate trigger condition
 	};
 
 	enum class ConditionComparison
@@ -1080,6 +1081,44 @@ namespace Langums
 		uint8_t m_PlayerId;
 		uint8_t m_UnitId;
 		std::string m_LocationName;
+		ConditionComparison m_Comparison;
+		uint32_t m_Quantity;
+	};
+
+	class IRAccumCondInstruction : public IIRInstruction
+	{
+		public:
+		IRAccumCondInstruction(uint8_t playerId, CHK::ResourceType resourceType, ConditionComparison comparison, uint32_t quantity) :
+			m_PlayerId(playerId), m_ResourceType(resourceType), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::AccumCond) {}
+
+		std::string DebugDump() const
+		{
+			return SafePrintf("ACCUM % % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", (int)m_Comparison, (int)m_Quantity);
+		}
+
+		uint8_t GetPlayerId() const
+		{
+			return m_PlayerId;
+		}
+
+		CHK::ResourceType GetResourceType() const
+		{
+			return m_ResourceType;
+		}
+
+		ConditionComparison GetComparison() const
+		{
+			return m_Comparison;
+		}
+
+		uint32_t GetQuantity() const
+		{
+			return m_Quantity;
+		}
+
+		private:
+		uint8_t m_PlayerId;
+		CHK::ResourceType m_ResourceType;
 		ConditionComparison m_Comparison;
 		uint32_t m_Quantity;
 	};
