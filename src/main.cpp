@@ -183,7 +183,16 @@ int main(int argc, char* argv[])
 	script.push_back('\n');
 	
 	Preprocessor preprocessor(langPath.relative_path().remove_filename().generic_u8string());
-	script = preprocessor.Process(script);
+
+	try
+	{
+		script = preprocessor.Process(script);
+	}
+	catch (const PreprocessorException& ex)
+	{
+		LOG_EXITERR("Preprocessor error: %", ex.what());
+		return 1;
+	}
 
 	Parser parser;
 	std::shared_ptr<IASTNode> ast;

@@ -87,10 +87,17 @@ namespace Langums
 					{
 						auto time = (IRTimeCondInstruction*)condition.get();
 
-						eventTrigger.CodeGen_ElapsedTime(
-							(CHK::TriggerComparisonType)time->GetComparison(),
-							time->GetQuantity()
-						);
+						eventTrigger.CodeGen_ElapsedTime((CHK::TriggerComparisonType)time->GetComparison(), time->GetQuantity());
+					}
+					else if (condition->GetType() == IRInstructionType::CmdCond)
+					{
+						auto cmd = (IRCmdCondInstruction*)condition.get();
+						eventTrigger.CodeGen_Commands(cmd->GetPlayerId(), (CHK::TriggerComparisonType)cmd->GetComparison(), cmd->GetUnitId(), cmd->GetQuantity());
+					}
+					else if (condition->GetType() == IRInstructionType::KillCond)
+					{
+						auto kill = (IRKillCondInstruction*)condition.get();
+						eventTrigger.CodeGen_Kills(kill->GetPlayerId(), (CHK::TriggerComparisonType)kill->GetComparison(), kill->GetUnitId(), kill->GetQuantity());
 					}
 				}
 

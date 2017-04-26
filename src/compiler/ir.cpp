@@ -143,6 +143,74 @@ namespace Langums
 
 						EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity->GetValue()), m_Instructions);
 					}
+					else if (name == "commands" || name == "killed")
+					{
+						auto arg0 = condition->GetArgument(0);
+						if (arg0->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
+						}
+
+						auto playerName = (ASTIdentifier*)arg0.get();
+						auto playerId = PlayerNameToId(playerName->GetName());
+
+						auto arg1 = condition->GetArgument(1);
+						if (arg1->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected comparison type", name));
+						}
+
+						auto comparisonType = (ASTIdentifier*)arg1.get();
+						auto comparisonName = comparisonType->GetName();
+
+						ConditionComparison comparison;
+						if (comparisonName == "AtLeast")
+						{
+							comparison = ConditionComparison::AtLeast;
+						}
+						else if (comparisonName == "AtMost")
+						{
+							comparison = ConditionComparison::AtMost;
+						}
+						else if (comparisonName == "Exactly")
+						{
+							comparison = ConditionComparison::Exactly;
+						}
+						else
+						{
+							throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
+						}
+
+						auto arg2 = condition->GetArgument(2);
+						if (arg2->GetType() != ASTNodeType::NumberLiteral)
+						{
+							throw IRCompilerException(SafePrintf("Something other than a number literal passed as third argument to %(), expected quantity", name));
+						}
+
+						auto quantity = (ASTNumberLiteral*)arg2.get();
+
+						auto arg3 = condition->GetArgument(3);
+						if (arg3->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException(SafePrintf("Something other than an identifier passed as fourth argument to %(), expected unit type", name));
+						}
+
+						auto unitName = (ASTIdentifier*)arg3.get();
+						auto unitId = UnitNameToId(unitName->GetName());
+						if (unitId == -1)
+						{
+							throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
+						}
+
+						if (name == "commands")
+						{
+							EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+						}
+						else
+						{
+							EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+						}
+					}
 					else if (name == "accumulate")
 					{
 						auto arg0 = condition->GetArgument(0);

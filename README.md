@@ -116,7 +116,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `take_resource(Player, ResourceType, QuantityExpression)`    | Takes resources from a player.                           |
 | `center_view(LocationName)`                                  | Centers the view on a location.                          |
 | `print(String, optional: Player)`                            | Prints a message to a player, defaults to Player1.       |
-| `sleep(milliseconds)`                                        | Sleeps for milliseconds. (Will freeze the event loop!)   |
+| `sleep(Quantity)`                                            | Sleeps for milliseconds. (Will freeze the event loop!)   |
 | `spawn(Unit, Player, QuantityExpression, LocationName)`      | Spawns units for player at a location.                   |
 | `kill(Unit, Player, QuantityExpression, optional: Location)` | Kills units for player at an optional location.          |
 | More to be added ...                                         |                                                          |
@@ -125,9 +125,11 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 
 | Event prototype                                                 | Description                                           |
 |-----------------------------------------------------------------|-------------------------------------------------------|
-| `bring(Player, Comparison, Quantity, Unit, LocationName)`       | When the player owns a quantity of units at location. |
-| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When the player owns a quantity of resources.         |
+| `bring(Player, Comparison, Quantity, Unit, LocationName)`       | When a player owns a quantity of units at location.   |
+| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.           |
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
+| `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.             |
+| `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.           |
 | More to be added ...                                            |                                                       |
 
 ## Preprocessor
@@ -137,6 +139,30 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - `#define KEY VALUE` will add a new macro definition, all further occurences of `KEY` will be replaced with `VALUE`. You can override previous definitions by calling `#define` again.
 - `#undef KEY` will remove an already existing macro definition
 - `#include filename` will fetch the contents of `filename` and copy/ paste them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
+
+## Examples
+
+[Look at the test/ folder here for examples.](https://github.com/AlexanderDzhoganov/langums/tree/master/test)
+Feel free to contribute your own.
+
+## FAQ
+
+#### How does the code generation work?
+
+LangUMS is compiled into an intermediate representation (IR) which is then optimized and emitted as trigger chains.
+It's a kind of wacky virtual machine.
+
+#### Code documentation?
+
+Will happen sometime in the future. You can help.
+
+#### Can you stop the compiler from replacing the existing triggers in the map?
+
+Yes. Use the `--preserve-triggers` option. Make sure your existing triggers don't mess with Player 8's stuff.
+
+#### Do you plan to rewrite this in Rust?
+
+No, but thanks for asking.
 
 ## Limitations
 
@@ -171,7 +197,7 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - Gas
 ```
 
-## Comparison
+### Comparison
 
 ```
 - AtLeast
@@ -196,7 +222,7 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - Player12
 ```
 
-## Unit
+### Unit
 
 ```
 - TerranMarine
@@ -433,13 +459,3 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - Buildings
 - Factories
 ```
-
-## Examples
-
-[Look at the test/ folder here for examples](https://github.com/AlexanderDzhoganov/langums/tree/master/test)
-
-## FAQ
-
-#### Rewrite it in Rust?
-
-No, but thanks for asking.

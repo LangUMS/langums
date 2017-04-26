@@ -90,6 +90,8 @@ namespace Langums
 		BringCond, // Bring trigger condition
 		AccumCond, // Accumulate trigger condition
 		TimeCond, // Elapsed time trigger condition
+		CmdCond, // Player commands a quantity of units condition
+		KillCond, // Player has killed a quantity of units condition
 	};
 
 	enum class ConditionComparison
@@ -1168,6 +1170,82 @@ namespace Langums
 		}
 
 		private:
+		ConditionComparison m_Comparison;
+		uint32_t m_Quantity;
+	};
+
+	class IRCmdCondInstruction : public IIRInstruction
+	{
+		public:
+		IRCmdCondInstruction(uint8_t playerId, uint8_t unitId, ConditionComparison comparison, uint32_t quantity) :
+			m_PlayerId(playerId), m_UnitId(unitId), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::CmdCond) {}
+
+		std::string DebugDump() const
+		{
+			return SafePrintf("CMDS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+		}
+
+		uint8_t GetPlayerId() const
+		{
+			return m_PlayerId;
+		}
+
+		uint8_t GetUnitId() const
+		{
+			return m_UnitId;
+		}
+
+		ConditionComparison GetComparison() const
+		{
+			return m_Comparison;
+		}
+
+		uint32_t GetQuantity() const
+		{
+			return m_Quantity;
+		}
+
+		private:
+		uint8_t m_PlayerId;
+		uint8_t m_UnitId;
+		ConditionComparison m_Comparison;
+		uint32_t m_Quantity;
+	};
+
+	class IRKillCondInstruction : public IIRInstruction
+	{
+		public:
+		IRKillCondInstruction(uint8_t playerId, uint8_t unitId, ConditionComparison comparison, uint32_t quantity) :
+			m_PlayerId(playerId), m_UnitId(unitId), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::KillCond) {}
+
+		std::string DebugDump() const
+		{
+			return SafePrintf("KILLS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+		}
+
+		uint8_t GetPlayerId() const
+		{
+			return m_PlayerId;
+		}
+
+		uint8_t GetUnitId() const
+		{
+			return m_UnitId;
+		}
+
+		ConditionComparison GetComparison() const
+		{
+			return m_Comparison;
+		}
+
+		uint32_t GetQuantity() const
+		{
+			return m_Quantity;
+		}
+
+		private:
+		uint8_t m_PlayerId;
+		uint8_t m_UnitId;
 		ConditionComparison m_Comparison;
 		uint32_t m_Quantity;
 	};
