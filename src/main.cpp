@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 		("l,lang", "Source .l script file", cxxopts::value<std::string>())
 		("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
 		("preserve-triggers", "Preserves already existing triggers in the map. (DANGEROUS, USE WITH CAUTION)", cxxopts::value<bool>())
+		("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
 		;
 	opts.parse(argc, argv);
 
@@ -248,7 +249,7 @@ int main(int argc, char* argv[])
 	}
 
 	IRCompiler ir;
-
+	
 	try
 	{
 		ir.Compile(ast);
@@ -278,6 +279,26 @@ int main(int argc, char* argv[])
 	LOG_F("Emitted % instructions.", instructions.size());
 
 	Compiler compiler;
+
+	if (opts.count("copy-batch-size") > 0)
+	{
+		auto copyBatchSize = opts["copy-batch-size"].as<unsigned int>();
+
+		if ((copyBatchSize & (copyBatchSize - 1)) != 0)
+		{
+			LOG_EXITERR("\n(!) copy-batch-size must be a power of 2!");
+			return 1;
+		}
+
+		LOG_F("Copy batch size: %", copyBatchSize);
+
+		if (copyBatchSize < 1024)
+		{
+			LOG_F("(!) WARNING! Copy batch size is set to an extremely low value (< 1024). Arithmetic operations with large numbers will be VERY slow to execute.");
+		}
+
+		compiler.SetCopyBatchSize(copyBatchSize);
+	}
 
 	auto preserveTriggers = opts.count("preserve-triggers") > 0;
 

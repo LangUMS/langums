@@ -160,6 +160,13 @@ Will happen sometime in the future. You can help.
 
 Yes. Use the `--preserve-triggers` option. Make sure your existing triggers don't mess with Player 8's stuff.
 
+### LangUMS emits way more triggers than I'd like.
+
+The biggest culprit for this is the amount of triggers emitted for arithmetic operations.
+By default LangUMS is tweaked for values up to 65535, but if you don't need such large values in your map you can set the `--copy-batch-size` command-line argument to a lower value e.g. 1024.
+This will drastically lower the amount of emitted triggers with the tradeoff that any arithmetic on larger numbers will take more than one cycle. In any case you should set the value to the
+next power of 2 of the largest number you use in your map. If uncertain leave it to the default value.
+
 #### Do you plan to rewrite this in Rust?
 
 No, but thanks for asking.
@@ -171,6 +178,8 @@ No, but thanks for asking.
 - Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
 - Currently you have can have up to 253 event handlers, this limitation will be lifted in the future.
 - Recursion of any kind is not allowed and leads to undefined behavior.
+- Multiplication and division can take many cycles to complete, especially with very large numbers.
+- In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle.
 
 ## Future plans
 

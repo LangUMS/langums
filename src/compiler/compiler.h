@@ -24,6 +24,11 @@ namespace Langums
 	class Compiler
 	{
 		public:
+		void SetCopyBatchSize(uint32_t copyBatchSize)
+		{
+			m_CopyBatchSize = copyBatchSize;
+		}
+
 		bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
 
 		private:
@@ -35,7 +40,7 @@ namespace Langums
 		void CodeGen_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
 
 		int GetLastTriggerActionId(const CHK::Trigger& trigger);
-		uint32_t m_CopyBatchSize = 16384u;
+		uint32_t m_CopyBatchSize = 65536u;
 		uint32_t m_HyperTriggerCount = 5;
 
 		CHK::File* m_File = nullptr;
