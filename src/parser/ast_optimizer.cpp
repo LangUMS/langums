@@ -39,6 +39,37 @@ namespace Langums
 				auto result = CalculateConstantBinaryExpression(lhsNumber->GetValue(), rhsNumber->GetValue(), expression->GetOperator());
 				return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result));
 			}
+
+			/*if (expression->GetOperator() == OperatorType::Multiply &&
+				(lhs->GetType() == ASTNodeType::NumberLiteral || rhs->GetType() == ASTNodeType::NumberLiteral))
+			{
+				// turn multiplication by a constant to repeated additions
+
+				ASTNumberLiteral* numberLiteral = (ASTNumberLiteral*)((lhs->GetType() == ASTNodeType::NumberLiteral) ? lhs.get() : rhs.get());
+				auto other = (lhs->GetType() == ASTNodeType::NumberLiteral) ? rhs : lhs;
+
+				auto number = numberLiteral->GetValue();
+				if (number == 0)
+				{
+					return std::shared_ptr<IASTNode>(new ASTNumberLiteral(0));
+				}
+
+				auto root = std::shared_ptr<IASTNode>(new ASTBinaryExpression(OperatorType::Add));
+				auto current = root;
+
+				while (number > 2)
+				{
+					current->AddChild(other);
+					current->AddChild(std::unique_ptr<IASTNode>(new ASTBinaryExpression(OperatorType::Add)));
+					current = current->GetChild(1);
+					number--;
+				}
+
+				current->AddChild(other);
+				current->AddChild(other);
+
+				return std::shared_ptr<IASTNode>(root);
+			}*/
 		}
 		else if (node->GetType() == ASTNodeType::UnaryExpression)
 		{

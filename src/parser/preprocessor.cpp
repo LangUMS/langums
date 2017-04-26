@@ -85,7 +85,7 @@ namespace Langums
 			}
 		}
 
-		auto commentStart = outLine.find_first_of("//");
+		auto commentStart = outLine.find("//");
 		if (commentStart == std::string::npos)
 		{
 			return outLine;

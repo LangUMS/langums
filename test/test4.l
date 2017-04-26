@@ -1,6 +1,6 @@
 fn main() {  
-  var foo = 10;
-  add_resource(Player1, Minerals, 5 * foo);
+  var foo = 100;
+  add_resource(Player1, Minerals, foo / 3);
   
   while (true) {
     poll_events();

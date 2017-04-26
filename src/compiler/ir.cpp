@@ -914,20 +914,23 @@ namespace Langums
 		auto& lhs = expression->GetLHSValue();
 		auto& rhs = expression->GetRHSValue();
 
-		EmitExpression(lhs.get(), instructions, aliases);
-		EmitExpression(rhs.get(), instructions, aliases);
-
 		auto op = expression->GetOperator();
 		if (op == OperatorType::Add)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRAddInstruction(), instructions);
 		}
 		else if (op == OperatorType::Subtract)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 		}
 		else if (op == OperatorType::Multiply)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
 			EmitInstruction(new IRPopInstruction(Reg_Temp1), instructions);
 
@@ -938,10 +941,23 @@ namespace Langums
 		}
 		else if (op == OperatorType::Divide)
 		{
-			throw IRCompilerException("Division is not yet implemented.");
+			EmitExpression(rhs.get(), instructions, aliases);
+			EmitExpression(lhs.get(), instructions, aliases);
+
+			EmitInstruction(new IRSetRegInstruction(Reg_Temp1, 0), instructions);
+			EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
+			EmitInstruction(new IRPushInstruction(Reg_Temp0), instructions);
+			EmitInstruction(new IRIncRegInstruction(Reg_Temp1, 1), instructions);
+			EmitInstruction(new IRSubInstruction(), instructions);
+			EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, -3), instructions);
+			EmitInstruction(new IRPopInstruction(0), instructions);
+			EmitInstruction(new IRDecRegInstruction(Reg_Temp1, 1), instructions);
+			EmitInstruction(new IRPushInstruction(Reg_Temp1), instructions);
 		}
 		else if (op == OperatorType::Equals)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
 			EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 3), instructions);
@@ -951,6 +967,8 @@ namespace Langums
 		}
 		else if (op == OperatorType::NotEquals)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
 			EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 3), instructions);
@@ -960,6 +978,8 @@ namespace Langums
 		}
 		else if (op == OperatorType::LessThanOrEquals)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
 			EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
@@ -968,6 +988,8 @@ namespace Langums
 		}
 		else if (op == OperatorType::LessThan)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRDecRegInstruction(Reg_StackTop+1, 1), instructions);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
@@ -977,6 +999,8 @@ namespace Langums
 		}
 		else if (op == OperatorType::GreaterThanOrEquals)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 4), instructions);
 			EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
@@ -986,6 +1010,8 @@ namespace Langums
 		}
 		else if (op == OperatorType::GreaterThan)
 		{
+			EmitExpression(lhs.get(), instructions, aliases);
+			EmitExpression(rhs.get(), instructions, aliases);
 			EmitInstruction(new IRSubInstruction(), instructions);
 			EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
 			EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
