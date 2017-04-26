@@ -720,13 +720,18 @@ namespace Langums
 	class IRSpawnInstruction : public IIRInstruction
 	{
 		public:
-		IRSpawnInstruction(uint8_t playerId, uint8_t unitId, uint32_t quantity, const std::string& locationName) :
-			m_PlayerId(playerId), m_UnitId(unitId), m_Quantity(quantity), m_LocationName(locationName),
+		IRSpawnInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName) :
+			m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_LocationName(locationName),
 			IIRInstruction(IRInstructionType::Spawn) {}
 
 		std::string DebugDump() const
 		{
-			return SafePrintf("SPAWN % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_Quantity, m_LocationName);
+			if (m_IsLiteralValue)
+			{
+				return SafePrintf("SPAWN % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_LocationName);
+			}
+
+			return SafePrintf("SPAWN % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
 		}
 
 		uint8_t GetPlayerId() const
@@ -739,9 +744,14 @@ namespace Langums
 			return m_UnitId;
 		}
 
-		uint32_t GetQuantity() const
+		uint32_t GetRegisterId() const
 		{
-			return m_Quantity;
+			return m_RegId;
+		}
+
+		bool IsValueLiteral() const
+		{
+			return m_IsLiteralValue;
 		}
 
 		const std::string& GetLocationName() const
@@ -752,20 +762,26 @@ namespace Langums
 		private:
 		uint8_t m_PlayerId;
 		uint8_t m_UnitId;
-		uint32_t m_Quantity;
+		uint32_t m_RegId;
+		bool m_IsLiteralValue = false;
 		std::string m_LocationName;
 	};
 
 	class IRKillInstruction : public IIRInstruction
 	{
 		public:
-		IRKillInstruction(uint8_t playerId, uint8_t unitId, uint32_t quantity, const std::string& locationName) :
-			m_PlayerId(playerId), m_UnitId(unitId), m_Quantity(quantity), m_LocationName(locationName),
+		IRKillInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName) :
+			m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_LocationName(locationName),
 			IIRInstruction(IRInstructionType::Kill) {}
 
 		std::string DebugDump() const
 		{
-			return SafePrintf("KILL % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_Quantity, m_LocationName);
+			if (m_IsLiteralValue)
+			{
+				return SafePrintf("KILL % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_LocationName);
+			}
+
+			return SafePrintf("KILL % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
 		}
 
 		uint8_t GetPlayerId() const
@@ -778,9 +794,14 @@ namespace Langums
 			return m_UnitId;
 		}
 
-		uint32_t GetQuantity() const
+		uint32_t GetRegisterId() const
 		{
-			return m_Quantity;
+			return m_RegId;
+		}
+
+		bool IsValueLiteral() const
+		{
+			return m_IsLiteralValue;
 		}
 
 		const std::string& GetLocationName() const
@@ -791,7 +812,8 @@ namespace Langums
 		private:
 		uint8_t m_PlayerId;
 		uint8_t m_UnitId;
-		uint32_t m_Quantity;
+		uint32_t m_RegId;
+		bool m_IsLiteralValue;
 		std::string m_LocationName;
 	};
 

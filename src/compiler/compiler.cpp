@@ -525,7 +525,41 @@ namespace Langums
 					throw CompilerException(SafePrintf("Location \"%\" not found!", spawn->GetLocationName()));
 				}
 				
-				current.CodeGen_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), spawn->GetQuantity(), locationId);
+				if (spawn->IsValueLiteral())
+				{
+					current.CodeGen_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), spawn->GetRegisterId(), locationId);
+				}
+				else
+				{
+					auto regId = spawn->GetRegisterId();
+					if (regId != Reg_StackTop)
+					{
+						throw CompilerException(SafePrintf("Malformed IR! Spawn expects the quantity on top of the stack."));
+					}
+
+					regId = ++m_StackPointer;
+
+					auto address = nextAddress++;
+					current.CodeGen_JumpTo(address);
+					m_Triggers.push_back(current.GetTrigger());
+
+					auto retAddress = nextAddress++;
+					current = TriggerBuilder(retAddress, instruction.get());
+
+					for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+					{
+						auto spawnTrigger = TriggerBuilder(address, instruction.get());
+						spawnTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+						spawnTrigger.CodeGen_DecReg(regId, i);
+						spawnTrigger.CodeGen_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), i, locationId);
+						m_Triggers.push_back(spawnTrigger.GetTrigger());
+					}
+
+					auto finishSpawn = TriggerBuilder(address, instruction.get());
+					finishSpawn.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+					finishSpawn.CodeGen_JumpTo(retAddress);
+					m_Triggers.push_back(finishSpawn.GetTrigger());
+				}
 			}
 			else if (instruction->GetType() == IRInstructionType::Kill)
 			{
@@ -543,7 +577,41 @@ namespace Langums
 					}
 				}
 
-				current.CodeGen_KillUnit(kill->GetPlayerId(), kill->GetUnitId(), kill->GetQuantity(), locationId);
+				if (kill->IsValueLiteral())
+				{
+					current.CodeGen_KillUnit(kill->GetPlayerId(), kill->GetUnitId(), kill->GetRegisterId(), locationId);
+				}
+				else
+				{
+					auto regId = kill->GetRegisterId();
+					if (regId != Reg_StackTop)
+					{
+						throw CompilerException(SafePrintf("Malformed IR! Kill expects the quantity on top of the stack."));
+					}
+
+					regId = ++m_StackPointer;
+
+					auto address = nextAddress++;
+					current.CodeGen_JumpTo(address);
+					m_Triggers.push_back(current.GetTrigger());
+
+					auto retAddress = nextAddress++;
+					current = TriggerBuilder(retAddress, instruction.get());
+
+					for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+					{
+						auto killTrigger = TriggerBuilder(address, instruction.get());
+						killTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+						killTrigger.CodeGen_DecReg(regId, i);
+						killTrigger.CodeGen_KillUnit(kill->GetPlayerId(), kill->GetUnitId(), i, locationId);
+						m_Triggers.push_back(killTrigger.GetTrigger());
+					}
+
+					auto finishTrigger = TriggerBuilder(address, instruction.get());
+					finishTrigger.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+					finishTrigger.CodeGen_JumpTo(retAddress);
+					m_Triggers.push_back(finishTrigger.GetTrigger());
+				}
 			}
 			else if (instruction->GetType() == IRInstructionType::EndGame)
 			{

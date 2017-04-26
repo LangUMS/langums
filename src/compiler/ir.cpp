@@ -757,20 +757,29 @@ namespace Langums
 				throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
 			}
 
+			auto regId = 0;
+			bool isLiteral = false;
+
 			auto arg2 = fnCall->GetArgument(2);
-			if (arg2->GetType() != ASTNodeType::NumberLiteral)
+			if (arg2->GetType() == ASTNodeType::NumberLiteral)
 			{
-				throw IRCompilerException(SafePrintf("Something other than an number literal as third argument to %(), expected unit quantity", fnName));
+				auto unitQuantity = (ASTNumberLiteral*)arg2.get();
+				regId = unitQuantity->GetValue();
+
+				if (regId <= 0)
+				{
+					throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
+				}
+
+				isLiteral = true;
 			}
-
-			auto unitQuantity = (ASTNumberLiteral*)arg2.get();
-			auto qty = unitQuantity->GetValue();
-
-			if (qty <= 0)
+			else
 			{
-				throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
+				EmitExpression(arg2.get(), instructions, aliases);
+				isLiteral = false;
+				regId = Reg_StackTop;
 			}
-
+			
 			std::string locName;
 
 			if (fnCall->GetChildCount() == 4)
@@ -787,11 +796,11 @@ namespace Langums
 
 			if (fnName == "spawn")
 			{
-				EmitInstruction(new IRSpawnInstruction(playerId, unitId, qty, locName), instructions);
+				EmitInstruction(new IRSpawnInstruction(playerId, unitId, regId, isLiteral, locName), instructions);
 			}
 			else if (fnName == "kill")
 			{
-				EmitInstruction(new IRKillInstruction(playerId, unitId, qty, locName), instructions);
+				EmitInstruction(new IRKillInstruction(playerId, unitId, regId, isLiteral, locName), instructions);
 			}
 		}
 		else if (m_FunctionDeclarations.find(fnName) != m_FunctionDeclarations.end())
