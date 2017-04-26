@@ -1,5 +1,10 @@
 ### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
 
+### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
+### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
+### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
+### [Discord channel](https://discord.gg/BcY23) for support and discussion.
+
 ## LangUMS
 
 LangUMS is a procedural imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
@@ -9,12 +14,19 @@ You still need an editor to make the actual map, preplace locations and units, e
 
 ## Usage
 
-Run langums.exe with your map, source file and destination file e.g.
+1. Get the latest langums.exe from [here](https://github.com/AlexanderDzhoganov/langums/blob/master/langums.exe?raw=true).
+
+2. You will need to install [Microsoft Visual Studio 2015 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=48145) (x86) if you don't have it already.
+
+3. Run langums.exe with your map, source file and destination file e.g.
+
 ```
 langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 ```
 
-After that you can run `my_map_final.scx` directly in the game or open it with an editor.
+4. Now you can run `my_map_final.scx` directly in the game or open it with an editor.
+
+(!) Right now you must set Player 8 manually to be a Computer player before giving the map to langums.exe. This will be automated in the future.
 
 ## Language features
 
@@ -36,11 +48,13 @@ The "hello world" program for LangUMS would look like:
 
 ```
 fn main() {
-  print("Hello World!")
+  print("Hello World!");
 }
 ```
 
 Which will print `Hello World!` on Player1's screen.
+
+Note: All statements must end with a semicolon (`;`). Block statements (code enclosed in `{}`) do not need a semicolon at the end.
 
 The more complex example below will give 36 minerals total to Player1. It declares a global variable called `foo`, a local variable `bar` and then calls the `add_resource()` built-in within a while loop.
 The quantity argument for `add_resource()` is the expression `foo + 2`. Some built-ins support expressions for some of their arguments.
@@ -93,27 +107,44 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 
 ## Built-in functions
 
-- poll_events() -- runs any associated event handlers
-- end(Player, EndCondition) -- ends the game for Player with EndCondition e.g. end(Player1, Victory)
-- set_resource(Player, ResourceType, QuantityExpression) -- sets the resource count
-- add_resource(Player, ResourceType, QuantityExpression) -- gives resources to a player
-- take_resource(Player, ResourceType, QuantityExpression) -- takes resources from a player
-- center_view(LocationName) -- centers the view on a location
-- print(String, optional: Player) -- prints a message to a player, defaults to player 1 if not player is passed
-- sleep(milliseconds) -- sleeps for milliseconds (warning! will freeze the whole event loop)
-- spawn(Unit, Player, QuantityExpression, LocationName) -- spawns units for player at a location
-- kill(Unit, Player, QuantityExpression, optional: LocationName) -- kills units for player at an optional location
-- More to be added ...
+| Function prototype                                           | Description                                              |
+|--------------------------------------------------------------|----------------------------------------------------------|
+| `poll_events()`                                              | Runs any associated event handlers.                      |
+| `end(Player, EndCondition)`                                  | Ends the game for Player with EndCondition.              |
+| `set_resource(Player, ResourceType, QuantityExpression)`     | Sets the resource count for player.                      |
+| `add_resource(Player, ResourceType, QuantityExpression)`     | Gives resources to a player.                             |
+| `take_resource(Player, ResourceType, QuantityExpression)`    | Takes resources from a player.                           |
+| `center_view(LocationName)`                                  | Centers the view on a location.                          |
+| `print(String, optional: Player)`                            | Prints a message to a player, defaults to Player1.       |
+| `sleep(milliseconds)`                                        | Sleeps for milliseconds. (Will freeze the event loop!)   |
+| `spawn(Unit, Player, QuantityExpression, LocationName)`      | Spawns units for player at a location.                   |
+| `kill(Unit, Player, QuantityExpression, optional: Location)` | Kills units for player at an optional location.          |
+| More to be added ...                                         |                                                          |
 
 ## Built-in event conditions
 
-- bring(Player, Comparison, Quantity, Unit, LocationName) -- called when player owns quantity of units at location
-- More to be added ...
+| Event prototype                                                 | Description                                           |
+|-----------------------------------------------------------------|-------------------------------------------------------|
+| `bring(Player, Comparison, Quantity, Unit, LocationName)`       | When the player owns a quantity of units at location. |
+| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When the player owns a quantity of resources.         |
+| `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
+| More to be added ...                                            |                                                       |
 
 ## Limitations
 
-- LangUMS needs Player 8 to be untouched to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely.
-- There are about 240 registers available for variables and the stack. The variable storage grows from the left and the stack grows from the right. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue.
+- You must set Player 8 to a Computer player. Also Player 8 has to remain untouched for LangUMS to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely. Preplaced units for Player 8 are also not allowed.
+- There are about 240 registers available for variables and the stack. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue.
+- Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
+- Currently you have can have up to 253 event handlers, this limitation will be lifted in the future.
+- Recursion of any kind is not allowed and leads to undefined behavior.
+
+## Future plans
+
+- For loop
+- Arrays
+- Template-like metaprogramming facilities
+- Improved AST/ IR optimization
+- Multiple execution threads
 
 ## Built-in constants
 
@@ -377,3 +408,9 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 ## Examples
 
 [Look at the test/ folder here for examples](https://github.com/AlexanderDzhoganov/langums/tree/master/test)
+
+## FAQ
+
+#### Rewrite it in Rust?
+
+No, but thanks for asking.

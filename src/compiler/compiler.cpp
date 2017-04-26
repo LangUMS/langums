@@ -83,6 +83,15 @@ namespace Langums
 							accum->GetQuantity()
 						);
 					}
+					else if (condition->GetType() == IRInstructionType::TimeCond)
+					{
+						auto time = (IRTimeCondInstruction*)condition.get();
+
+						eventTrigger.CodeGen_ElapsedTime(
+							(CHK::TriggerComparisonType)time->GetComparison(),
+							time->GetQuantity()
+						);
+					}
 				}
 
 				m_Triggers.push_back(eventTrigger.GetTrigger());
@@ -772,7 +781,8 @@ namespace Langums
 			(
 				instruction->GetType() == IRInstructionType::Event ||
 				instruction->GetType() == IRInstructionType::BringCond ||
-				instruction->GetType() == IRInstructionType::AccumCond
+				instruction->GetType() == IRInstructionType::AccumCond ||
+				instruction->GetType() == IRInstructionType::TimeCond
 			)
 			{
 				continue;

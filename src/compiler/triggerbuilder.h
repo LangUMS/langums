@@ -16,6 +16,7 @@ namespace Langums
 		void CodeGen_Always();
 		void CodeGen_Bring(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int locationId, unsigned int quantity);
 		void CodeGen_Accumulate(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ResourceType resourceType, unsigned int quantity);
+		void CodeGen_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity);
 
 		void CodeGen_SetReg(unsigned int regId, int value);
 		void CodeGen_IncReg(unsigned int regId, int amount);

@@ -143,7 +143,7 @@ namespace Langums
 
 						EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity->GetValue()), m_Instructions);
 					}
-					if (name == "accumulate")
+					else if (name == "accumulate")
 					{
 						auto arg0 = condition->GetArgument(0);
 						if (arg0->GetType() != ASTNodeType::Identifier)
@@ -212,6 +212,45 @@ namespace Langums
 						}
 
 						EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity->GetValue()), m_Instructions);
+					}
+					else if (name == "elapsed_time")
+					{
+						auto arg0 = condition->GetArgument(0);
+						if (arg0->GetType() != ASTNodeType::Identifier)
+						{
+							throw IRCompilerException("Something other than an identifier passed as first argument to elapsed_time(), expected comparison type");
+						}
+
+						auto comparisonType = (ASTIdentifier*)arg0.get();
+						auto comparisonName = comparisonType->GetName();
+
+						ConditionComparison comparison;
+						if (comparisonName == "AtLeast")
+						{
+							comparison = ConditionComparison::AtLeast;
+						}
+						else if (comparisonName == "AtMost")
+						{
+							comparison = ConditionComparison::AtMost;
+						}
+						else if (comparisonName == "Exactly")
+						{
+							comparison = ConditionComparison::Exactly;
+						}
+						else
+						{
+							throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
+						}
+
+						auto arg1 = condition->GetArgument(1);
+						if (arg1->GetType() != ASTNodeType::NumberLiteral)
+						{
+							throw IRCompilerException("Something other than a number literal passed as second argument to accumulate(), expected elapsed time quantity");
+						}
+
+						auto quantity = (ASTNumberLiteral*)arg1.get();
+
+						EmitInstruction(new IRTimeCondInstruction(comparison, quantity->GetValue()), m_Instructions);
 					}
 					else
 					{

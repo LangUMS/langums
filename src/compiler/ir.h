@@ -89,6 +89,7 @@ namespace Langums
 		Event,
 		BringCond, // Bring trigger condition
 		AccumCond, // Accumulate trigger condition
+		TimeCond, // Elapsed time trigger condition
 	};
 
 	enum class ConditionComparison
@@ -1119,6 +1120,32 @@ namespace Langums
 		private:
 		uint8_t m_PlayerId;
 		CHK::ResourceType m_ResourceType;
+		ConditionComparison m_Comparison;
+		uint32_t m_Quantity;
+	};
+
+	class IRTimeCondInstruction : public IIRInstruction
+	{
+		public:
+		IRTimeCondInstruction(ConditionComparison comparison, uint32_t quantity) :
+			m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::TimeCond) {}
+
+		std::string DebugDump() const
+		{
+			return SafePrintf("TIME % %", (int)m_Comparison, (int)m_Quantity);
+		}
+
+		ConditionComparison GetComparison() const
+		{
+			return m_Comparison;
+		}
+
+		uint32_t GetQuantity() const
+		{
+			return m_Quantity;
+		}
+
+		private:
 		ConditionComparison m_Comparison;
 		uint32_t m_Quantity;
 	};
