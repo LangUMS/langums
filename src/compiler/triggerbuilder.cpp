@@ -296,6 +296,22 @@ namespace Langums
 
         m_HasChanges = true;
     }
+
+    void TriggerBuilder::CodeGen_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::MoveLocation;
+        action.m_Source = srcLocationId + 1;
+        action.m_Arg0 = dstLocationId + 1;
+
+        action.m_Group = playerId;
+        action.m_Arg1 = unitId;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
     
     void TriggerBuilder::CodeGen_Victory()
     {

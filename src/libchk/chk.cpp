@@ -40,6 +40,10 @@ namespace CHK
             {
                 chunk = std::make_unique<CHKOwnrChunk>(bytes, type);
             }
+            else if (type == "DIM ")
+            {
+                chunk = std::make_unique<CHKDimChunk>(bytes, type);
+            }
             else if
             ( // skip all non-required chunks to lower file-size
                 type == "TYPE" ||

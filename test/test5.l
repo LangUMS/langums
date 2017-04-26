@@ -8,6 +8,7 @@ countdown(Exactly, 0) => {
 fn main() {
   set_countdown(timer);
   spawn(TerranMarine, Player1, 1, "TestLocation");
+  move_loc(TerranMarine, Player1, "TestLocation2", "TestLocation");
  
   while (true) {
     poll_events();

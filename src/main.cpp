@@ -86,9 +86,9 @@ int main(int argc, char* argv[])
         dstPath += srcPath.filename();
     }
 
-    LOG_F("Source: %", srcPath);
-    LOG_F("Destination: %", dstPath);
-    LOG_F("Script: %", langPath);
+    LOG_F("Source map: %", srcPath);
+    LOG_F("Code source: %", langPath);
+    LOG_F("Destination map: %", dstPath);
 
     auto filename = srcPath.filename();
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     }
 
     LOG_F("Looks like a valid MPQ file.");
-
+     
     MPQHANDLE scenarioFile = nullptr;
     if (!SFileOpenFileEx(mpq, SCENARIO_FILENAME, 0, &scenarioFile))
     {
@@ -163,7 +163,31 @@ int main(int argc, char* argv[])
         LOG_EXITERR("\n(!) TRIG chunk not found in scenario.chk. Add at least one trigger before running LangUMS.");
         return 1;
     }
+
+    if (!chk.HasChunk("DIM "))
+    {
+        LOG_EXITERR("\n(!) DIM chunk not found in scenario.chk. Map file is corrupted.");
+        return 1;
+    }
+
+    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
+    if (ownrChunk.GetPlayerType(7) != PlayerType::Computer)
+    {
+        LOG_F("(!) Warning! Player 8 is not set to type \"Computer\". Overriding.");
+        ownrChunk.SetPlayerType(7, PlayerType::Computer);
+    }
+
+    auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
+    triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
+    auto preserveTriggers = opts.count("preserve-triggers") > 0;
+
+    LOG_F("Pre-existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
+
+    auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>("DIM ");
+    LOG_F("Map size is %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
     
+    LOG_F("");
+
     LOG_F("Compiling script \"%\"", langPath.generic_u8string());
 
     std::ifstream scriptFile(langPath.generic_u8string());
@@ -193,7 +217,7 @@ int main(int argc, char* argv[])
     {
         LOG_EXITERR("Preprocessor error: %", ex.what());
         return 1;
-    }
+    } 
 
     Parser parser;
     std::shared_ptr<IASTNode> ast;
@@ -300,8 +324,6 @@ int main(int argc, char* argv[])
         compiler.SetCopyBatchSize(copyBatchSize);
     }
 
-    auto preserveTriggers = opts.count("preserve-triggers") > 0;
-
     try
     {
         compiler.Compile(instructions, chk, preserveTriggers);
@@ -312,16 +334,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
-    if (ownrChunk.GetPlayerType(7) != PlayerType::Computer)
-    {
-        LOG_F("(!) Warning! Player 8 is not set to type \"Computer\". Overriding.");
-        ownrChunk.SetPlayerType(7, PlayerType::Computer);
-    }
-
-    auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
-    triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
-    LOG_F("Compilation successful! Trigger count: %.", triggersChunk.GetTriggersCount());
+    LOG_F("Compilation successful! Trigger count: %", triggersChunk.GetTriggersCount());
 
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);

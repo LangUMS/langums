@@ -185,6 +185,9 @@
     <ClCompile Include="..\src\libchk\ownrchunk.cpp">
       <Filter>libchk</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libchk\dimchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -338,6 +341,9 @@
       <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\ownrchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\dimchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,6 +12,7 @@
 #include "triggerschunk.h"
 #include "locationschunk.h"
 #include "ownrchunk.h"
+#include "dimchunk.h"
 
 namespace CHK
 {

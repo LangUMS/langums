@@ -683,6 +683,30 @@ namespace Langums
                     m_Triggers.push_back(finishTrigger.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::MoveLoc)
+            {
+                auto move = (IRMoveLocInstruction*)instruction.get();
+
+                auto srcLocName = move->GetSrcLocationName();
+                auto locationStringId = m_StringsChunk->FindString(srcLocName) + 1;
+                auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId);
+
+                if (srcLocationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
+                }
+
+                auto dstLocName = move->GetDstLocationName();
+                locationStringId = m_StringsChunk->FindString(dstLocName) + 1;
+                auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId);
+
+                if (dstLocationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
+                }
+
+                current.CodeGen_MoveLocation(move->GetPlayerId(), move->GetUnitId(), srcLocationId, dstLocationId);
+            }
             else if (instruction->GetType() == IRInstructionType::EndGame)
             {
                 auto endGame = (IREndGameInstruction*)instruction.get();

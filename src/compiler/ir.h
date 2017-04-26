@@ -81,6 +81,7 @@ namespace Langums
         Spawn, // spawns a unit
         Kill, // kills a unit
         Move, // moves a unit
+        MoveLoc, // moves a location
         EndGame, // ends the game in a victory or defeat for a given player
         CenterView, // centers the camera on a location for a given player
         Ping, // Minimap ping at a location
@@ -883,6 +884,44 @@ namespace Langums
         uint8_t m_UnitId;
         uint32_t m_RegId;
         bool m_IsLiteralValue;
+        std::string m_SrcLocationName;
+        std::string m_DstLocationName;
+    };
+
+    class IRMoveLocInstruction : public IIRInstruction
+    {
+        public:
+        IRMoveLocInstruction(uint8_t playerId, uint8_t unitId, const std::string& srcLocation, const std::string& dstLocation) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_SrcLocationName(srcLocation), m_DstLocationName(dstLocation), IIRInstruction(IRInstructionType::MoveLoc) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("MOVLOC % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_SrcLocationName, m_DstLocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        const std::string& GetSrcLocationName() const
+        {
+            return m_SrcLocationName;
+        }
+
+        const std::string& GetDstLocationName() const
+        {
+            return m_DstLocationName;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
         std::string m_SrcLocationName;
         std::string m_DstLocationName;
     };

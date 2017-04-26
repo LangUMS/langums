@@ -114,11 +114,12 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `set_resource(Player, ResourceType, QuantityExpression)`           | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`           | Gives resources to a player.                             |
 | `take_resource(Player, ResourceType, QuantityExpression)`          | Takes resources from a player.                           |
-| `center_view(Player, LocationName)`                                | Centers the view on a location for a player.             |
-| `ping(Player, LocationName)`                                       | Triggers a minimap ping on a location for a player.      |
-| `spawn(Unit, Player, QuantityExpression, LocationName)`            | Spawns units at a location.                              |
+| `center_view(Player, Location)`                                    | Centers the view on a location for a player.             |
+| `ping(Player, Location)`                                           | Triggers a minimap ping on a location for a player.      |
+| `spawn(Unit, Player, QuantityExpression, Location)`                | Spawns units at a location.                              |
 | `kill(Unit, Player, QuantityExpression, optional: Location)`       | Kills units at an optional location.                     |
 | `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)` | Moves units from one location to another.                |
+| `move_loc(Unit, Player, SrcLocation, DstLocation)`                 | Centers DstLocation on a unit at SrcLocation.            |
 | `end(Player, EndCondition)`                                        | Ends the game for Player with EndCondition.              |
 | `set_countdown(Expression)`                                        | Sets the countdown timer.                                |
 | `sleep(Quantity)`                                                  | Sleeps for milliseconds. (Dangerous!)                    |
@@ -128,7 +129,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 
 | Event prototype                                                 | Description                                           |
 |-----------------------------------------------------------------|-------------------------------------------------------|
-| `bring(Player, Comparison, Quantity, Unit, LocationName)`       | When a player owns a quantity of units at location.   |
+| `bring(Player, Comparison, Quantity, Unit, Location)`           | When a player owns a quantity of units at location.   |
 | `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.           |
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
 | `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.             |
@@ -208,6 +209,7 @@ No, but thanks for asking.
 
 ## Future plans
 
+- Else/ Else-If statements
 - For loop
 - Arrays
 - Template-like metaprogramming facilities
