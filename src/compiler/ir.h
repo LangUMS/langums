@@ -109,7 +109,15 @@ namespace Langums
 		}
 		else if (regId == Reg_Temp0)
 		{
-			return "[TEMP]";
+			return "[TEMP 0]";
+		}
+		else if (regId == Reg_Temp1)
+		{
+			return "[TEMP 1]";
+		}
+		else if (regId == Reg_Temp2)
+		{
+			return "[TEMP 2]";
 		}
 		else if (regId == Reg_FunctionReturn)
 		{
@@ -417,7 +425,7 @@ namespace Langums
 				}
 				else
 				{
-					return SafePrintf("JMP -%", m_Offset);
+					return SafePrintf("JMP %", m_Offset);
 
 				}
 			}
@@ -463,7 +471,7 @@ namespace Langums
 				}
 				else
 				{
-					return SafePrintf("JEZ % -%", RegisterIdToString(m_RegisterId), m_Offset);
+					return SafePrintf("JEZ % %", RegisterIdToString(m_RegisterId), m_Offset);
 
 				}
 			}
@@ -510,7 +518,7 @@ namespace Langums
 				}
 				else
 				{
-					return SafePrintf("JNZ % -%", RegisterIdToString(m_RegisterId), m_Offset);
+					return SafePrintf("JNZ % %", RegisterIdToString(m_RegisterId), m_Offset);
 
 				}
 			}
@@ -557,7 +565,7 @@ namespace Langums
 				}
 				else
 				{
-					return SafePrintf("JSNS % -%", SwitchToString(m_SwitchId), m_Offset);
+					return SafePrintf("JSNS % %", SwitchToString(m_SwitchId), m_Offset);
 
 				}
 			}
@@ -604,7 +612,7 @@ namespace Langums
 				}
 				else
 				{
-					return SafePrintf("JSS % -%", SwitchToString(m_SwitchId), m_Offset);
+					return SafePrintf("JSS % %", SwitchToString(m_SwitchId), m_Offset);
 
 				}
 			}
@@ -912,7 +920,7 @@ namespace Langums
 				qty = RegisterIdToString(m_RegId);
 			}
 
-			return SafePrintf("SETRESOURCE % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+			return SafePrintf("SETRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
 		}
 
 		uint8_t GetPlayerId() const
@@ -961,7 +969,7 @@ namespace Langums
 				qty = RegisterIdToString(m_RegId);
 			}
 
-			return SafePrintf("INCRESOURCE % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+			return SafePrintf("INCRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
 		}
 
 		uint8_t GetPlayerId() const
@@ -1010,7 +1018,7 @@ namespace Langums
 				qty = RegisterIdToString(m_RegId);
 			}
 
-			return SafePrintf("DECRESOURCE % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+			return SafePrintf("DECRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
 		}
 
 		uint8_t GetPlayerId() const

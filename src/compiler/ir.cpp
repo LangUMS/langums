@@ -926,6 +926,20 @@ namespace Langums
 		{
 			EmitInstruction(new IRSubInstruction(), instructions);
 		}
+		else if (op == OperatorType::Multiply)
+		{
+			EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
+			EmitInstruction(new IRPopInstruction(Reg_Temp1), instructions);
+
+			EmitInstruction(new IRDecRegInstruction(Reg_Temp0, 1), instructions);
+			EmitInstruction(new IRPushInstruction(Reg_Temp1), instructions);
+			EmitInstruction(new IRAddInstruction(), instructions);
+			EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_Temp0, -3), instructions);
+		}
+		else if (op == OperatorType::Divide)
+		{
+			throw IRCompilerException("Division is not yet implemented.");
+		}
 		else if (op == OperatorType::Equals)
 		{
 			EmitInstruction(new IRSubInstruction(), instructions);
