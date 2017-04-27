@@ -54,12 +54,20 @@ namespace Langums
         Switch_InstructionCounterMutex,
         Switch_EventsMutex,
         Switch_ArithmeticUnderflow,
+        Switch_Random0,
+        Switch_Random1,
+        Switch_Random2,
+        Switch_Random3,
+        Switch_Random4,
+        Switch_Random5,
+        Switch_Random6,
+        Switch_Random7,
         Switch_ReservedEnd
     };
 
     enum class IRInstructionType
     {
-        None = 0,
+        Nop = 0,
         // core
         Push, // pushes value on top of the stack and decrements the stack pointer
         Pop, // pops a value from the stack and increments the stack pointer
@@ -71,6 +79,7 @@ namespace Langums
         CopyReg, // copies a register's value to another register
         Add, // pops two values off the stack and adds them together, pushes the result on the stack
         Sub, // pops two values off the stack, subtracts the second from the first, pushes the result on the stack
+        Rnd256, // pushes a random value between 0 and 255 on top of the stack
         Jmp, // jumps to an instruction using relative or absolute offset
         JmpIfEqZero, // jumps to an instruction if a register is equal to zero,
         JmpIfNotEqZero, // jumps to an instruction if a register is not equal to zero
@@ -180,7 +189,18 @@ namespace Langums
         virtual std::string DebugDump() const = 0;
 
         private:
-        IRInstructionType m_Type = IRInstructionType::None;
+        IRInstructionType m_Type = IRInstructionType::Nop;
+    };
+
+    class IRNopInstruction : public IIRInstruction
+    {
+        public:
+        IRNopInstruction() : IIRInstruction(IRInstructionType::Nop) {}
+
+        std::string DebugDump() const
+        {
+            return "NOP";
+        }
     };
 
     class IRPushInstruction : public IIRInstruction
@@ -376,6 +396,17 @@ namespace Langums
         std::string DebugDump() const
         {
             return "SUB";
+        }
+    };
+
+    class IRRnd256Instruction : public IIRInstruction
+    {
+        public:
+        IRRnd256Instruction() : IIRInstruction(IRInstructionType::Rnd256) {}
+
+        std::string DebugDump() const
+        {
+            return "RND256";
         }
     };
 

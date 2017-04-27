@@ -410,6 +410,35 @@ namespace Langums
                 finishSub.CodeGen_JumpTo(retAddress);
                 m_Triggers.push_back(finishSub.GetTrigger());
             }
+            else if (instruction->GetType() == IRInstructionType::Rnd256)
+            {
+                auto rndAddress = nextAddress++;
+
+                for (auto i = 0; i < 8; i++)
+                {
+                    current.CodeGen_SetSwitch(Switch_Random0 + i, CHK::TriggerActionState::RandomizeSwitch);
+                }
+
+                auto stackTop = m_StackPointer--;
+                current.CodeGen_SetReg(stackTop, 0);
+                current.CodeGen_JumpTo(rndAddress);
+
+                m_Triggers.push_back(current.GetTrigger());
+                auto retAddress = nextAddress++;
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                for (auto i = 0; i < 8; i++)
+                {
+                    auto rnd = TriggerBuilder(rndAddress, instruction.get(), m_TriggersOwner);
+                    rnd.CodeGen_TestSwitch(Switch_Random0 + i, true);
+                    rnd.CodeGen_IncReg(stackTop, (1 << i));
+                    m_Triggers.push_back(rnd.GetTrigger());
+                }
+
+                auto finish = TriggerBuilder(rndAddress, instruction.get(), m_TriggersOwner);
+                finish.CodeGen_JumpTo(retAddress);
+                m_Triggers.push_back(finish.GetTrigger());
+            }
             else if (instruction->GetType() == IRInstructionType::Jmp)
             {
                 auto jmp = (IRJmpInstruction*)instruction.get();
@@ -1349,6 +1378,7 @@ namespace Langums
             }
             else if
             (
+                instruction->GetType() == IRInstructionType::Nop ||
                 instruction->GetType() == IRInstructionType::Event ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||

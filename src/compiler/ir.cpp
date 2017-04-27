@@ -73,6 +73,7 @@ namespace Langums
                 {
                     auto condition = (ASTEventCondition*)eventDeclaration->GetCondition(i).get();
                     auto& name = condition->GetName();
+
                     if (name == "bring")
                     {
                         auto arg0 = condition->GetArgument(0);
@@ -492,6 +493,11 @@ namespace Langums
                 EmitInstruction(new IRCallInstruction("poll_events", m_PollEventsAddress, m_PollEventsRetRegId), instructions);
                 EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_Instructions);
             }
+        }
+        else if (fnName == "rnd256")
+        {
+            EmitInstruction(new IRRnd256Instruction(), m_Instructions);
+            EmitInstruction(new IRPopInstruction(Reg_FunctionReturn), m_Instructions);
         }
         else if (fnName == "end")
         {

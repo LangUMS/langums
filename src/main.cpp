@@ -8,6 +8,7 @@
 #include "libchk/chk.h"
 #include "parser/preprocessor.h"
 #include "parser/parser.h"
+#include "parser/ast_optimizer.h"
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
 #include "compiler/registermap_parser.h"
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
         ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
         ("registers-owner", "The index of the player whose death counts will be used as memory (default: 8)", cxxopts::value<unsigned int>())
+        ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues)", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
 
@@ -223,12 +225,21 @@ int main(int argc, char* argv[])
         return 1;
     } 
 
+    auto disableOptimization = opts.count("disable-optimization") > 0;
+
     Parser parser;
     std::shared_ptr<IASTNode> ast;
     
+    ASTOptimizer astOptimizer;
+
     try
     {
         ast = std::shared_ptr<IASTNode>(parser.Parse(script));
+
+        if (!disableOptimization)
+        {
+            ast = astOptimizer.Process(ast);
+        }
     }
     catch (const ParserException& ex)
     {
@@ -290,7 +301,10 @@ int main(int argc, char* argv[])
 
     try
     {
-        ir.Optimize();
+        if (!disableOptimization)
+        {
+            ir.Optimize();
+        }
     }
     catch (const IRCompilerException& ex)
     {

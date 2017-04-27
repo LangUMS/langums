@@ -12,7 +12,7 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>> Process(std::vector<std::unique_ptr<IIRInstruction>> instructions);
 
         private:
-        void EliminateRedundantStores();
+        bool EliminateRedundantPushPopPairs();
 
         std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
     };

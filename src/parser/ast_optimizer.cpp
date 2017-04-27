@@ -3,7 +3,7 @@
 namespace Langums
 {
 
-    std::unique_ptr<IASTNode> ASTOptimizer::Process(std::unique_ptr<IASTNode> ast)
+    std::shared_ptr<IASTNode> ASTOptimizer::Process(std::shared_ptr<IASTNode> ast)
     {
         m_Root = std::move(ast);
 

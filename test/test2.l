@@ -5,8 +5,8 @@ fn main() {
     print("6 >= 5");
   }
   
-  if (foo >= 6) {
-    print("6 >= 6");
+  if (foo > 5) {
+    print("6 > 5");
   }
   
   if (foo >= 4) {

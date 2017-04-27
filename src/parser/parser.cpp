@@ -1,6 +1,5 @@
 #include "parser.h"
 #include "preprocessor.h"
-#include "ast_optimizer.h"
 
 namespace Langums
 {
@@ -9,9 +8,7 @@ namespace Langums
     {
         m_Buffer = input;
         m_CurrentChar = 0;
-        
-        ASTOptimizer optimizer;
-        return optimizer.Process(Unit());
+        return Unit();
     }
 
     ExpressionToken Parser::Token()

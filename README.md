@@ -218,6 +218,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 |------------------------------------------------------------------------|----------------------------------------------------------|
 | `poll_events()`                                                        | Runs any associated event handlers.                      |
 | `print(String, optional: Player)`                                      | Prints a message to a player, defaults to Player1.       |
+| `rnd256()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
 | `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
 | `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                           |
@@ -304,7 +305,7 @@ No, but thanks for asking.
 - One player (out of the 8 possible) must be reserved for LangUMS. By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
 - There are about 240 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
 - Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
-- Currently you have can have up to 253 event handlers, this limitation will be lifted in the future.
+- Currently you have can have up to 240 event handlers, this limitation will be lifted in the future.
 - Recursion of any kind is not allowed and leads to undefined behavior.
 - Multiplication and division can take many cycles to complete, especially with very large numbers.
 - In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.

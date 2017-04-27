@@ -9,14 +9,14 @@ namespace Langums
     class ASTOptimizer
     {
         public:
-        std::unique_ptr<IASTNode> Process(std::unique_ptr<IASTNode> ast);
+        std::shared_ptr<IASTNode> Process(std::shared_ptr<IASTNode> ast);
 
         private:
         std::shared_ptr<IASTNode> CalculateConstantExpressions(const std::shared_ptr<IASTNode>& node);
 
         int CalculateConstantBinaryExpression(int left, int right, OperatorType op);
 
-        std::unique_ptr<IASTNode> m_Root;
+        std::shared_ptr<IASTNode> m_Root;
     };
 
 }
