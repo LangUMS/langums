@@ -251,11 +251,11 @@ Yes. Use the `--preserve-triggers` option.
 
 #### How do you change which player owns the main triggers?
 
-With the `--main-triggers-owner` command-line option.
+With the `--triggers-owner` command-line option.
 
 #### How do you change which player's death counts are used for storage?
 
-Use the `--death-counts-owner` command-line option.
+Use the `--registers-owner` command-line option.
 
 #### The compiler emits way more triggers than I'd like. What can I do?
 
@@ -277,6 +277,37 @@ No, but thanks for asking.
 - Recursion of any kind is not allowed and leads to undefined behavior.
 - Multiplication and division can take many cycles to complete, especially with very large numbers.
 - In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
+
+
+## Integration with existing maps
+
+There are some facilities for integrating LangUMS code with existing maps and more will be added in the future.
+
+#### Use --preserve-triggers
+
+The `--preserve-triggers` option makes it so that the compiler doesn't wipe all existing triggers in the map but appends to them instead.
+
+#### Use a registers map file
+
+You can pass a file that tells the compiler which death counts for which players are free to use as general purpose storage.
+The format of this file is:
+
+```
+Player1, TerranMarine
+Player2, TerranGhost
+Player4, TerranVulture
+Player8, TerranGoliath
+```
+
+Where each line contains two items - a player name and a unit name. Note that the order of the lines does not matter.
+
+You can pass this file to the compiler with the `--reg` option e.g.
+
+```
+langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_registers.txt
+```
+
+A sample file with the default mappings [is available here](https://github.com/AlexanderDzhoganov/langums/blob/master/registermap.txt?raw=true).
 
 ## For programmers
 

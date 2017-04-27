@@ -6,6 +6,26 @@
 namespace Langums
 {
 
+    Compiler::Compiler()
+    {
+        SetDefaultRegistersOwner(m_DefaultRegistersOwner);
+    }
+
+    void Compiler::SetDefaultRegistersOwner(uint8_t owner)
+    {
+        m_DefaultRegistersOwner = owner;
+
+        g_RegisterMap.clear();
+
+        for (auto i = 0; i < MAX_REGISTER_INDEX; i++)
+        {
+            RegisterDef def;
+            def.m_PlayerId = m_DefaultRegistersOwner;
+            def.m_Index = i;
+            g_RegisterMap.push_back(def);
+        }
+    }
+
     bool Compiler::Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers)
     {
         using namespace CHK;
@@ -26,7 +46,7 @@ namespace Langums
             throw CompilerException("No locations chunk found in scenario file");
         }
 
-        m_StackPointer = MAX_REGISTER_INDEX;
+        m_StackPointer = g_RegisterMap.size() - 1;
 
         for (auto i = 0u; i < instructions.size(); i++) // emit event triggers first
         {

@@ -188,6 +188,9 @@
     <ClCompile Include="..\src\libchk\dimchunk.cpp">
       <Filter>libchk</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\compiler\registermap_parser.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -345,6 +348,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libchk\dimchunk.h">
       <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\registermap_parser.h">
+      <Filter>compiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -24,6 +24,8 @@ namespace Langums
     class Compiler
     {
         public:
+        Compiler();
+
         void SetCopyBatchSize(uint32_t copyBatchSize)
         {
             m_CopyBatchSize = copyBatchSize;
@@ -34,11 +36,13 @@ namespace Langums
             m_TriggersOwner = owner;
         }
 
-        void SetDeathCountsOwner(uint8_t owner)
-        {
-            g_RegistersOwnerPlayer = owner;
-        }
+        void SetDefaultRegistersOwner(uint8_t owner);
 
+        void SetCustomRegisterDefinitions(const std::vector<RegisterDef>& defs)
+        {
+            g_RegisterMap = defs;
+        }
+        
         bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
 
         private:
@@ -53,6 +57,7 @@ namespace Langums
         uint32_t m_CopyBatchSize = 65536u;
         uint32_t m_HyperTriggerCount = 5;
         uint8_t m_TriggersOwner = 1;
+        uint8_t m_DefaultRegistersOwner = 7;
 
         CHK::File* m_File = nullptr;
         CHK::CHKStringsChunk* m_StringsChunk = nullptr;
@@ -64,6 +69,8 @@ namespace Langums
 
         unsigned int m_StackPointer = MAX_REGISTER_INDEX;
         bool m_DebugTrace = true;
+
+        std::vector<RegisterDef> m_RegisterMap;
     };
 
 }

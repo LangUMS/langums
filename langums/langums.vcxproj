@@ -122,6 +122,7 @@
     <ClCompile Include="..\src\compiler\compiler.cpp" />
     <ClCompile Include="..\src\compiler\ir.cpp" />
     <ClCompile Include="..\src\compiler\ir_optimizer.cpp" />
+    <ClCompile Include="..\src\compiler\registermap_parser.cpp" />
     <ClCompile Include="..\src\compiler\triggerbuilder.cpp" />
     <ClCompile Include="..\src\libchk\chk.cpp" />
     <ClCompile Include="..\src\libchk\dimchunk.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="..\src\compiler\compiler.h" />
     <ClInclude Include="..\src\compiler\ir.h" />
     <ClInclude Include="..\src\compiler\ir_optimizer.h" />
+    <ClInclude Include="..\src\compiler\registermap_parser.h" />
     <ClInclude Include="..\src\compiler\triggerbuilder.h" />
     <ClInclude Include="..\src\cxxopts.h" />
     <ClInclude Include="..\src\libchk\chk.h" />

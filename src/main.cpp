@@ -10,6 +10,7 @@
 #include "parser/parser.h"
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
+#include "compiler/registermap_parser.h"
 
 #undef min
 #undef max
@@ -29,11 +30,12 @@ int main(int argc, char* argv[])
         ("s,src", "Source .scx map file", cxxopts::value<std::string>())
         ("d,dst", "Destination .scx map file", cxxopts::value<std::string>())
         ("l,lang", "Source .l script file", cxxopts::value<std::string>())
+        ("r,reg", "Available registers map file", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
         ("preserve-triggers", "Preserves already existing triggers in the map. (Use with caution!)", cxxopts::value<bool>())
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
-        ("main-trigger-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
-        ("death-counts-owner", "The index of the player whose death counts will be used as memory (default: 8)", cxxopts::value<unsigned int>())
+        ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
+        ("registers-owner", "The index of the player whose death counts will be used as memory (default: 8)", cxxopts::value<unsigned int>())
         ;
     opts.parse(argc, argv);
 
@@ -306,30 +308,30 @@ int main(int argc, char* argv[])
 
     Compiler compiler;
 
-    if (opts.count("main-trigger-owner") > 0)
+    if (opts.count("registers-owner") > 0)
     {
-        auto triggerOwner = opts["main-trigger-owner"].as<unsigned int>();
+        auto registersOwner = opts["registers-owner"].as<unsigned int>();
+        if (registersOwner < 1 || registersOwner > 8)
+        {
+            LOG_EXITERR("\n(!) registers-owner must be between 1 and 8");
+            return 1;
+        }
+
+        LOG_F("Registers owner: %", registersOwner);
+        compiler.SetDefaultRegistersOwner(registersOwner);
+    }
+
+    if (opts.count("triggers-owner") > 0)
+    {
+        auto triggerOwner = opts["triggers-owner"].as<unsigned int>();
         if (triggerOwner < 1 || triggerOwner > 8)
         {
-            LOG_EXITERR("\n(!) main-trigger-owner must be between 1 and 8");
+            LOG_EXITERR("\n(!) triggers-owner must be between 1 and 8");
             return 1;
         }
 
         LOG_F("Main trigger owner: %", triggerOwner);
         compiler.SetTriggersOwner(triggerOwner);
-    }
-
-    if (opts.count("death-counts-owner") > 0)
-    {
-        auto deathCountsOwner = opts["death-counts-owner"].as<unsigned int>();
-        if (deathCountsOwner < 1 || deathCountsOwner > 8)
-        {
-            LOG_EXITERR("\n(!) death-counts-owner must be between 1 and 8");
-            return 1;
-        }
-
-        LOG_F("Death counts owner: %", deathCountsOwner);
-        compiler.SetDeathCountsOwner(deathCountsOwner);
     }
 
     if (opts.count("copy-batch-size") > 0)
@@ -350,6 +352,55 @@ int main(int argc, char* argv[])
         }
 
         compiler.SetCopyBatchSize(copyBatchSize);
+    }
+
+    if (opts.count("reg") > 0)
+    {
+        auto regPath = filesystem::path(opts["reg"].as<std::string>());
+        if (!regPath.has_filename())
+        {
+            LOG_F("%", opts.help());
+            LOG_EXITERR("\n(!) --reg path must be a valid text file.");
+            return 1;
+        }
+
+        std::ifstream regFile(regPath.generic_u8string());
+        if (!regFile.is_open())
+        {
+            LOG_EXITERR("\n(!) Failed to open \"%\" for reading.", regPath.generic_u8string());
+            return 1;
+        }
+
+        LOG_F("Using registers map from \"%\"", regPath.generic_u8string());
+
+        std::string str;
+        std::string regFileContents;
+        while (std::getline(regFile, str))
+        {
+            regFileContents += str;
+            regFileContents.push_back('\n');
+        }
+
+        RegistermapParser registerParser;
+
+        std::vector<RegisterDef> defs;
+
+        try
+        {
+            defs = registerParser.Parse(regFileContents);
+        }
+        catch (RegistermapParserException& ex)
+        {
+            LOG_EXITERR("\n(!) Register map parser error: %", ex.what());
+            return 1;
+        }
+
+        if (defs.size() < 24)
+        {
+            LOG_F("(!) Warning! Registers map contains less than 24 items. There is a high chance of stack overflow.");
+        }
+
+        compiler.SetCustomRegisterDefinitions(defs);
     }
 
     try

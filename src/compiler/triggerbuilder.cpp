@@ -3,6 +3,7 @@
 namespace Langums
 {
     unsigned int g_RegistersOwnerPlayer = 7;
+    std::vector<RegisterDef> g_RegisterMap;
 
     TriggerBuilder::TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerMask)
         : m_Address(address), m_Instruction(instruction), m_PlayerMask(playerMask)
@@ -34,8 +35,10 @@ namespace Langums
         condition.m_Condition = TriggerConditionType::Deaths;
         condition.m_Quantity = value;
         condition.m_Flags = 16;
-        condition.m_Group = g_RegistersOwnerPlayer;
-        condition.m_UnitId = regId;
+
+        auto& regDef = g_RegisterMap[regId];
+        condition.m_Group = regDef.m_PlayerId;
+        condition.m_UnitId = regDef.m_Index;
         m_HasChanges = true;
     }
 
@@ -155,11 +158,13 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::SetTo;
         action.m_Flags = 16;
+
+        auto& regDef = g_RegisterMap[regId];
+        action.m_Group = regDef.m_PlayerId;
         action.m_Arg0 = value;
-        action.m_Arg1 = regId;
+        action.m_Arg1 = regDef.m_Index;
         m_HasChanges = true;
     }
 
@@ -169,11 +174,13 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::Add;
         action.m_Flags = 16;
+
+        auto& regDef = g_RegisterMap[regId];
+        action.m_Group = regDef.m_PlayerId;
         action.m_Arg0 = amount;
-        action.m_Arg1 = regId;
+        action.m_Arg1 = regDef.m_Index;
         m_HasChanges = true;
     }
 
@@ -183,11 +190,13 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::Subtract;
         action.m_Flags = 16;
+
+        auto& regDef = g_RegisterMap[regId];
+        action.m_Group = regDef.m_PlayerId;
         action.m_Arg0 = amount;
-        action.m_Arg1 = regId;
+        action.m_Arg1 = regDef.m_Index;
         m_HasChanges = true;
     }
 

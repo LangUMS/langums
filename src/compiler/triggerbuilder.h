@@ -6,7 +6,13 @@
 namespace Langums
 {
 
-    extern unsigned int g_RegistersOwnerPlayer;
+    struct RegisterDef
+    {
+        uint8_t m_PlayerId;
+        uint8_t m_Index;
+    };
+
+    extern std::vector<RegisterDef> g_RegisterMap;
 
     class TriggerBuilder
     {
