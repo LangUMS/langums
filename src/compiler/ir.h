@@ -84,6 +84,7 @@ namespace Langums
         Kill, // kills a unit
         Move, // moves a unit
         Order, // orders a unit to move, attack or patrol
+        Modify, // modifies a unit's properties such as hp, energy, shields and hangar count
         MoveLoc, // moves a location
         EndGame, // ends the game in a victory or defeat for a given player
         CenterView, // centers the camera on a location for a given player
@@ -949,6 +950,93 @@ namespace Langums
         TriggerActionState m_Order;
         std::string m_SrcLocationName;
         std::string m_DstLocationName;
+    };
+
+    enum class ModifyType
+    {
+        HitPoints,
+        Energy,
+        ShieldPoints,
+        HangarCount
+    };
+
+    class IRModifyInstruction : public IIRInstruction
+    {
+        public:
+        IRModifyInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, uint32_t amount, ModifyType modifyType, const std::string& locationName) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_Amount(amount), m_ModifyType(modifyType), m_LocationName(locationName),
+            IIRInstruction(IRInstructionType::Modify) {}
+
+        std::string DebugDump() const
+        {
+            std::string type;
+            switch (m_ModifyType)
+            {
+            case ModifyType::HitPoints:
+                type = "HitPoints";
+                break;
+            case ModifyType::Energy:
+                type = "Energy";
+                break;
+            case ModifyType::ShieldPoints:
+                type = "ShieldPoints";
+                break;
+            case ModifyType::HangarCount:
+                type = "HangarCount";
+                break;
+            }
+
+            if (m_IsLiteralValue)
+            {
+                return SafePrintf("MODIFY % % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, type, m_Amount, m_LocationName);
+            }
+
+            return SafePrintf("MODIFY % % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), type, m_Amount, m_LocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsLiteralValue;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        uint32_t GetAmount() const
+        {
+            return m_Amount;
+        }
+
+        ModifyType GetModifyType() const
+        {
+            return m_ModifyType;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        uint32_t m_RegId;
+        uint32_t m_Amount;
+        bool m_IsLiteralValue = false;
+        std::string m_LocationName;
+        ModifyType m_ModifyType;
     };
 
     class IRMoveLocInstruction : public IIRInstruction

@@ -188,24 +188,25 @@ fn main() {
 
 ## Built-in functions
 
-| Function prototype                                                 | Description                                              |
-|--------------------------------------------------------------------|----------------------------------------------------------|
-| `poll_events()`                                                    | Runs any associated event handlers.                      |
-| `print(String, optional: Player)`                                  | Prints a message to a player, defaults to Player1.       |
-| `set_resource(Player, ResourceType, QuantityExpression)`           | Sets the resource count for player.                      |
-| `add_resource(Player, ResourceType, QuantityExpression)`           | Gives resources to a player.                             |
-| `take_resource(Player, ResourceType, QuantityExpression)`          | Takes resources from a player.                           |
-| `center_view(Player, Location)`                                    | Centers the view on a location for a player.             |
-| `ping(Player, Location)`                                           | Triggers a minimap ping on a location for a player.      |
-| `spawn(Unit, Player, QuantityExpression, Location)`                | Spawns units at a location.                              |
-| `kill(Unit, Player, QuantityExpression, optional: Location)`       | Kills units at an optional location.                     |
-| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)` | Moves units from one location to another.                |
-| `order(Unit, Player, Order, SrcLocation, DstLocation)`             | Orders a unit to move, attack or patrol.                 |
-| `move_loc(Unit, Player, SrcLocation, DstLocation)`                 | Centers DstLocation on a unit at SrcLocation.            |
-| `end(Player, EndCondition)`                                        | Ends the game for Player with EndCondition.              |
-| `set_countdown(Expression)`                                        | Sets the countdown timer.                                |
-| `sleep(Quantity)`                                                  | Sleeps for milliseconds. (Dangerous!)                    |
-| More to be added ...                                               |                                                          |
+| Function prototype                                                     | Description                                              |
+|------------------------------------------------------------------------|----------------------------------------------------------|
+| `poll_events()`                                                        | Runs any associated event handlers.                      |
+| `print(String, optional: Player)`                                      | Prints a message to a player, defaults to Player1.       |
+| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
+| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
+| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                           |
+| `center_view(Player, Location)`                                        | Centers the view on a location for a player.             |
+| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.      |
+| `spawn(Unit, Player, QuantityExpression, Location)`                    | Spawns units at a location.                              |
+| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                     |
+| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                |
+| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                 |
+| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.        |
+| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.            |
+| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.              |
+| `set_countdown(Expression)`                                            | Sets the countdown timer.                                |
+| `sleep(Quantity)`                                                      | Sleeps for milliseconds. (Dangerous!)                    |
+| More to be added ...                                                   |                                                          |
 
 ## Built-in event conditions
 
@@ -342,6 +343,15 @@ Exactly
 Move
 Attack
 Patrol
+```
+
+### UnitMod
+
+```
+Health,
+Energy,
+Shields,
+Hangar
 ```
 
 ### Player

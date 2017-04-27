@@ -731,6 +731,88 @@ namespace Langums
 
                 current.CodeGen_OrderUnit(order->GetPlayerId(), order->GetUnitId(), order->GetOrder(), srcLocationId, dstLocationId);
             }
+            else if (instruction->GetType() == IRInstructionType::Modify)
+            {
+                auto modify = (IRModifyInstruction*)instruction.get();
+
+                auto locationStringId = m_StringsChunk->FindString(modify->GetLocationName()) + 1;
+                auto locationId = m_LocationsChunk->FindLocation(locationStringId);
+                if (locationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", modify->GetLocationName()));
+                }
+
+                auto playerId = modify->GetPlayerId();
+                auto unitId = modify->GetUnitId();
+                auto quantity = modify->GetRegisterId();
+                auto amount = modify->GetAmount();
+
+                if (modify->IsValueLiteral())
+                {
+                    switch (modify->GetModifyType())
+                    {
+                    case ModifyType::HitPoints:
+                        current.CodeGen_ModifyUnitHitPoints(playerId, unitId, quantity, amount, locationId);
+                        break;
+                    case ModifyType::Energy:
+                        current.CodeGen_ModifyUnitEnergy(playerId, unitId, quantity, amount, locationId);
+                        break;
+                    case ModifyType::ShieldPoints:
+                        current.CodeGen_ModifyUnitShieldPoints(playerId, unitId, quantity, amount, locationId);
+                        break;
+                    case ModifyType::HangarCount:
+                        current.CodeGen_ModifyUnitHangarCount(playerId, unitId, quantity, amount, locationId);
+                        break;
+                    }
+                }
+                else
+                {
+                    auto regId = modify->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! Modify expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto modifyTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        modifyTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        modifyTrigger.CodeGen_DecReg(regId, i);
+
+                        switch (modify->GetModifyType())
+                        {
+                        case ModifyType::HitPoints:
+                            current.CodeGen_ModifyUnitHitPoints(playerId, unitId, i, amount, locationId);
+                            break;
+                        case ModifyType::Energy:
+                            current.CodeGen_ModifyUnitEnergy(playerId, unitId, i, amount, locationId);
+                            break;
+                        case ModifyType::ShieldPoints:
+                            current.CodeGen_ModifyUnitShieldPoints(playerId, unitId, i, amount, locationId);
+                            break;
+                        case ModifyType::HangarCount:
+                            current.CodeGen_ModifyUnitHangarCount(playerId, unitId, i, amount, locationId);
+                            break;
+                        }
+
+                        m_Triggers.push_back(modifyTrigger.GetTrigger());
+                    }
+
+                    auto finishModify = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishModify.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishModify.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishModify.GetTrigger());
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::MoveLoc)
             {
                 auto move = (IRMoveLocInstruction*)instruction.get();

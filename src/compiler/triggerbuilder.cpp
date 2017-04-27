@@ -321,6 +321,74 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_ModifyUnitHitPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::ModifyUnitHitPoints;
+        action.m_Source = locationId + 1;
+
+        action.m_Group = playerId;
+        action.m_Arg0 = amount;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::CodeGen_ModifyUnitEnergy(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::ModifyUnitEnergy;
+        action.m_Source = locationId + 1;
+
+        action.m_Group = playerId;
+        action.m_Arg0 = amount;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::CodeGen_ModifyUnitShieldPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::ModifyUnitShieldPoints;
+        action.m_Source = locationId + 1;
+
+        action.m_Group = playerId;
+        action.m_Arg0 = amount;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::CodeGen_ModifyUnitHangarCount(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::ModifyUnitHangerCount;
+        action.m_Source = locationId + 1;
+
+        action.m_Group = playerId;
+        action.m_Arg0 = amount;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::CodeGen_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;

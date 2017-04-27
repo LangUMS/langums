@@ -1145,6 +1145,116 @@ namespace Langums
 
             EmitInstruction(new IROrderInstruction(playerId, unitId, orderValue, srcLocName, dstLocName), instructions);
         }
+        else if (fnName == "modify")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
+            }
+
+            if (fnCall->GetChildCount() != 6)
+            {
+                throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg0.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
+            }
+
+            auto playerName = (ASTIdentifier*)arg1.get();
+            auto playerId = PlayerNameToId(playerName->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+            }
+
+            auto regId = 0;
+            bool isLiteral = false;
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto unitQuantity = (ASTNumberLiteral*)arg2.get();
+                regId = unitQuantity->GetValue();
+
+                if (regId <= 0)
+                {
+                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
+                }
+
+                isLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg2.get(), instructions, aliases);
+                isLiteral = false;
+                regId = Reg_StackTop;
+            }
+
+            auto arg3 = fnCall->GetArgument(3);
+            if (arg3->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a string literal as third argument to %(), expected Health, Energy, Shields or Hangar", fnName));
+            }
+
+            auto modify = (ASTIdentifier*)arg3.get();
+            auto modifyValue = modify->GetName();
+            ModifyType modifyType;
+            if (modifyValue == "Health")
+            {
+                modifyType = ModifyType::HitPoints;
+            }
+            else if (modifyValue == "Energy")
+            {
+                modifyType = ModifyType::Energy;
+            }
+            else if (modifyValue == "Shields")
+            {
+                modifyType = ModifyType::ShieldPoints;
+            }
+            else if (modifyValue == "Hangar")
+            {
+                modifyType = ModifyType::HangarCount;
+            }
+            else
+            {
+                throw IRCompilerException(SafePrintf("Invalid fourth argument to %(), expected Health, Energy, Shields or Hangar", fnName));
+            }
+
+            auto arg4 = fnCall->GetArgument(4);
+            if (arg4->GetType() != ASTNodeType::NumberLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a number literal as fourth argument to %(), expected amount", fnName));
+            }
+
+            auto amount = (ASTNumberLiteral*)arg4.get();
+
+            auto arg5 = fnCall->GetArgument(5);
+            if (arg5->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
+            }
+
+            auto locationName = (ASTStringLiteral*)arg5.get();
+            auto locName = locationName->GetValue();
+
+            EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount->GetValue(), modifyType, locName), instructions);
+        }
         else if (fnName == "move_loc")
         {
             if (!fnCall->HasChildren())
