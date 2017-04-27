@@ -15,6 +15,7 @@ namespace Langums
         bool EliminateRedundantPushPopPairs();
 
         std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
+        std::vector<bool> CalculateJmpTargets(const std::vector<std::unique_ptr<IIRInstruction>>& instructions);
     };
 
 }

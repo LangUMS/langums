@@ -288,6 +288,11 @@ With the `--triggers-owner` command-line option.
 
 Use the `--registers-owner` command-line option.
 
+#### Some piece of code behaves weirdly or is clearly executed wrong. What can I do?
+
+Please report it [by adding a new issue here](https://github.com/AlexanderDzhoganov/langums/issues/new).
+You can try using the `--disable-optimizations` option, if that fixes the issue it's a bug in the optimizer. In any case please report it.
+
 #### The compiler emits way more triggers than I'd like. What can I do?
 
 The biggest culprit for this is the amount of triggers emitted for arithmetic operations.
@@ -307,9 +312,8 @@ No, but thanks for asking.
 
 - One player (out of the 8 possible) must be reserved for LangUMS (unless you are using the `--reg` option). By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
 - There are about 240 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
-- Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
+- All functions are inlined at the moment, which does increase code size quite a bit if you have many long functions. This will change in the near future.
 - Currently you have can have up to 240 event handlers, this limitation will be lifted in the future.
-- Recursion of any kind is not allowed and leads to undefined behavior.
 - Multiplication and division can take many cycles to complete, especially with very large numbers.
 - In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 

@@ -10,6 +10,7 @@
 
 #define MAX_REGISTER_INDEX 224
 #define MAX_EVENT_CONDITIONS 64
+#define JMP_TO_END_OFFSET_CONSTANT 0xB4DF00D
 
 namespace Langums
 {
@@ -20,22 +21,9 @@ namespace Langums
     {
         Reg_InstructionCounter = 0,
         Reg_CopyStorage,
-        Reg_FunctionReturn,
         Reg_Temp0,
         Reg_Temp1,
         Reg_Temp2,
-        Reg_Reserved0,
-        Reg_Reserved1,
-        Reg_Reserved2,
-        Reg_Reserved3,
-        Reg_Reserved4,
-        Reg_Reserved5,
-        Reg_Reserved6,
-        Reg_Reserved7,
-        Reg_Reserved8,
-        Reg_Reserved9,
-        Reg_Reserved10,
-        Reg_Reserved11,
         Reg_ReservedEnd,
 
         Reg_StackTop = 0x574C
@@ -43,7 +31,6 @@ namespace Langums
 
     enum ReservedSwitches
     {
-        Switch_InstructionCounterMutex,
         Switch_EventsMutex,
         Switch_ArithmeticUnderflow,
         Switch_Random0,
@@ -61,55 +48,52 @@ namespace Langums
     {
         Nop = 0,
         // core
-        Push, // pushes value on top of the stack and decrements the stack pointer
-        Pop, // pops a value from the stack and increments the stack pointer
-        Call, // calls a function, pushes return address on the stack
-        Ret, // pops return address from the stack and jumps to it
-        SetStackPtr, // sets the stack pointer to a specific value
-        SetReg, // sets a register to a constant value
-        IncReg, // increments a register by a constant value
-        DecReg, // decrements a register by a constant value
-        CopyReg, // copies a register's value to another register
-        Add, // pops two values off the stack and adds them together, pushes the result on the stack
-        Sub, // pops two values off the stack, subtracts the second from the first, pushes the result on the stack
-        Rnd256, // pushes a random value between 0 and 255 on top of the stack
-        Jmp, // jumps to an instruction using relative or absolute offset
-        JmpIfEqZero, // jumps to an instruction if a register is equal to zero,
+        Push,           // pushes value on top of the stack and decrements the stack pointer
+        Pop,            // pops a value from the stack and increments the stack pointer
+        SetReg,         // sets a register to a constant value
+        IncReg,         // increments a register by a constant value
+        DecReg,         // decrements a register by a constant value
+        CopyReg,        // copies a register's value to another register
+        Add,            // pops two values off the stack and adds them together, pushes the result on the stack
+        Sub,            // pops two values off the stack, subtracts the second from the first, pushes the result on the stack
+        Rnd256,         // pushes a random value between 0 and 255 on top of the stack
+        Jmp,            // jumps to an instruction using a relative or an absolute offset
+        JmpIfEqZero,    // jumps to an instruction if a register is equal to zero
         JmpIfNotEqZero, // jumps to an instruction if a register is not equal to zero
-        JmpIfSwNotSet, // jumps to an instruction if a switch is not set
-        JmpIfSwSet, // jumps to an instruction if a switch is set
-        SetSw, // sets a switch
+        JmpIfSwNotSet,  // jumps to an instruction if a switch is not set
+        JmpIfSwSet,     // jumps to an instruction if a switch is set
+        SetSw,          // sets a switch
         // actions
-        Wait, // waits for an amount of time
-        DisplayMsg, // displays a text message
-        Spawn, // spawns a unit
-        Kill, // kills a unit
-        Remove, // removes a unit
-        Move, // moves a unit
-        Order, // orders a unit to move, attack or patrol
-        Modify, // modifies a unit's properties such as hp, energy, shields and hangar count
-        Give, // gives units to another player
-        MoveLoc, // moves a location
-        EndGame, // ends the game in a victory or defeat for a given player
-        CenterView, // centers the camera on a location for a given player
-        Ping, // Minimap ping at a location
-        SetResource, // sets the resource count for a given resource for a given player
-        IncResource, // increments the resource count for a given resource for a given player
-        DecResource, // decrements the resource count for a given resource for a given player
-        SetCountdown, // sets the countdown timer, 
-        SetDeaths, // sets the death count for a given unit
-        IncDeaths, // increments the death count for a given unit
-        DecDeaths, // decrements the death count for a given unit
-        Talk, // shows the unit talking portrait for an amount of time
+        Wait,           // waits for an amount of time
+        DisplayMsg,     // displays a text message
+        Spawn,          // spawns a unit
+        Kill,           // kills a unit
+        Remove,         // removes a unit
+        Move,           // moves a unit
+        Order,          // orders a unit to move, attack or patrol
+        Modify,         // modifies a unit's properties such as hp, energy, shields and hangar count
+        Give,           // gives units to another player
+        MoveLoc,        // moves a location
+        EndGame,        // ends the game in a victory or defeat for a given player
+        CenterView,     // centers the camera on a location for a given player
+        Ping,           // Minimap ping at a location
+        SetResource,    // sets the resource count for a given resource for a given player
+        IncResource,    // increments the resource count for a given resource for a given player
+        DecResource,    // decrements the resource count for a given resource for a given player
+        SetCountdown,   // sets the countdown timer, 
+        SetDeaths,      // sets the death count for a given unit
+        IncDeaths,      // increments the death count for a given unit
+        DecDeaths,      // decrements the death count for a given unit
+        Talk,           // shows the unit talking portrait for an amount of time
         // conditions
         Event,
-        BringCond, // Bring trigger condition
-        AccumCond, // Accumulate trigger condition
-        TimeCond, // Elapsed time trigger condition
-        CmdCond, // Player commands a quantity of units condition
-        KillCond, // Player has killed a quantity of units condition
-        DeathCond, // Player has lots a quantity of units condition
-        CountdownCond, // Countdown timer condition
+        BringCond,      // Bring trigger condition
+        AccumCond,      // Accumulate trigger condition
+        TimeCond,       // Elapsed time trigger condition
+        CmdCond,        // Player commands a quantity of units condition
+        KillCond,       // Player has killed a quantity of units condition
+        DeathCond,      // Player has lots a quantity of units condition
+        CountdownCond,  // Countdown timer condition
     };
 
     enum class ConditionComparison
@@ -137,13 +121,9 @@ namespace Langums
         {
             return "[TEMP 2]";
         }
-        else if (regId == Reg_FunctionReturn)
-        {
-            return "[RETURN]";
-        }
         else if (regId >= Reg_StackTop)
         {
-            return SafePrintf("s%", regId - Reg_StackTop);
+            return SafePrintf("[STACK %]", regId - Reg_StackTop);
         }
         else if(regId <= 200)
         {
@@ -236,7 +216,7 @@ namespace Langums
         IRPopInstruction(int regId = -1) : // if regId == -1 will only increment the stack pointer without copying the value into a register
             m_RegId(regId), IIRInstruction(IRInstructionType::Pop) {}
 
-        unsigned int GetRegisterId() const
+        int GetRegisterId() const
         {
             return m_RegId;
         }
@@ -708,89 +688,6 @@ namespace Langums
 
         private:
         unsigned int m_Milliseconds = 0;
-    };
-
-    class IRCallInstruction : public IIRInstruction
-    {
-        public:
-        IRCallInstruction(const std::string& fnName, unsigned int index, unsigned int returnRegId, unsigned int argsCount) :
-            m_Index(index), m_ReturnRegId(returnRegId), m_FunctionName(fnName), m_ArgsCount(argsCount), IIRInstruction(IRInstructionType::Call) {}
-
-        unsigned int GetIndex() const
-        {
-            return m_Index;
-        }
-
-        void SetIndex(unsigned int index)
-        {
-            m_Index = index;
-        }
-
-        unsigned int GetReturnRegisterId() const
-        {
-            return m_ReturnRegId;
-        }
-
-        const std::string& GetFunctionName() const
-        {
-            return m_FunctionName;
-        }
-
-        unsigned int GetArgsCount() const
-        {
-            return m_ArgsCount;
-        }
-
-        std::string DebugDump() const
-        {
-            return SafePrintf("CALL % % %", m_Index, RegisterIdToString(m_ReturnRegId), m_ArgsCount);
-        }
-
-        private:
-        std::string m_FunctionName;
-        unsigned int m_Index = 0;
-        unsigned int m_ReturnRegId = 0;
-        unsigned int m_ArgsCount = 0;
-    };
-
-    class IRRetInstruction : public IIRInstruction
-    {
-        public:
-        IRRetInstruction(unsigned int regId) :
-            m_RegisterId(regId), IIRInstruction(IRInstructionType::Ret) {}
-
-        std::string DebugDump() const
-        {
-            return SafePrintf("RET %", RegisterIdToString(m_RegisterId));
-        }
-
-        unsigned int GetRegisterId() const
-        {
-            return m_RegisterId;
-        }
-
-        private:
-        unsigned int m_RegisterId = 0;
-    };
-
-    class IRSetStackPtrInstruction : public IIRInstruction
-    {
-        public:
-        IRSetStackPtrInstruction(unsigned int value) :
-            m_Value(value), IIRInstruction(IRInstructionType::SetStackPtr) {}
-
-        std::string DebugDump() const
-        {
-            return SafePrintf("STACKPTR %", m_Value);
-        }
-
-        unsigned int GetValue() const
-        {
-            return m_Value;
-        }
-
-        private:
-        unsigned int m_Value = 0;
     };
 
     class IRSpawnInstruction : public IIRInstruction
@@ -1959,6 +1856,8 @@ namespace Langums
     class RegisterAliases
     {
         public:
+        RegisterAliases() {}
+
         int GetAlias(const std::string& name) const
         {
             auto it = m_Overrides.find(name);
@@ -2007,23 +1906,6 @@ namespace Langums
             }
         }
 
-        void Deallocate(int registerIndex)
-        {
-            auto index = registerIndex - (int)Reg_ReservedEnd;
-            m_Aliases.erase(m_Aliases.begin() + index);
-        }
-
-        int GetTemporary()
-        {
-            m_Aliases.push_back(SafePrintf("temp%", m_Aliases.size()));
-            return m_Aliases.size() - 1 + (int)Reg_ReservedEnd;
-        }
-
-        void Override(const std::string& name, unsigned int regId)
-        {
-            m_Overrides.insert(std::make_pair(name, regId));
-        }
-
         private:
         std::vector<std::string> m_Aliases;
         std::unordered_map<std::string, unsigned int> m_Overrides;
@@ -2068,12 +1950,12 @@ namespace Langums
             instructions.push_back(std::unique_ptr<IIRInstruction>(instruction));
         }
 
-        void EmitFunctionCall(ASTFunctionCall* fnCall, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
+        void EmitFunctionCall(ASTFunctionCall* fnCall, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool ignoreReturnValue);
         void EmitBinaryExpression(ASTBinaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         void EmitUnaryExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         void EmitExpression(IASTNode* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
-        unsigned int EmitBlockStatement(ASTBlockStatement* blockStatement, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, unsigned int returnReg);
-        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases);
+        unsigned int EmitBlockStatement(ASTBlockStatement* blockStatement, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
+        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
 
         bool IsRegisterName(const std::string& name, RegisterAliases& aliases) const;
         int RegisterNameToIndex(const std::string& name, RegisterAliases& aliases) const;
@@ -2084,11 +1966,10 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
         std::unordered_map<std::string, ASTFunctionDeclaration*> m_FunctionDeclarations;
         std::unordered_map<ASTFunctionDeclaration*, unsigned int> m_FunctionIndices;
-        std::unordered_map<std::string, unsigned int> m_FunctionStartIndices;
-        std::unordered_map<std::string, unsigned int> m_FunctionReturnRegisters;
 
-        unsigned int m_PollEventsAddress = 0;
-        unsigned int m_PollEventsRetRegId = 0;
+        RegisterAliases m_GlobalAliases;
+
+        std::vector<std::unique_ptr<IIRInstruction>> m_PollEventsInstructions;
         bool m_HasEvents = false;
     };
 

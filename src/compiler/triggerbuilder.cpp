@@ -18,7 +18,6 @@ namespace Langums
         if (address >= 0)
         {
             CodeGen_TestReg(Reg_InstructionCounter, address, TriggerComparisonType::Exactly);
-            CodeGen_TestSwitch(Switch_InstructionCounterMutex, false);
         }
 
         // actions
@@ -312,7 +311,6 @@ namespace Langums
         action.m_Group = playerId;
         action.m_Arg1 = unitId;
         action.m_Modifier = quantity;
-        action.m_Flags = 4;
 
         m_HasChanges = true;
     }

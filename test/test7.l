@@ -1,3 +1,7 @@
+fn bar(arg) {
+  print("hello world");
+}
+
 fn main() {
   var foo = rnd256();
   
@@ -8,4 +12,6 @@ fn main() {
     print("try again next time");
     spawn(TerranMarine, Player2, 1, "TestLocation");
   }
+  
+  bar(1);
 }

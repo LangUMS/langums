@@ -144,37 +144,6 @@ namespace Langums
             }
         }
 
-        auto hasRetInstructions = false;
-        for (auto& instruction : instructions)
-        {
-            if (instruction->GetType() == IRInstructionType::Ret)
-            {
-                hasRetInstructions = true;
-                break;
-            }
-        }
-
-        if (hasRetInstructions)
-        {
-            // copy instruction counter from storage helper, used for Ret instruction
-            for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
-            {
-                TriggerBuilder copyIC(-1, nullptr, m_TriggersOwner);
-                copyIC.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
-                copyIC.CodeGen_TestReg(Reg_CopyStorage, i, TriggerComparisonType::AtLeast);
-                copyIC.CodeGen_DecReg(Reg_CopyStorage, i);
-                copyIC.CodeGen_IncReg(Reg_InstructionCounter, i);
-                m_Triggers.push_back(copyIC.GetTrigger());
-            }
-
-            TriggerBuilder copyICFinish(-1, nullptr, m_TriggersOwner);
-            copyICFinish.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
-            copyICFinish.CodeGen_TestReg(Reg_CopyStorage, 0, TriggerComparisonType::Exactly);
-            copyICFinish.CodeGen_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::ClearSwitch);
-            m_Triggers.push_back(copyICFinish.GetTrigger());
-            //
-        }
-
         m_JumpTargets.clear();
 
         for (auto i = 0u; i < instructions.size(); i++)
@@ -209,11 +178,6 @@ namespace Langums
                 auto jmp = (IRJmpIfSwSetInstruction*)instruction.get();
                 targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
             }
-            else if (type == IRInstructionType::Call)
-            {
-                auto call = (IRCallInstruction*)instruction.get();
-                targetIndex = call->GetIndex();
-            }
             
             if (targetIndex >= 0)
             {
@@ -222,7 +186,8 @@ namespace Langums
                     throw CompilerException(SafePrintf("Malformed IR. Trying to jump past last instruction (target address: %)", targetIndex));
                 }
 
-                m_JumpTargets.insert(instructions[targetIndex].get());
+                auto target = instructions[targetIndex].get();
+                m_JumpTargets.insert(target);
             }
         }
 
@@ -396,6 +361,7 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::Sub)
             {
                 auto subAddress = nextAddress++;
+                current.CodeGen_SetSwitch(Switch_ArithmeticUnderflow, TriggerActionState::ClearSwitch);
                 current.CodeGen_JumpTo(subAddress);
 
                 m_Triggers.push_back(current.GetTrigger());
@@ -481,14 +447,14 @@ namespace Langums
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
 
-                auto address = current.GetAddress();
                 auto retAddress = nextAddress++;
+
+                auto ifFalse = current;
 
                 current.CodeGen_TestReg(regId, 1, TriggerComparisonType::AtLeast);
                 current.CodeGen_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
                 ifFalse.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
                 m_Triggers.push_back(ifFalse.GetTrigger());
                 auto trigger = &m_Triggers.back();
@@ -508,14 +474,13 @@ namespace Langums
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
 
-                auto address = current.GetAddress();
                 auto retAddress = nextAddress++;
+                auto ifFalse = current;
 
                 current.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
                 current.CodeGen_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
                 ifFalse.CodeGen_TestReg(regId, 1, TriggerComparisonType::AtLeast);
                 m_Triggers.push_back(ifFalse.GetTrigger());
                 auto trigger = &m_Triggers.back();
@@ -532,13 +497,12 @@ namespace Langums
                 auto switchId = jmp->GetSwitchId();
 
                 auto retAddress = nextAddress++;
-                auto address = current.GetAddress();
+                auto ifFalse = current;
 
                 current.CodeGen_TestSwitch(switchId, true);
                 current.CodeGen_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
                 ifFalse.CodeGen_TestSwitch(switchId, false);
                 m_Triggers.push_back(ifFalse.GetTrigger());
                 auto trigger = &m_Triggers.back();
@@ -555,13 +519,12 @@ namespace Langums
                 auto switchId = jmp->GetSwitchId();
 
                 auto retAddress = nextAddress++;
-                auto address = current.GetAddress();
+                auto ifFalse = current;
 
                 current.CodeGen_TestSwitch(switchId, false);
                 current.CodeGen_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
                 ifFalse.CodeGen_TestSwitch(switchId, true);
                 m_Triggers.push_back(ifFalse.GetTrigger());
                 auto trigger = &m_Triggers.back();
@@ -576,22 +539,29 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DisplayMsg)
             {
-                auto address = nextAddress++;
-                current.CodeGen_JumpTo(address);
-                m_Triggers.push_back(current.GetTrigger());
-
                 auto displayMsgReg = (IRDisplayMsgInstruction*)instruction.get();
-                auto playerMask = displayMsgReg->GetPlayerMask();
-                auto msgTrigger = TriggerBuilder(address, instruction.get(), playerMask);
-
+                auto playerId = displayMsgReg->GetPlayerMask();
                 auto stringId = m_StringsChunk->InsertString(displayMsgReg->GetMessage());
-                msgTrigger.CodeGen_DisplayMsg(stringId);
 
-                auto retAddress = nextAddress++;
-                msgTrigger.CodeGen_JumpTo(retAddress);
-                m_Triggers.push_back(msgTrigger.GetTrigger());
+                if (playerId == m_TriggersOwner)
+                {
+                    current.CodeGen_DisplayMsg(stringId);
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
 
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                    auto msgTrigger = TriggerBuilder(address, instruction.get(), playerId);
+
+                    msgTrigger.CodeGen_DisplayMsg(stringId);
+
+                    auto retAddress = nextAddress++;
+                    msgTrigger.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(msgTrigger.GetTrigger());
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if (instruction->GetType() == IRInstructionType::Wait)
             {
@@ -664,7 +634,7 @@ namespace Langums
                         throw CompilerException(SafePrintf("Location \"%\" not found!", kill->GetLocationName()));
                     }
 
-                    auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+                    locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
                     if (locationId == -1)
                     {
                         throw CompilerException(SafePrintf("Location \"%\" not found!", kill->GetLocationName()));
@@ -1450,54 +1420,6 @@ namespace Langums
                 auto talk = (IRTalkInstruction*)instruction.get();
                 current.CodeGen_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
             }
-            else if (instruction->GetType() == IRInstructionType::Call)
-            {
-                auto call = (IRCallInstruction*)instruction.get();
-                
-                m_StackPointer += call->GetArgsCount();
-
-                auto retAddress = nextAddress++;
-                current.CodeGen_SetReg(call->GetReturnRegisterId(), retAddress);
-                m_Triggers.push_back(current.GetTrigger());
-                auto trigger = &m_Triggers.back();
-
-                auto targetIndex = call->GetIndex();
-                jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
-
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
-            }
-            else if (instruction->GetType() == IRInstructionType::Ret)
-            {
-                auto address = nextAddress++;
-                current.CodeGen_SetReg(Reg_CopyStorage, 0);
-                current.CodeGen_JumpTo(address);
-                m_Triggers.push_back(current.GetTrigger());
-
-                auto ret = (IRRetInstruction*)instruction.get();
-                auto regId = ret->GetRegisterId();
-
-                // step 1 - copy to storage
-                for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
-                {
-                    auto copyToStorageTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
-                    copyToStorageTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
-                    copyToStorageTrigger.CodeGen_DecReg(regId, i);
-                    copyToStorageTrigger.CodeGen_IncReg(Reg_CopyStorage, i);
-                    m_Triggers.push_back(copyToStorageTrigger.GetTrigger());
-                }
-
-                // step 1 (finish)
-                auto finishCopyTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
-                finishCopyTrigger.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
-                finishCopyTrigger.CodeGen_SetReg(Reg_InstructionCounter, 0);
-                finishCopyTrigger.CodeGen_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::SetSwitch);
-                m_Triggers.push_back(finishCopyTrigger.GetTrigger());
-            }
-            else if (instruction->GetType() == IRInstructionType::SetStackPtr)
-            {
-                auto setStackPtr = (IRSetStackPtrInstruction*)instruction.get();
-                m_StackPointer = g_RegisterMap.size() - 2 - setStackPtr->GetValue();
-            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||
@@ -1540,6 +1462,11 @@ namespace Langums
             }
 
             CodeGen_JumpTo(targetAddress, trigger.m_Actions[actionId]);
+        }
+
+        if (m_Triggers.back().m_Actions[1].m_ActionType == TriggerActionType::NoAction)
+        {
+            m_Triggers.pop_back();
         }
 
         for (auto q = 0u; q < m_HyperTriggerCount; q++)
