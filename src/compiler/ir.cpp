@@ -773,6 +773,174 @@ namespace Langums
 
             EmitInstruction(new IRSetCountdownInstruction(regId, isValueLiteral), instructions);
         }
+        else if (fnName == "set_deaths")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_deaths() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("set_deaths() takes exactly three arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
+            }
+
+            auto playerName = (ASTIdentifier*)arg0.get();
+            auto playerId = PlayerNameToId(playerName->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg1.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto regId = 0;
+            bool isValueLiteral = false;
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto number = (ASTNumberLiteral*)arg2.get();
+                regId = number->GetValue();
+                isValueLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg2.get(), instructions, aliases);
+                regId = Reg_StackTop;
+            }
+
+            EmitInstruction(new IRSetDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+        }
+        else if (fnName == "add_deaths")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("inc_deaths() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("inc_deaths() takes exactly three arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
+            }
+
+            auto playerName = (ASTIdentifier*)arg0.get();
+            auto playerId = PlayerNameToId(playerName->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg1.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto regId = 0;
+            bool isValueLiteral = false;
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto number = (ASTNumberLiteral*)arg2.get();
+                regId = number->GetValue();
+                isValueLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg2.get(), instructions, aliases);
+                regId = Reg_StackTop;
+            }
+
+            EmitInstruction(new IRIncDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+        }
+        else if (fnName == "remove_deaths")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("remove_deaths() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("remove_deaths() takes exactly three arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
+            }
+
+            auto playerName = (ASTIdentifier*)arg0.get();
+            auto playerId = PlayerNameToId(playerName->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg1.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto regId = 0;
+            bool isValueLiteral = false;
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto number = (ASTNumberLiteral*)arg2.get();
+                regId = number->GetValue();
+                isValueLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg2.get(), instructions, aliases);
+                regId = Reg_StackTop;
+            }
+
+            EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

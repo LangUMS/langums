@@ -473,6 +473,18 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState actionType)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetDeaths;
+        action.m_Arg1 = (uint16_t)unitId;
+        action.m_Group = playerId;
+        action.m_Modifier = (uint8_t)actionType;
+        action.m_Arg0 = quantity;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::CodeGen_SetCountdown(unsigned int time, CHK::TriggerActionState actionType)
     {
         using namespace CHK;

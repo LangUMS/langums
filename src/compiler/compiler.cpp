@@ -1122,6 +1122,133 @@ namespace Langums
                     m_Triggers.push_back(finishAdd.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::SetDeaths)
+            {
+                auto setDeaths = (IRSetDeathsInstruction*)instruction.get();
+                auto playerId = setDeaths->GetPlayerId();
+
+                if (setDeaths->IsValueLiteral())
+                {
+                    auto quantity = setDeaths->GetRegisterId();
+                    current.CodeGen_SetDeaths(playerId, setDeaths->GetUnitId(), quantity, TriggerActionState::SetTo);
+                }
+                else
+                {
+                    auto regId = setDeaths->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! SetDeaths expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_SetDeaths(playerId, setDeaths->GetUnitId(), 0, TriggerActionState::SetTo);
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.CodeGen_DecReg(regId, i);
+                        current.CodeGen_SetDeaths(playerId, setDeaths->GetUnitId(), i, TriggerActionState::Add);
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::IncDeaths)
+            {
+                auto incDeaths = (IRIncDeathsInstruction*)instruction.get();
+                auto playerId = incDeaths->GetPlayerId();
+
+                if (incDeaths->IsValueLiteral())
+                {
+                    auto quantity = incDeaths->GetRegisterId();
+                    current.CodeGen_SetDeaths(playerId, incDeaths->GetUnitId(), quantity, TriggerActionState::Add);
+                }
+                else
+                {
+                    auto regId = incDeaths->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! IncDeaths expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.CodeGen_DecReg(regId, i);
+                        current.CodeGen_SetDeaths(playerId, incDeaths->GetUnitId(), i, TriggerActionState::Add);
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::DecDeaths)
+            {
+                auto decDeaths = (IRDecDeathsInstruction*)instruction.get();
+                auto playerId = decDeaths->GetPlayerId();
+
+                if (decDeaths->IsValueLiteral())
+                {
+                    auto quantity = decDeaths->GetRegisterId();
+                    current.CodeGen_SetDeaths(playerId, decDeaths->GetUnitId(), quantity, TriggerActionState::Subtract);
+                }
+                else
+                {
+                    auto regId = decDeaths->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! DecDeaths expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.CodeGen_DecReg(regId, i);
+                        current.CodeGen_SetDeaths(playerId, decDeaths->GetUnitId(), i, TriggerActionState::Subtract);
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::Call)
             {
                 auto call = (IRCallInstruction*)instruction.get();

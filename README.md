@@ -1,16 +1,40 @@
-### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
-
-### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
-### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
-### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
-### [Discord channel](https://discord.gg/BcY23) for support and discussion.
-
 ## LangUMS
 
 LangUMS is a procedural imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
 
 It supercedes the trigger functionality offered by editors such as SCMDraft 2 and the official Blizzard one.
 You still need an editor to make the actual map, preplace locations and units, etc, but the triggers are added by LangUMS.
+
+Table of Contents
+=================
+  * [Usage](#usage)
+  * [Language features](#language-features)
+  * [Language basics](#language-basics)
+  * [Event handlers](#event-handlers)
+  * [Built-in functions](#built-in-functions)
+  * [Built-in event conditions](#built-in-event-conditions)
+  * [Preprocessor](#preprocessor)
+  * [Examples](#examples)
+  * [FAQ](#faq)
+  * [Limitations](#limitations)
+  * [Integration with existing maps](#integration-with-existing-maps)
+  * [For programmers](#for-programmers)
+  * [Future plans](#future-plans)
+  * [Built-in constants](#built-in-constants)
+    * [EndCondition](#endcondition)
+    * [ResourceType](#resourcetype)
+    * [Comparison](#comparison)
+    * [Order](#order)
+    * [UnitMod](#unitmod)
+    * [Player](#player)
+    * [Unit](#unit)
+
+### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
+
+### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
+### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
+### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
+### [Discord channel](https://discord.gg/BcY23) for support and discussion.
 
 ## Usage
 
@@ -205,6 +229,9 @@ fn main() {
 | `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.            |
 | `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.              |
 | `set_countdown(Expression)`                                            | Sets the countdown timer.                                |
+| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)              |
+| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)           |
+| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)    |
 | `sleep(Quantity)`                                                      | Sleeps for milliseconds. (Dangerous!)                    |
 | More to be added ...                                                   |                                                          |
 
@@ -309,11 +336,21 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_reg
 
 A sample file with the default mappings [is available here](https://github.com/AlexanderDzhoganov/langums/blob/master/registermap.txt?raw=true).
 
+#### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
+
+You can manipulate your existing death counters with the death counter built-in functions e.g.
+
+```
+set_deaths(Player5, TerranMarine, foo);
+```
+
+Will set the death counter for Player5's marines to the value of variable `foo`.
+
 ## For programmers
 
 ### Compiling the code
 
-A Visual Studio 2015 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiller. The code has no external dependencies and is written in portable C++. You will need a compiler with `std::experimental::filesystem` available. Contributions of a Makefile as well as support for other build systems are welcome.
+A Visual Studio 2015 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
 
 ### Parts of LangUMS
 

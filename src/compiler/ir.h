@@ -93,6 +93,9 @@ namespace Langums
         IncResource, // increments the resource count for a given resource for a given player
         DecResource, // decrements the resource count for a given resource for a given player
         SetCountdown, // sets the countdown timer, 
+        SetDeaths, // sets the death count for a given unit
+        IncDeaths, // increments the death count for a given unit
+        DecDeaths, // decrements the death count for a given unit
         // conditions
         Event,
         BringCond, // Bring trigger condition
@@ -1354,6 +1357,135 @@ namespace Langums
         }
 
         private:
+        uint32_t m_RegisterId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRSetDeathsInstruction : public IIRInstruction
+    {
+        public:
+        IRSetDeathsInstruction(unsigned int playerId, unsigned int unitId, unsigned int regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegisterId(regId), m_IsValueLiteral(isLiteralValue), IIRInstruction(IRInstructionType::SetDeaths) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        std::string DebugDump() const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf("SETDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegisterId);
+            }
+
+            return SafePrintf("SETDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegisterId));
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        uint32_t m_RegisterId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRIncDeathsInstruction : public IIRInstruction
+    {
+        public:
+        IRIncDeathsInstruction(unsigned int playerId, unsigned int unitId, unsigned int regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegisterId(regId), m_IsValueLiteral(isLiteralValue), IIRInstruction(IRInstructionType::IncDeaths) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        std::string DebugDump() const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegisterId);
+            }
+
+            return SafePrintf("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegisterId));
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        uint32_t m_RegisterId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRDecDeathsInstruction : public IIRInstruction
+    {
+        public:
+           IRDecDeathsInstruction(unsigned int playerId, unsigned int unitId, unsigned int regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegisterId(regId), m_IsValueLiteral(isLiteralValue), IIRInstruction(IRInstructionType::DecDeaths) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        std::string DebugDump() const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegisterId);
+            }
+
+            return SafePrintf("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegisterId));
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
         uint32_t m_RegisterId;
         bool m_IsValueLiteral;
     };
