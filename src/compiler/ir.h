@@ -82,6 +82,7 @@ namespace Langums
         DisplayMsg, // displays a text message
         Spawn, // spawns a unit
         Kill, // kills a unit
+        Remove, // removes a unit
         Move, // moves a unit
         Order, // orders a unit to move, attack or patrol
         Modify, // modifies a unit's properties such as hp, energy, shields and hangar count
@@ -805,6 +806,56 @@ namespace Langums
             }
 
             return SafePrintf("KILL % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsLiteralValue;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        uint32_t m_RegId;
+        bool m_IsLiteralValue;
+        std::string m_LocationName;
+    };
+
+    class IRRemoveInstruction : public IIRInstruction
+    {
+        public:
+        IRRemoveInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_LocationName(locationName),
+            IIRInstruction(IRInstructionType::Remove) {}
+
+        std::string DebugDump() const
+        {
+            if (m_IsLiteralValue)
+            {
+                return SafePrintf("REMOVE % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName);
+            }
+
+            return SafePrintf("REMOVE % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
         }
 
         uint8_t GetPlayerId() const

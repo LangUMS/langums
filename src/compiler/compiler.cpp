@@ -650,6 +650,58 @@ namespace Langums
                     m_Triggers.push_back(finishTrigger.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::Remove)
+            {
+                auto remove = (IRRemoveInstruction*)instruction.get();
+
+                auto locationId = -1;
+                auto locName = remove->GetLocationName();
+                if (locName.length() != 0)
+                {
+                    auto locationStringId = m_StringsChunk->FindString(remove->GetLocationName()) + 1;
+                    auto locationId = m_LocationsChunk->FindLocation(locationStringId);
+                    if (locationId == -1)
+                    {
+                        throw CompilerException(SafePrintf("Location \"%\" not found!", remove->GetLocationName()));
+                    }
+                }
+
+                if (remove->IsValueLiteral())
+                {
+                    current.CodeGen_RemoveUnit(remove->GetPlayerId(), remove->GetUnitId(), remove->GetRegisterId(), locationId);
+                }
+                else
+                {
+                    auto regId = remove->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! Remove expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto removeTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        removeTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        removeTrigger.CodeGen_DecReg(regId, i);
+                        removeTrigger.CodeGen_RemoveUnit(remove->GetPlayerId(), remove->GetUnitId(), i, locationId);
+                        m_Triggers.push_back(removeTrigger.GetTrigger());
+                    }
+
+                    auto finishTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishTrigger.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishTrigger.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishTrigger.GetTrigger());
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::Move)
             {
                 auto move = (IRMoveInstruction*)instruction.get();

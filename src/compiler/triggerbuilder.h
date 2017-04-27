@@ -41,6 +41,7 @@ namespace Langums
         void CodeGen_SetSwitch(unsigned int switchId, CHK::TriggerActionState state);
         void CodeGen_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId);
         void CodeGen_KillUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId);
+        void CodeGen_RemoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId);
         void CodeGen_MoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int srcLocationId, unsigned int dstLocationId);
         void CodeGen_OrderUnit(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState order, unsigned int srcLocationId, unsigned int dstLocationId);
         void CodeGen_ModifyUnitHitPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId);

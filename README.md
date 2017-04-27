@@ -3,7 +3,7 @@
 LangUMS is a procedural imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
 
 It supercedes the trigger functionality offered by editors such as SCMDraft 2 and the official Blizzard one.
-You still need an editor to make the actual map, preplace locations and units, etc, but the triggers are added by LangUMS.
+You still need an editor to make the actual map, preplace locations and units, etc. but the triggers are added by LangUMS.
 
 Table of Contents
 =================
@@ -212,6 +212,8 @@ fn main() {
 
 ## Built-in functions
 
+Note: Arguments named `QuantityExpression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
+
 | Function prototype                                                     | Description                                              |
 |------------------------------------------------------------------------|----------------------------------------------------------|
 | `poll_events()`                                                        | Runs any associated event handlers.                      |
@@ -223,6 +225,7 @@ fn main() {
 | `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.      |
 | `spawn(Unit, Player, QuantityExpression, Location)`                    | Spawns units at a location.                              |
 | `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                     |
+| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                   |
 | `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                |
 | `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                 |
 | `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.        |

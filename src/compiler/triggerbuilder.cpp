@@ -296,6 +296,29 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_RemoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        if (locationId != -1)
+        {
+            action.m_ActionType = TriggerActionType::RemoveUnitAtLocation;
+            action.m_Source = locationId + 1;
+        }
+        else
+        {
+            action.m_ActionType = TriggerActionType::RemoveUnit;
+        }
+
+        action.m_Group = playerId;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::CodeGen_MoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;

@@ -1063,7 +1063,7 @@ namespace Langums
             auto milliseconds = (ASTNumberLiteral*)arg0.get();
             EmitInstruction(new IRWaitInstruction(milliseconds->GetValue()), instructions);
         }
-        else if (fnName == "spawn" || fnName == "kill")
+        else if (fnName == "spawn" || fnName == "kill" || fnName == "remove")
         {
             if (!fnCall->HasChildren())
             {
@@ -1075,6 +1075,10 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 4 arguments", fnName));
             }
             else if (fnName == "kill" && (fnCall->GetChildCount() < 3 || fnCall->GetChildCount() > 4))
+            {
+                throw IRCompilerException(SafePrintf("%() takes 3 or 4 arguments", fnName));
+            }
+            else if (fnName == "remove" && (fnCall->GetChildCount() < 3 || fnCall->GetChildCount() > 4))
             {
                 throw IRCompilerException(SafePrintf("%() takes 3 or 4 arguments", fnName));
             }
@@ -1149,6 +1153,10 @@ namespace Langums
             else if (fnName == "kill")
             {
                 EmitInstruction(new IRKillInstruction(playerId, unitId, regId, isLiteral, locName), instructions);
+            }
+            else if (fnName == "remove")
+            {
+                EmitInstruction(new IRRemoveInstruction(playerId, unitId, regId, isLiteral, locName), instructions);
             }
         }
         else if (fnName == "move")
