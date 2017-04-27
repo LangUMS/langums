@@ -34,6 +34,19 @@ namespace Langums
                     madeChanges = true;
                 }
             }
+            else if (current->GetType() == IRInstructionType::Push &&
+                next->GetType() == IRInstructionType::Pop)
+            {
+                auto push = (IRPushInstruction*)current.get();
+                auto pop = (IRPopInstruction*)next.get();
+
+                if (push->GetRegisterId() == pop->GetRegisterId())
+                {
+                    m_Instructions[i] = std::make_unique<IRNopInstruction>();
+                    m_Instructions[i + 1] = std::make_unique<IRNopInstruction>();
+                    madeChanges = true;
+                }
+            }
         }
 
         return madeChanges;

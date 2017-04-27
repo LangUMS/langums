@@ -18,7 +18,7 @@ Table of Contents
   * [FAQ](#faq)
   * [Limitations](#limitations)
   * [Integration with existing maps](#integration-with-existing-maps)
-  * [For programmers](#for-programmers)
+  * [For project contributors](#for-project-contributors)
   * [Future plans](#future-plans)
   * [Built-in constants](#built-in-constants)
     * [EndCondition](#endcondition)
@@ -61,7 +61,7 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 - Postfix increment and decrement operators - `x++`, `y--`
 - Arithmetic operators - `+`, `-`, `/`, `*`
 - Comparison operators - `<`, `<=`, `==`, `!=`, `>=`, `>`
-- `if` statement
+- `if` and `if/else` statements
 - `while` loop
 - Event handlers
 
@@ -173,14 +173,13 @@ bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2"),
 elapsed_time(AtLeast, 15) => {
   if (allowedSwaps == 0) {
     print("Sorry, you have no more swaps left.");
-    return;
+  } else { 
+    allowedSwaps--;
+    kill(TerranMarine, Player1, 1, "TestLocation2");
+    spawn(ProtossZealot, Player1, 1, "TestLocation");
+    
+    print("Here is your zealot.");
   }
-  
-  allowedSwaps--;
-  kill(TerranMarine, Player1, 1, "TestLocation2");
-  spawn(ProtossZealot, Player1, 1, "TestLocation");
-  
-  print("Here is your zealot.");
 }
 
 bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2"),
@@ -191,14 +190,13 @@ elapsed_time(AtMost, 15) => {
 bring(Player1, AtLeast, 1, ProtossZealot, "TestLocation2") => {
   if (allowedSwaps == 0) {
     print("Sorry, you have no more swaps left.");
-    return;
+  } else {
+    allowedSwaps--;
+    kill(ProtossZealot, Player1, 1, "TestLocation2");
+    spawn(TerranMarine, Player1, 1, "TestLocation");
+    
+    print("Here is your marine.");
   }
-  
-  allowedSwaps--;
-  kill(ProtossZealot, Player1, 1, "TestLocation2");
-  spawn(TerranMarine, Player1, 1, "TestLocation");
-  
-  print("Here is your marine.");
 }
 
 fn main() {
@@ -297,6 +295,10 @@ By default LangUMS is tweaked for values up to 65535, but if you don't need such
 This will drastically lower the amount of emitted triggers with the tradeoff that any arithmetic on larger numbers will take more than one cycle. In any case you should set the value to the
 next power of 2 of the largest number you use in your map. If uncertain leave it to the default value.
 
+#### What happens when the main() function returns?
+
+At the moment control returns back to the start of `main()` if for some reason you return from it. In most cases you want to be calling `poll_events()` in an infinite loop inside `main()` so this shouldn't be an issue.
+
 #### Do you plan to rewrite this in Rust?
 
 No, but thanks for asking.
@@ -378,8 +380,8 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 
 ## Future plans
 
-- Else/ Else-If statements
-- For loop
+- else-if statement
+- for loop
 - Arrays
 - Template-like metaprogramming facilities
 - Improved AST/ IR optimization

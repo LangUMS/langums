@@ -1,23 +1,15 @@
-fn get_unit_count(wave) {
-  return 10 + wave * 5;
-}
 
-fn spawn_units(count, wave) {
-  if (wave == 1) {
-    spawn(TerranMarine, Player7, count, "MobsSpawn");
-  }
-  
-  if (wave == 2) {
-    spawn(ProtossZealot, Player7, count, "MobsSpawn");
-  }
-  
-  if (wave == 3) {
-    spawn(ZergZergling, Player7, count, "MobsSpawn");
-  }
+fn spawn_units(wave) {
+  print("spawn_units");
+  spawn(ProtossZealot, Player7, wave, "TestLocation");
 }
 
 fn main() {
-  var wave = 4;
-  var count = get_unit_count(wave);
-  spawn_units(count, wave);
+  print("1");
+  spawn_units(5);
+  print("2");
+  
+  while (true) {
+    poll_events();
+  }
 }

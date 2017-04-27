@@ -248,6 +248,11 @@ namespace Langums
         {
             return GetChild(1);
         }
+
+        const std::shared_ptr<IASTNode>& GetElseBody() const
+        {
+            return GetChild(2);
+        }
     };
 
     class ASTWhileStatement : public IASTNode

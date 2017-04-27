@@ -601,6 +601,13 @@ namespace Langums
         ifStatement->AddChild(Expression());
         Whitespace();
         ifStatement->AddChild(BlockStatement());
+        Whitespace();
+
+        if (PeekKeyword("else"))
+        {
+            Keyword("else");
+            ifStatement->AddChild(BlockStatement());
+        }
 
         return std::unique_ptr<IASTNode>(ifStatement);
     }

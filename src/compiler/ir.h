@@ -21,14 +21,6 @@ namespace Langums
         Reg_InstructionCounter = 0,
         Reg_CopyStorage,
         Reg_FunctionReturn,
-        Reg_FunctionArg0,
-        Reg_FunctionArg1,
-        Reg_FunctionArg2,
-        Reg_FunctionArg3,
-        Reg_FunctionArg4,
-        Reg_FunctionArg5,
-        Reg_FunctionArg6,
-        Reg_FunctionArg7,
         Reg_Temp0,
         Reg_Temp1,
         Reg_Temp2,
@@ -73,6 +65,7 @@ namespace Langums
         Pop, // pops a value from the stack and increments the stack pointer
         Call, // calls a function, pushes return address on the stack
         Ret, // pops return address from the stack and jumps to it
+        SetStackPtr, // sets the stack pointer to a specific value
         SetReg, // sets a register to a constant value
         IncReg, // increments a register by a constant value
         DecReg, // decrements a register by a constant value
@@ -720,8 +713,8 @@ namespace Langums
     class IRCallInstruction : public IIRInstruction
     {
         public:
-        IRCallInstruction(const std::string& fnName, unsigned int index, unsigned int returnRegId) :
-            m_Index(index), m_ReturnRegId(returnRegId), m_FunctionName(fnName), IIRInstruction(IRInstructionType::Call) {}
+        IRCallInstruction(const std::string& fnName, unsigned int index, unsigned int returnRegId, unsigned int argsCount) :
+            m_Index(index), m_ReturnRegId(returnRegId), m_FunctionName(fnName), m_ArgsCount(argsCount), IIRInstruction(IRInstructionType::Call) {}
 
         unsigned int GetIndex() const
         {
@@ -738,20 +731,26 @@ namespace Langums
             return m_ReturnRegId;
         }
 
-        const std::string& GetFunctionName()
+        const std::string& GetFunctionName() const
         {
             return m_FunctionName;
         }
 
+        unsigned int GetArgsCount() const
+        {
+            return m_ArgsCount;
+        }
+
         std::string DebugDump() const
         {
-            return SafePrintf("CALL % %", m_Index, RegisterIdToString(m_ReturnRegId));
+            return SafePrintf("CALL % % %", m_Index, RegisterIdToString(m_ReturnRegId), m_ArgsCount);
         }
 
         private:
         std::string m_FunctionName;
         unsigned int m_Index = 0;
         unsigned int m_ReturnRegId = 0;
+        unsigned int m_ArgsCount = 0;
     };
 
     class IRRetInstruction : public IIRInstruction
@@ -772,6 +771,26 @@ namespace Langums
 
         private:
         unsigned int m_RegisterId = 0;
+    };
+
+    class IRSetStackPtrInstruction : public IIRInstruction
+    {
+        public:
+        IRSetStackPtrInstruction(unsigned int value) :
+            m_Value(value), IIRInstruction(IRInstructionType::SetStackPtr) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("STACKPTR %", m_Value);
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        private:
+        unsigned int m_Value = 0;
     };
 
     class IRSpawnInstruction : public IIRInstruction
@@ -2054,7 +2073,7 @@ namespace Langums
         void EmitUnaryExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         void EmitExpression(IASTNode* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         unsigned int EmitBlockStatement(ASTBlockStatement* blockStatement, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, unsigned int returnReg);
-        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
+        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases);
 
         bool IsRegisterName(const std::string& name, RegisterAliases& aliases) const;
         int RegisterNameToIndex(const std::string& name, RegisterAliases& aliases) const;

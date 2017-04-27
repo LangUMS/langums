@@ -439,15 +439,10 @@ namespace Langums
 
         for (auto& pair : m_FunctionDeclarations)
         {
-            auto& fn = pair.second;
-            auto& args = fn->GetArguments();
-            auto argCount = fn->GetArgumentCount();
-            for (auto i = 0u; i < argCount; i++)
-            {
-                aliases.Override(args[i], Reg_FunctionArg0 + i);
-            }
+            auto localAliases = aliases;
 
-            auto startIndex = EmitFunction(fn, m_Instructions, aliases);
+            auto& fn = pair.second;
+            auto startIndex = EmitFunction(fn, m_Instructions, localAliases);
             m_FunctionStartIndices.insert(std::make_pair(pair.first, startIndex));
         }
 
@@ -490,7 +485,7 @@ namespace Langums
             if (m_HasEvents)
             {
                 EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), m_Instructions);
-                EmitInstruction(new IRCallInstruction("poll_events", m_PollEventsAddress, m_PollEventsRetRegId), instructions);
+                EmitInstruction(new IRCallInstruction("poll_events", m_PollEventsAddress, m_PollEventsRetRegId, 0), instructions);
                 EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_Instructions);
             }
         }
@@ -1638,7 +1633,6 @@ namespace Langums
             {
                 auto& arg = fnCall->GetArgument(i);
                 EmitExpression(arg.get(), instructions, aliases);
-                EmitInstruction(new IRPopInstruction(Reg_FunctionArg0 + i), instructions);
             }
 
             if (m_FunctionReturnRegisters.find(fnName) == m_FunctionReturnRegisters.end())
@@ -1647,7 +1641,7 @@ namespace Langums
             }
 
             auto retRegId = m_FunctionReturnRegisters[fnName];
-            EmitInstruction(new IRCallInstruction(fnName, 0, retRegId), instructions);
+            EmitInstruction(new IRCallInstruction(fnName, 0, retRegId, declaration->GetArgumentCount()), instructions);
         }
         else
         {
@@ -1960,8 +1954,8 @@ namespace Langums
             else if (statement->GetType() == ASTNodeType::IfStatement)
             {
                 auto ifStatement = (ASTIfStatement*)statement.get();
-                auto expression = ifStatement->GetExpression();
-                auto body = ifStatement->GetBody();
+                auto& expression = ifStatement->GetExpression();
+                auto& body = ifStatement->GetBody();
 
                 if (body->GetType() != ASTNodeType::BlockStatement)
                 {
@@ -1976,12 +1970,36 @@ namespace Langums
                     throw IRCompilerException("Disallowed if statement with empty body");
                 }
 
+                std::vector<std::unique_ptr<IIRInstruction>> elseBodyInstructions;
+                auto& elseBody = ifStatement->GetElseBody();
+                if (elseBody != nullptr)
+                {
+                    if (elseBody->GetType() != ASTNodeType::BlockStatement)
+                    {
+                        throw IRCompilerException("Invalid AST. If-else statement body must be a block statement");
+                    }
+
+                    EmitBlockStatement((ASTBlockStatement*)elseBody.get(), elseBodyInstructions, aliases, returnReg);
+
+                    if (elseBodyInstructions.size() == 0)
+                    {
+                        throw IRCompilerException("Disallowed if-else statement with empty body");
+                    }
+                }
+
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
                 {
                     auto numberLiteral = (ASTNumberLiteral*)expression.get();
                     if (numberLiteral->GetValue() > 0)
                     {
                         for (auto& instruction : bodyInstructions)
+                        {
+                            instructions.push_back(std::move(instruction));
+                        }
+                    }
+                    else
+                    {
+                        for (auto& instruction : elseBodyInstructions)
                         {
                             instructions.push_back(std::move(instruction));
                         }
@@ -1997,9 +2015,25 @@ namespace Langums
                     }
 
                     auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(regId, bodyInstructions.size() + 1), instructions);
+                    auto offset = 1;
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        offset = 2;
+                    }
+
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(regId, bodyInstructions.size() + 2), instructions);
 
                     for (auto& instruction : bodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions);
+                    }
+
+                    for (auto& instruction : elseBodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
@@ -2009,9 +2043,26 @@ namespace Langums
                     auto binaryExpression = (ASTBinaryExpression*)expression.get();
                     EmitBinaryExpression(binaryExpression, instructions, aliases);
                     EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + 1), instructions);
+
+                    auto offset = 1;
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        offset = 2;
+                    }
+
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions);
+                    }
+
+                    for (auto& instruction : elseBodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
@@ -2021,9 +2072,26 @@ namespace Langums
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
                     EmitUnaryExpression(unaryExpression, instructions, aliases);
                     EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + 1), instructions);
+
+                    auto offset = 1;
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        offset = 2;
+                    }
+
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions);
+                    }
+
+                    for (auto& instruction : elseBodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
@@ -2031,9 +2099,26 @@ namespace Langums
                 else if (expression->GetType() == ASTNodeType::FunctionCall)
                 {
                     EmitFunctionCall((ASTFunctionCall*)expression.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_FunctionReturn, bodyInstructions.size() + 1), instructions);
+
+                    auto offset = 1;
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        offset = 2;
+                    }
+
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_FunctionReturn, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions);
+                    }
+
+                    for (auto& instruction : elseBodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
@@ -2174,7 +2259,7 @@ namespace Langums
         return startIndex;
     }
 
-    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
+    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases)
     {
         auto body = fn->GetChild(0);
         if (body->GetType() != ASTNodeType::BlockStatement)
@@ -2191,7 +2276,20 @@ namespace Langums
 
         auto returnReg = m_FunctionReturnRegisters[fn->GetName()];
 
-        auto startIndex = EmitBlockStatement(blockStatement, instructions, aliases, returnReg);
+        auto startIndex = instructions.size();
+
+        auto argsCount = fn->GetArgumentCount();
+        EmitInstruction(new IRSetStackPtrInstruction(argsCount), instructions);
+
+        auto& args = fn->GetArguments();
+        for (auto i = 0u; i < argsCount; i++)
+        {
+            auto& argName = args[i];
+            auto regId = aliases.Allocate(argName);
+            EmitInstruction(new IRPopInstruction(regId), instructions);
+        }
+
+        EmitBlockStatement(blockStatement, instructions, aliases, returnReg);
 
         if (fn->GetName() != "main")
         {
