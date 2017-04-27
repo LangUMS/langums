@@ -1772,6 +1772,7 @@ namespace Langums
 
         unsigned int m_PollEventsAddress = 0;
         unsigned int m_PollEventsRetRegId = 0;
+        bool m_HasEvents = false;
     };
 
 }

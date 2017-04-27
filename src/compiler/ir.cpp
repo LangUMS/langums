@@ -403,13 +403,13 @@ namespace Langums
         m_PollEventsRetRegId = nextReturnRegister++;
         nextSwitchId = (int)Switch_ReservedEnd;
 
-        bool hasEvents = false;
+        m_HasEvents = false;
 
         for (auto& node : unitNodes)
         {
             if (node->GetType() == ASTNodeType::EventDeclaration)
             {
-                hasEvents = true;
+                m_HasEvents = true;
                 auto eventDeclaration = (ASTEventDeclaration*)node.get();
                 auto body = eventDeclaration->GetBody();
                 if (body->GetType() != ASTNodeType::BlockStatement)
@@ -431,7 +431,7 @@ namespace Langums
             }
         }
 
-        if (hasEvents)
+        if (m_HasEvents)
         {
             EmitInstruction(new IRRetInstruction(m_PollEventsRetRegId), m_Instructions);
         }
@@ -486,9 +486,12 @@ namespace Langums
 
         if (fnName == "poll_events")
         {
-            EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), m_Instructions);
-            EmitInstruction(new IRCallInstruction("poll_events", m_PollEventsAddress, m_PollEventsRetRegId), instructions);
-            EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_Instructions);
+            if (m_HasEvents)
+            {
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), m_Instructions);
+                EmitInstruction(new IRCallInstruction("poll_events", m_PollEventsAddress, m_PollEventsRetRegId), instructions);
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_Instructions);
+            }
         }
         else if (fnName == "end")
         {
