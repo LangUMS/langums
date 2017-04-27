@@ -57,6 +57,7 @@ namespace Langums
         void CodeGen_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ResourceType resourceType);
         void CodeGen_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState action);
         void CodeGen_SetCountdown(unsigned int time, CHK::TriggerActionState action);
+        void CodeGen_TalkingPortrait(unsigned int unitId, unsigned int time);
 
         const CHK::Trigger& GetTrigger()
         {

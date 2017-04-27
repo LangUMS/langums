@@ -1301,6 +1301,11 @@ namespace Langums
                     m_Triggers.push_back(finishAdd.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::Talk)
+            {
+                auto talk = (IRTalkInstruction*)instruction.get();
+                current.CodeGen_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
+            }
             else if (instruction->GetType() == IRInstructionType::Call)
             {
                 auto call = (IRCallInstruction*)instruction.get();

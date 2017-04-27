@@ -97,6 +97,7 @@ namespace Langums
         SetDeaths, // sets the death count for a given unit
         IncDeaths, // increments the death count for a given unit
         DecDeaths, // decrements the death count for a given unit
+        Talk, // shows the unit talking portrait for an amount of time
         // conditions
         Event,
         BringCond, // Bring trigger condition
@@ -1539,6 +1540,32 @@ namespace Langums
         uint8_t m_UnitId;
         uint32_t m_RegisterId;
         bool m_IsValueLiteral;
+    };
+
+    class IRTalkInstruction : public IIRInstruction
+    {
+        public:
+        IRTalkInstruction(unsigned int unitId, unsigned int time) :
+            m_UnitId(unitId), m_Time(time), IIRInstruction(IRInstructionType::Talk) {}
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetTime() const
+        {
+            return m_Time;
+        }
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("TALK % %", CHK::UnitsByName[m_UnitId], m_Time);
+        }
+
+        private:
+        uint8_t m_UnitId;
+        uint32_t m_Time;
     };
 
     class IREventInstruction : public IIRInstruction

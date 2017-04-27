@@ -941,6 +941,40 @@ namespace Langums
 
             EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
         }
+        else if (fnName == "talking_portrait")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("talking_portrait() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 2)
+            {
+                throw IRCompilerException("talking_portrait() takes exactly two arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg0.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::NumberLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a number literal passed as second argument to %(), expected amount of time", fnName));
+            }
+
+            auto time = (ASTNumberLiteral*)arg1.get();
+            EmitInstruction(new IRTalkInstruction(unitId, time->GetValue() * 1000), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

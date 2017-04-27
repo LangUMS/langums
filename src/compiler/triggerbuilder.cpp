@@ -1,4 +1,5 @@
 #include "triggerbuilder.h"
+#include "compiler.h"
 
 namespace Langums
 {
@@ -35,6 +36,11 @@ namespace Langums
         condition.m_Condition = TriggerConditionType::Deaths;
         condition.m_Quantity = value;
         condition.m_Flags = 16;
+
+        if (regId >= g_RegisterMap.size())
+        {
+            throw CompilerException("Fatal error. Out of registers.");
+        }
 
         auto& regDef = g_RegisterMap[regId];
         condition.m_Group = regDef.m_PlayerId;
@@ -161,6 +167,11 @@ namespace Langums
         action.m_Modifier = (uint8_t)TriggerActionState::SetTo;
         action.m_Flags = 16;
 
+        if (regId >= g_RegisterMap.size())
+        {
+            throw CompilerException("Fatal error. Out of registers.");
+        }
+
         auto& regDef = g_RegisterMap[regId];
         action.m_Group = regDef.m_PlayerId;
         action.m_Arg0 = value;
@@ -177,6 +188,11 @@ namespace Langums
         action.m_Modifier = (uint8_t)TriggerActionState::Add;
         action.m_Flags = 16;
 
+        if (regId >= g_RegisterMap.size())
+        {
+            throw CompilerException("Fatal error. Out of registers.");
+        }
+
         auto& regDef = g_RegisterMap[regId];
         action.m_Group = regDef.m_PlayerId;
         action.m_Arg0 = amount;
@@ -192,6 +208,11 @@ namespace Langums
         action.m_ActionType = TriggerActionType::SetDeaths;
         action.m_Modifier = (uint8_t)TriggerActionState::Subtract;
         action.m_Flags = 16;
+
+        if (regId >= g_RegisterMap.size())
+        {
+            throw CompilerException("Fatal error. Out of registers.");
+        }
 
         auto& regDef = g_RegisterMap[regId];
         action.m_Group = regDef.m_PlayerId;
@@ -515,6 +536,16 @@ namespace Langums
         action.m_ActionType = TriggerActionType::SetCountdownTimer;
         action.m_Milliseconds = time;
         action.m_Modifier = (uint8_t)actionType;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::CodeGen_TalkingPortrait(unsigned int unitId, unsigned int time)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::TalkingPortrait;
+        action.m_Milliseconds = time;
+        action.m_Arg1 = unitId;
         m_HasChanges = true;
     }
 
