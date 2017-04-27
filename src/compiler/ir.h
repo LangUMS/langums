@@ -96,6 +96,7 @@ namespace Langums
         TimeCond, // Elapsed time trigger condition
         CmdCond, // Player commands a quantity of units condition
         KillCond, // Player has killed a quantity of units condition
+        DeathCond, // Player has lots a quantity of units condition
         CountdownCond, // Countdown timer condition
     };
 
@@ -1388,6 +1389,44 @@ namespace Langums
         std::string DebugDump() const
         {
             return SafePrintf("KILLS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        ConditionComparison GetComparison() const
+        {
+            return m_Comparison;
+        }
+
+        uint32_t GetQuantity() const
+        {
+            return m_Quantity;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        ConditionComparison m_Comparison;
+        uint32_t m_Quantity;
+    };
+
+    class IRDeathCondInstruction : public IIRInstruction
+    {
+        public:
+        IRDeathCondInstruction(uint8_t playerId, uint8_t unitId, ConditionComparison comparison, uint32_t quantity) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::DeathCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("DEATHS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const

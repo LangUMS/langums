@@ -43,18 +43,20 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 ## Language basics
 
+You can try out all of the examples below using the [test.scx map from here](https://github.com/AlexanderDzhoganov/langums/blob/master/test/test.scx?raw=true).
+
 Every program must contain a `main()` function which is the entry point where the code starts executing immediately after the map starts.
 The "hello world" program for LangUMS would look like:
 
 ```
 fn main() {
-  print("Hello World!");
+  print("Hello World!"); // prints Hello World! for Player 1
 }
 ```
 
 Which will print `Hello World!` on Player1's screen.
 
-Note: All statements must end with a semicolon (`;`). Block statements (code enclosed in `{}`) do not need a semicolon at the end.
+Note: All statements must end with a semicolon (`;`). Block statements (code enclosed in `{}`) do not need a semicolon at the end. C-style comments with `//` are supported.
 
 The more complex example below will give 36 minerals total to Player1. It declares a global variable called `foo`, a local variable `bar` and then calls the `add_resource()` built-in within a while loop.
 The quantity argument for `add_resource()` is the expression `foo + 2`. Some built-ins support expressions for some of their arguments.
@@ -69,6 +71,37 @@ fn main() {
     add_resource(Player1, Minerals, foo + 2);
     foo = foo + 10;
   }
+}
+```
+
+You can define your own functions that accept arguments and return a value.
+
+```
+fn get_unit_count(wave) {
+  return 10 + wave * 5;
+}
+
+fn spawn_units(count, wave) {
+  if (wave == 1) {
+    spawn(TerranMarine, Player1, count, "TestLocation");
+    return;
+  }
+  
+  if (wave == 2) {
+    spawn(ProtossZealot, Player1, count, "TestLocation");
+    return;
+  }
+  
+  if (wave == 3) {
+    spawn(ZergZergling, Player1, count, "TestLocation");
+    return;
+  }
+}
+
+fn main() {
+  var wave = 2;
+  var count = get_unit_count(wave);
+  spawn_units(count, wave);
 }
 ```
 
@@ -89,7 +122,7 @@ bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
 }
 ```
 
-Once we have our handlers setup we need to call a special built-in function called `poll_events()` at regular intervals. The whole program demonstrating the event above would looke like:
+Once we have our handlers setup we need to call the built-in function `poll_events()` at regular intervals. The whole program demonstrating the event above would look like:
 ```
 bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
   print("The marines have arrived!");
@@ -103,7 +136,55 @@ fn main() {
 ```
 
 You can do other kinds of processing between the `poll_events()` calls and you can be sure that no event handlers will be interleaved with your program's execution. Events are buffered
-so if you don't call `poll_events()` for a long time then call it, it will fire off all buffered events one after another the next cycle.
+so if you don't call `poll_events()` for a long time it will fire off all buffered events one after another the next time it's called.
+
+A slighly more contrived example of events. Also demonstrates usage of the preprocessor `#define` directive.
+
+```
+#define MAX_SWAPS 3
+
+global allowedSwaps = MAX_SWAPS;
+
+bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2"),
+elapsed_time(AtLeast, 15) => {
+  if (allowedSwaps == 0) {
+    print("Sorry, you have no more swaps left.");
+    return;
+  }
+  
+  allowedSwaps--;
+  kill(TerranMarine, Player1, 1, "TestLocation2");
+  spawn(ProtossZealot, Player1, 1, "TestLocation");
+  
+  print("Here is your zealot.");
+}
+
+bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2"),
+elapsed_time(AtMost, 15) => {
+  print("You have to wait 15 seconds before being able to swap.");
+}
+
+bring(Player1, AtLeast, 1, ProtossZealot, "TestLocation2") => {
+  if (allowedSwaps == 0) {
+    print("Sorry, you have no more swaps left.");
+    return;
+  }
+  
+  allowedSwaps--;
+  kill(ProtossZealot, Player1, 1, "TestLocation2");
+  spawn(TerranMarine, Player1, 1, "TestLocation");
+  
+  print("Here is your marine.");
+}
+
+fn main() {
+  spawn(TerranMarine, Player1, 1, "TestLocation");
+  
+  while (true) {
+    poll_events();
+  }
+}
+```
 
 ## Built-in functions
 
@@ -134,6 +215,7 @@ so if you don't call `poll_events()` for a long time then call it, it will fire 
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
 | `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.             |
 | `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.           |
+| `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.             |
 | `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.     |
 | More to be added ...                                            |                                                       |
 
@@ -187,6 +269,10 @@ No, but thanks for asking.
 - In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 
 ## For programmers
+
+### Compiling the code
+
+A Visual Studio 2015 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiller. The code has no external dependencies and is written in portable C++. You will need a compiler with `std::experimental::filesystem` available. Contributions of a Makefile as well as support for other build systems are welcome.
 
 ### Parts of LangUMS
 

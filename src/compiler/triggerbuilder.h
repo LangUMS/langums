@@ -19,6 +19,7 @@ namespace Langums
         void CodeGen_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity);
         void CodeGen_Commands(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity);
         void CodeGen_Kills(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity);
+        void CodeGen_Deaths(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity);
         void CodeGen_Countdown(CHK::TriggerComparisonType comparison, unsigned int time);
 
         void CodeGen_SetReg(unsigned int regId, int value);

@@ -143,7 +143,7 @@ namespace Langums
 
                         EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity->GetValue()), m_Instructions);
                     }
-                    else if (name == "commands" || name == "killed")
+                    else if (name == "commands" || name == "killed" || name == "deaths")
                     {
                         auto arg0 = condition->GetArgument(0);
                         if (arg0->GetType() != ASTNodeType::Identifier)
@@ -206,9 +206,13 @@ namespace Langums
                         {
                             EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
                         }
-                        else
+                        else if (name == "killed")
                         {
                             EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+                        }
+                        else if (name == "deaths")
+                        {
+                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
                         }
                     }
                     else if (name == "accumulate")
