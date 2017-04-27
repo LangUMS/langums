@@ -21,9 +21,8 @@ namespace CHK
 
     int CHKStringsChunk::FindString(const std::string& s)
     {
-        auto hash = StringHash(s);
-        auto it = m_Hashes.find(hash);
-        if (it == m_Hashes.end())
+        auto it = m_Indices.find(s);
+        if (it == m_Indices.end())
         {
             return -1;
         }
@@ -33,8 +32,8 @@ namespace CHK
 
     size_t CHKStringsChunk::InsertString(const std::string& s)
     {
-        auto it = m_Hashes.find(StringHash(s));
-        if (it != m_Hashes.end())
+        auto it = m_Indices.find(s);
+        if (it != m_Indices.end())
         {
             return (*it).second;
         }
@@ -42,11 +41,7 @@ namespace CHK
         auto& bytes = GetBytes();
         auto headerSize = sizeof(uint16_t) * (1 + m_Offsets.size());
 
-        auto index = m_Strings.size();
-        for (auto i = index + 1; i < m_Offsets.size(); i++)
-        {
-            m_Offsets[i] = headerSize;
-        }
+        auto index = m_Strings.size() + 1;
 
         BinaryWriter writer;
         writer.Write<uint16_t>((uint16_t)m_Offsets.size());
@@ -64,7 +59,7 @@ namespace CHK
     void CHKStringsChunk::SetBytes(const std::vector<char>& data)
     {
         m_Offsets.clear();
-        m_Hashes.clear();
+        m_Indices.clear();
 
         IChunk::SetBytes(data);
 
@@ -87,13 +82,8 @@ namespace CHK
 
             if (str != nullptr && strlen(str) > 0)
             {
-                auto hash = StringHash(str);
-                m_Hashes.insert(std::make_pair(hash, i));
+                m_Indices[str] = i;
                 m_Strings.push_back(str);
-            }
-            else
-            {
-                break;
             }
         }
     }

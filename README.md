@@ -245,7 +245,15 @@ Will happen sometime in the future. You can help.
 
 #### Can you stop the compiler from replacing the existing triggers in the map?
 
-Yes. Use the `--preserve-triggers` option. Make sure your existing triggers don't mess with Player 8's stuff.
+Yes. Use the `--preserve-triggers` option.
+
+#### How do you change which player owns the main triggers?
+
+With the `--main-triggers-owner` command-line option.
+
+#### How do you change which player's death counts are used for storage?
+
+Use the `--death-counts-owner` command-line option.
 
 #### The compiler emits way more triggers than I'd like. What can I do?
 
@@ -260,7 +268,7 @@ No, but thanks for asking.
 
 ## Limitations
 
-- Player 8 is reserved and must be a Computer player. This is enforced by the compiler. Also Player 8's stuff needs to remain untouched for LangUMS to do its work. Doing anything with Player 8 e.g. spawning units will lead to undefined behavior. Don't. You can use all other players freely. Preplaced units for Player 8 are also not allowed.
+- One player (out of the 8 possible) must be reserved for LangUMS. By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed.
 - There are about 240 registers available for variables and the stack. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue.
 - Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
 - Currently you have can have up to 253 event handlers, this limitation will be lifted in the future.

@@ -5,7 +5,6 @@
 #include <string>
 
 #include "ichunk.h"
-#include "../stringhash.h"
 #include "../serialization.h"
 
 namespace CHK
@@ -35,7 +34,7 @@ namespace CHK
         private:
         std::vector<uint16_t> m_Offsets;
         std::vector<std::string> m_Strings;
-        std::unordered_map<size_t, size_t> m_Hashes;
+        std::unordered_map<std::string, size_t> m_Indices;
     };
 
 }

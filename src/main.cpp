@@ -30,8 +30,10 @@ int main(int argc, char* argv[])
         ("d,dst", "Destination .scx map file", cxxopts::value<std::string>())
         ("l,lang", "Source .l script file", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
-        ("preserve-triggers", "Preserves already existing triggers in the map. (DANGEROUS, USE WITH CAUTION)", cxxopts::value<bool>())
+        ("preserve-triggers", "Preserves already existing triggers in the map. (Use with caution!)", cxxopts::value<bool>())
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
+        ("main-trigger-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
+        ("death-counts-owner", "The index of the player whose death counts will be used as memory (default: 8)", cxxopts::value<unsigned int>())
         ;
     opts.parse(argc, argv);
 
@@ -170,12 +172,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
+    /*auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
     if (ownrChunk.GetPlayerType(7) != PlayerType::Computer)
     {
         LOG_F("(!) Warning! Player 8 is not set to type \"Computer\". Overriding.");
         ownrChunk.SetPlayerType(7, PlayerType::Computer);
-    }
+    }*/
 
     auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
     triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
@@ -303,6 +305,32 @@ int main(int argc, char* argv[])
     LOG_F("Emitted % instructions.", instructions.size());
 
     Compiler compiler;
+
+    if (opts.count("main-trigger-owner") > 0)
+    {
+        auto triggerOwner = opts["main-trigger-owner"].as<unsigned int>();
+        if (triggerOwner < 1 || triggerOwner > 8)
+        {
+            LOG_EXITERR("\n(!) main-trigger-owner must be between 1 and 8");
+            return 1;
+        }
+
+        LOG_F("Main trigger owner: %", triggerOwner);
+        compiler.SetTriggersOwner(triggerOwner);
+    }
+
+    if (opts.count("death-counts-owner") > 0)
+    {
+        auto deathCountsOwner = opts["death-counts-owner"].as<unsigned int>();
+        if (deathCountsOwner < 1 || deathCountsOwner > 8)
+        {
+            LOG_EXITERR("\n(!) death-counts-owner must be between 1 and 8");
+            return 1;
+        }
+
+        LOG_F("Death counts owner: %", deathCountsOwner);
+        compiler.SetDeathCountsOwner(deathCountsOwner);
+    }
 
     if (opts.count("copy-batch-size") > 0)
     {

@@ -2,20 +2,14 @@
 
 namespace Langums
 {
+    unsigned int g_RegistersOwnerPlayer = 7;
 
     TriggerBuilder::TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerMask)
         : m_Address(address), m_Instruction(instruction), m_PlayerMask(playerMask)
     {
         using namespace CHK;
         m_Trigger.m_ExecutionFlags = 0;
-
-        for (auto i = 0; i < 8; i++)
-        {
-            if ((playerMask & (1 << i)) != 0)
-            {
-                m_Trigger.m_ExecutionMask[i] = 1;
-            }
-        }
+        m_Trigger.m_ExecutionMask[playerMask - 1] = 1;
 
         // conditions
 
@@ -40,7 +34,7 @@ namespace Langums
         condition.m_Condition = TriggerConditionType::Deaths;
         condition.m_Quantity = value;
         condition.m_Flags = 16;
-        condition.m_Group = 7;
+        condition.m_Group = g_RegistersOwnerPlayer;
         condition.m_UnitId = regId;
         m_HasChanges = true;
     }
@@ -54,7 +48,7 @@ namespace Langums
         condition.m_Comparison = expectedState ? TriggerComparisonType::SwitchSet : TriggerComparisonType::SwitchCleared;
         condition.m_Condition = TriggerConditionType::Switch;
         condition.m_Flags = 16;
-        condition.m_Group = 7;
+        condition.m_Group = g_RegistersOwnerPlayer;
         m_HasChanges = true;
     }
 
@@ -161,7 +155,7 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = 7;
+        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::SetTo;
         action.m_Flags = 16;
         action.m_Arg0 = value;
@@ -175,7 +169,7 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = 7;
+        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::Add;
         action.m_Flags = 16;
         action.m_Arg0 = amount;
@@ -189,7 +183,7 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
         action.m_ActionType = TriggerActionType::SetDeaths;
-        action.m_Group = 7;
+        action.m_Group = g_RegistersOwnerPlayer;
         action.m_Modifier = (uint8_t)TriggerActionState::Subtract;
         action.m_Flags = 16;
         action.m_Arg0 = amount;

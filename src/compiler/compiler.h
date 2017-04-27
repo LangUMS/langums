@@ -29,6 +29,16 @@ namespace Langums
             m_CopyBatchSize = copyBatchSize;
         }
 
+        void SetTriggersOwner(uint8_t owner)
+        {
+            m_TriggersOwner = owner;
+        }
+
+        void SetDeathCountsOwner(uint8_t owner)
+        {
+            g_RegistersOwnerPlayer = owner;
+        }
+
         bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
 
         private:
@@ -42,6 +52,7 @@ namespace Langums
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
         uint32_t m_CopyBatchSize = 65536u;
         uint32_t m_HyperTriggerCount = 5;
+        uint8_t m_TriggersOwner = 1;
 
         CHK::File* m_File = nullptr;
         CHK::CHKStringsChunk* m_StringsChunk = nullptr;

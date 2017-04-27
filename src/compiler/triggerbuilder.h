@@ -6,10 +6,12 @@
 namespace Langums
 {
 
+    extern unsigned int g_RegistersOwnerPlayer;
+
     class TriggerBuilder
     {
         public:
-        TriggerBuilder(int address, IIRInstruction* instruction = nullptr, uint8_t playerMask = 128);
+        TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerMask);
 
         void CodeGen_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison);
         void CodeGen_TestSwitch(unsigned int switchId, bool expectedState);
