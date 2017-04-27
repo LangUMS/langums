@@ -230,6 +230,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                |
 | `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                 |
 | `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.        |
+| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                           |
 | `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.            |
 | `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.              |
 | `set_countdown(Expression)`                                            | Sets the countdown timer.                                |
@@ -302,7 +303,7 @@ No, but thanks for asking.
 
 ## Limitations
 
-- One player (out of the 8 possible) must be reserved for LangUMS. By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
+- One player (out of the 8 possible) must be reserved for LangUMS (unless you are using the `--reg` option). By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
 - There are about 240 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
 - Functions are limited to a maximum of 8 arguments, this limitation can be lifted on request.
 - Currently you have can have up to 240 event handlers, this limitation will be lifted in the future.

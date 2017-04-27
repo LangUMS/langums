@@ -95,6 +95,7 @@ namespace Langums
         Move, // moves a unit
         Order, // orders a unit to move, attack or patrol
         Modify, // modifies a unit's properties such as hp, energy, shields and hangar count
+        Give, // gives units to another player
         MoveLoc, // moves a location
         EndGame, // ends the game in a victory or defeat for a given player
         CenterView, // centers the camera on a location for a given player
@@ -1123,6 +1124,62 @@ namespace Langums
         bool m_IsLiteralValue = false;
         std::string m_LocationName;
         ModifyType m_ModifyType;
+    };
+
+    class IRGiveInstruction : public IIRInstruction
+    {
+        public:
+        IRGiveInstruction(uint8_t srcPlayerId, uint8_t dstPlayerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName) :
+            m_SrcPlayerId(srcPlayerId), m_DstPlayerId(dstPlayerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_LocationName(locationName),
+            IIRInstruction(IRInstructionType::Give) {}
+
+        std::string DebugDump() const
+        {
+            if (m_IsLiteralValue)
+            {
+                return SafePrintf("GIVE % % % % %", PlayersByName[m_SrcPlayerId], PlayersByName[m_DstPlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName);
+            }
+
+            return SafePrintf("GIVE % % % % %", PlayersByName[m_SrcPlayerId], PlayersByName[m_DstPlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
+        }
+
+        uint8_t GetSrcPlayerId() const
+        {
+            return m_SrcPlayerId;
+        }
+
+        uint8_t GetDstPlayerId() const
+        {
+            return m_DstPlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsLiteralValue;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        private:
+        uint8_t m_SrcPlayerId;
+        uint8_t m_DstPlayerId;
+        uint8_t m_UnitId;
+        uint32_t m_RegId;
+        bool m_IsLiteralValue = false;
+        std::string m_LocationName;
     };
 
     class IRMoveLocInstruction : public IIRInstruction

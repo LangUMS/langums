@@ -139,23 +139,36 @@ namespace Langums
             }
         }
 
-        // copy instruction counter from storage helper
-        for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+        auto hasRetInstructions = false;
+        for (auto& instruction : instructions)
         {
-            TriggerBuilder copyIC(-1, nullptr, m_TriggersOwner);
-            copyIC.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
-            copyIC.CodeGen_TestReg(Reg_CopyStorage, i, TriggerComparisonType::AtLeast);
-            copyIC.CodeGen_DecReg(Reg_CopyStorage, i);
-            copyIC.CodeGen_IncReg(Reg_InstructionCounter, i);
-            m_Triggers.push_back(copyIC.GetTrigger());
+            if (instruction->GetType() == IRInstructionType::Ret)
+            {
+                hasRetInstructions = true;
+                break;
+            }
         }
 
-        TriggerBuilder copyICFinish(-1, nullptr, m_TriggersOwner);
-        copyICFinish.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
-        copyICFinish.CodeGen_TestReg(Reg_CopyStorage, 0, TriggerComparisonType::Exactly);
-        copyICFinish.CodeGen_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::ClearSwitch);
-        m_Triggers.push_back(copyICFinish.GetTrigger());
-        //
+        if (hasRetInstructions)
+        {
+            // copy instruction counter from storage helper, used for Ret instruction
+            for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+            {
+                TriggerBuilder copyIC(-1, nullptr, m_TriggersOwner);
+                copyIC.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
+                copyIC.CodeGen_TestReg(Reg_CopyStorage, i, TriggerComparisonType::AtLeast);
+                copyIC.CodeGen_DecReg(Reg_CopyStorage, i);
+                copyIC.CodeGen_IncReg(Reg_InstructionCounter, i);
+                m_Triggers.push_back(copyIC.GetTrigger());
+            }
+
+            TriggerBuilder copyICFinish(-1, nullptr, m_TriggersOwner);
+            copyICFinish.CodeGen_TestSwitch(Switch_InstructionCounterMutex, true);
+            copyICFinish.CodeGen_TestReg(Reg_CopyStorage, 0, TriggerComparisonType::Exactly);
+            copyICFinish.CodeGen_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::ClearSwitch);
+            m_Triggers.push_back(copyICFinish.GetTrigger());
+            //
+        }
 
         m_JumpTargets.clear();
 
@@ -912,6 +925,58 @@ namespace Langums
                     finishModify.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
                     finishModify.CodeGen_JumpTo(retAddress);
                     m_Triggers.push_back(finishModify.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::Give)
+            {
+                auto give = (IRGiveInstruction*)instruction.get();
+
+                auto locationStringId = m_StringsChunk->FindString(give->GetLocationName()) + 1;
+                auto locationId = m_LocationsChunk->FindLocation(locationStringId);
+                if (locationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", give->GetLocationName()));
+                }
+
+                auto srcPlayerId = give->GetSrcPlayerId();
+                auto dstPlayerId = give->GetDstPlayerId();
+                auto unitId = give->GetUnitId();
+
+                if (give->IsValueLiteral())
+                {
+                    auto quantity = give->GetRegisterId();
+                    current.CodeGen_GiveUnits(srcPlayerId, dstPlayerId, unitId, quantity, locationId);
+                }
+                else
+                {
+                    auto regId = give->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! Give expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.CodeGen_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto giveTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        giveTrigger.CodeGen_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        giveTrigger.CodeGen_DecReg(regId, i);
+                        giveTrigger.CodeGen_GiveUnits(srcPlayerId, dstPlayerId, unitId, i, locationId);
+                        m_Triggers.push_back(giveTrigger.GetTrigger());
+                    }
+
+                    auto finishGive = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishGive.CodeGen_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishGive.CodeGen_JumpTo(retAddress);
+                    m_Triggers.push_back(finishGive.GetTrigger());
                 }
             }
             else if (instruction->GetType() == IRInstructionType::MoveLoc)

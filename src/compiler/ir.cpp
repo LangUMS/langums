@@ -1373,7 +1373,7 @@ namespace Langums
 
             if (fnCall->GetChildCount() != 6)
             {
-                throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
+                throw IRCompilerException(SafePrintf("%() takes exactly 6 arguments", fnName));
             }
 
             auto arg0 = fnCall->GetArgument(0);
@@ -1473,6 +1473,91 @@ namespace Langums
             auto locName = locationName->GetValue();
 
             EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount->GetValue(), modifyType, locName), instructions);
+        }
+        else if (fnName == "give")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
+            }
+
+            if (fnCall->GetChildCount() != 5)
+            {
+                throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg0.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
+            }
+
+            auto srcPlayerName = (ASTIdentifier*)arg1.get();
+            auto srcPlayerId = PlayerNameToId(srcPlayerName->GetName());
+            if (srcPlayerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid source player name \"%\" passed to %()", srcPlayerName->GetName(), fnName));
+            }
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as third argument to %(), expected player name", fnName));
+            }
+
+            auto dstPlayerName = (ASTIdentifier*)arg2.get();
+            auto dstPlayerId = PlayerNameToId(dstPlayerName->GetName());
+            if (dstPlayerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid destination player name \"%\" passed to %()", dstPlayerName->GetName(), fnName));
+            }
+
+            auto regId = 0;
+            bool isLiteral = false;
+
+            auto arg3 = fnCall->GetArgument(3);
+            if (arg3->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto unitQuantity = (ASTNumberLiteral*)arg3.get();
+                regId = unitQuantity->GetValue();
+
+                if (regId <= 0)
+                {
+                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
+                }
+
+                isLiteral = true;
+            }
+            else
+            {
+                EmitExpression(arg3.get(), instructions, aliases);
+                isLiteral = false;
+                regId = Reg_StackTop;
+            }
+
+            auto arg4 = fnCall->GetArgument(4);
+            if (arg4->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
+            }
+
+            auto locationName = (ASTStringLiteral*)arg4.get();
+            auto locName = locationName->GetValue();
+
+            EmitInstruction(new IRGiveInstruction(srcPlayerId, dstPlayerId, unitId, regId, isLiteral, locName), instructions);
         }
         else if (fnName == "move_loc")
         {

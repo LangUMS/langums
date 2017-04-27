@@ -442,6 +442,22 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::CodeGen_GiveUnits(unsigned int srcPlayerId, unsigned int dstPlayerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::GiveUnitsToPlayer;
+        action.m_Source = locationId + 1;
+        action.m_Group = srcPlayerId;
+        action.m_Arg0 = dstPlayerId;
+        action.m_Arg1 = unitId;
+        action.m_Modifier = quantity;
+        action.m_Flags = 4;
+
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::CodeGen_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;

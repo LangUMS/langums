@@ -48,6 +48,7 @@ namespace Langums
         void CodeGen_ModifyUnitEnergy(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId);
         void CodeGen_ModifyUnitShieldPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId);
         void CodeGen_ModifyUnitHangarCount(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId);
+        void CodeGen_GiveUnits(unsigned int srcPlayerId, unsigned int dstPlayerId, unsigned int unitId, unsigned int quantity, unsigned int locationId);
         void CodeGen_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId);
         void CodeGen_Victory();
         void CodeGen_Defeat();
