@@ -200,6 +200,7 @@ fn main() {
 | `spawn(Unit, Player, QuantityExpression, Location)`                | Spawns units at a location.                              |
 | `kill(Unit, Player, QuantityExpression, optional: Location)`       | Kills units at an optional location.                     |
 | `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)` | Moves units from one location to another.                |
+| `order(Unit, Player, Order, SrcLocation, DstLocation)`             | Orders a unit to move, attack or patrol.                 |
 | `move_loc(Unit, Player, SrcLocation, DstLocation)`                 | Centers DstLocation on a unit at SrcLocation.            |
 | `end(Player, EndCondition)`                                        | Ends the game for Player with EndCondition.              |
 | `set_countdown(Expression)`                                        | Sets the countdown timer.                                |
@@ -315,277 +316,285 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 ### EndCondition
 
 ```
-- Victory
-- Defeat
-- Draw
+Victory
+Defeat
+Draw
 ```
 
 ### ResourceType
 
 ```
-- Minerals
-- Gas
+Minerals
+Gas
 ```
 
 ### Comparison
 
 ```
-- AtLeast
-- AtMost
-- Exactly
+AtLeast
+AtMost
+Exactly
+```
+
+### Order
+
+```
+Move
+Attack
+Patrol
 ```
 
 ### Player
 
 ```
-- Player1
-- Player2
-- Player3
-- Player4
-- Player5
-- Player6
-- Player7
-- Player8 (Do not use!)
-- Player9
-- Player10
-- Player11
-- Player12
+Player1
+Player2
+Player3
+Player4
+Player5
+Player6
+Player7
+Player8 (Do not use!)
+Player9
+Player10
+Player11
+Player12
 ```
 
 ### Unit
 
 ```
-- TerranMarine
-- TerranGhost
-- TerranVulture
-- TerranGoliath
-- TerranGoliathTurret
-- TerranSiegeTankTankMode
-- TerranSiegeTankTankModeTurret
-- TerranSCV
-- TerranWraith
-- TerranScienceVessel
-- HeroGuiMontag
-- TerranDropship
-- TerranBattlecruiser
-- TerranVultureSpiderMine
-- TerranNuclearMissile
-- TerranCivilian
-- HeroSarahKerrigan
-- HeroAlanSchezar
-- HeroAlanSchezarTurret
-- HeroJimRaynorVulture
-- HeroJimRaynorMarine
-- HeroTomKazansky
-- HeroMagellan
-- HeroEdmundDukeTankMode
-- HeroEdmundDukeTankModeTurret
-- HeroEdmundDukeSiegeMode
-- HeroEdmundDukeSiegeModeTurret
-- HeroArcturusMengsk
-- HeroHyperion
-- HeroNoradII
-- TerranSiegeTankSiegeMode
-- TerranSiegeTankSiegeModeTurret
-- TerranFirebat
-- SpellScannerSweep
-- TerranMedic
-- ZergLarva
-- ZergEgg
-- ZergZergling
-- ZergHydralisk
-- ZergUltralisk
-- ZergBroodling
-- ZergDrone
-- ZergOverlord
-- ZergMutalisk
-- ZergGuardian
-- ZergQueen
-- ZergDefiler
-- ZergScourge
-- HeroTorrasque
-- HeroMatriarch
-- ZergInfestedTerran
-- HeroInfestedKerrigan
-- HeroUncleanOne
-- HeroHunterKiller
-- HeroDevouringOne
-- HeroKukulzaMutalisk
-- HeroKukulzaGuardian
-- HeroYggdrasill
-- TerranValkyrie
-- ZergCocoon
-- ProtossCorsair
-- ProtossDarkTemplar
-- ZergDevourer
-- ProtossDarkArchon
-- ProtossProbe
-- ProtossZealot
-- ProtossDragoon
-- ProtossHighTemplar
-- ProtossArchon
-- ProtossShuttle
-- ProtossScout
-- ProtossArbiter
-- ProtossCarrier
-- ProtossInterceptor
-- HeroDarkTemplar
-- HeroZeratul
-- HeroTassadarZeratulArchon
-- HeroFenixZealot
-- HeroFenixDragoon
-- HeroTassadar
-- HeroMojo
-- HeroWarbringer
-- HeroGantrithor
-- ProtossReaver
-- ProtossObserver
-- ProtossScarab
-- HeroDanimoth
-- HeroAldaris
-- HeroArtanis
-- CritterRhynadon
-- CritterBengalaas
-- SpecialCargoShip
-- SpecialMercenaryGunship
-- CritterScantid
-- CritterKakaru
-- CritterRagnasaur
-- CritterUrsadon
-- ZergLurkerEgg
-- HeroRaszagal
-- HeroSamirDuran
-- HeroAlexeiStukov
-- SpecialMapRevealer
-- HeroGerardDuGalle
-- ZergLurker
-- HeroInfestedDuran
-- SpellDisruptionWeb
-- TerranCommandCenter
-- TerranComsatStation
-- TerranNuclearSilo
-- TerranSupplyDepot
-- TerranRefinery
-- TerranBarracks
-- TerranAcademy
-- TerranFactory
-- TerranStarport
-- TerranControlTower
-- TerranScienceFacility
-- TerranCovertOps
-- TerranPhysicsLab
-- UnusedTerran1
-- TerranMachineShop
-- UnusedTerran2
-- TerranEngineeringBay
-- TerranArmory
-- TerranMissileTurret
-- TerranBunker
-- SpecialCrashedNoradII
-- SpecialIonCannon
-- PowerupUrajCrystal
-- PowerupKhalisCrystal
-- ZergInfestedCommandCenter
-- ZergHatchery
-- ZergLair
-- ZergHive
-- ZergNydusCanal
-- ZergHydraliskDen
-- ZergDefilerMound
-- ZergGreaterSpire
-- ZergQueensNest
-- ZergEvolutionChamber
-- ZergUltraliskCavern
-- ZergSpire
-- ZergSpawningPool
-- ZergCreepColony
-- ZergSporeColony
-- UnusedZerg1
-- ZergSunkenColony
-- SpecialOvermindWithShell
-- SpecialOvermind
-- ZergExtractor
-- SpecialMatureChrysalis
-- SpecialCerebrate
-- SpecialCerebrateDaggoth
-- UnusedZerg2
-- ProtossNexus
-- ProtossRoboticsFacility
-- ProtossPylon
-- ProtossAssimilator
-- UnusedProtoss1
-- ProtossObservatory
-- ProtossGateway
-- UnusedProtoss2
-- ProtossPhotonCannon
-- ProtossCitadelofAdun
-- ProtossCyberneticsCore
-- ProtossTemplarArchives
-- ProtossForge
-- ProtossStargate
-- SpecialStasisCellPrison
-- ProtossFleetBeacon
-- ProtossArbiterTribunal
-- ProtossRoboticsSupportBay
-- ProtossShieldBattery
-- SpecialKhaydarinCrystalForm
-- SpecialProtossTemple
-- SpecialXelNagaTemple
-- ResourceMineralField
-- ResourceMineralFieldType2
-- ResourceMineralFieldType3
-- UnusedCave
-- UnusedCaveIn
-- UnusedCantina
-- UnusedMiningPlatform
-- UnusedIndependantCommandCenter
-- SpecialIndependantStarport
-- UnusedIndependantJumpGate
-- UnusedRuins
-- UnusedKhaydarinCrystalFormation
-- ResourceVespeneGeyser
-- SpecialWarpGate
-- SpecialPsiDisrupter
-- UnusedZergMarker
-- UnusedTerranMarker
-- UnusedProtossMarker
-- SpecialZergBeacon
-- SpecialTerranBeacon
-- SpecialProtossBeacon
-- SpecialZergFlagBeacon
-- SpecialTerranFlagBeacon
-- SpecialProtossFlagBeacon
-- SpecialPowerGenerator
-- SpecialOvermindCocoon
-- SpellDarkSwarm
-- SpecialFloorMissileTrap
-- SpecialFloorHatch
-- SpecialUpperLevelDoor
-- SpecialRightUpperLevelDoor
-- SpecialPitDoor
-- SpecialRightPitDoor
-- SpecialFloorGunTrap
-- SpecialWallMissileTrap
-- SpecialWallFlameTrap
-- SpecialRightWallMissileTrap
-- SpecialRightWallFlameTrap
-- SpecialStartLocation
-- PowerupFlag
-- PowerupYoungChrysalis
-- PowerupPsiEmitter
-- PowerupDataDisk
-- PowerupKhaydarinCrystal
-- PowerupMineralClusterType1
-- PowerupMineralClusterType2
-- PowerupProtossGasOrbType1
-- PowerupProtossGasOrbType2
-- PowerupZergGasSacType1
-- PowerupZergGasSacType2
-- PowerupTerranGasTankType1
-- PowerupTerranGasTankType2
-- None
-- AllUnits
-- Men
-- Buildings
-- Factories
+TerranMarine
+TerranGhost
+TerranVulture
+TerranGoliath
+TerranGoliathTurret
+TerranSiegeTankTankMode
+TerranSiegeTankTankModeTurret
+TerranSCV
+TerranWraith
+TerranScienceVessel
+HeroGuiMontag
+TerranDropship
+TerranBattlecruiser
+TerranVultureSpiderMine
+TerranNuclearMissile
+TerranCivilian
+HeroSarahKerrigan
+HeroAlanSchezar
+HeroAlanSchezarTurret
+HeroJimRaynorVulture
+HeroJimRaynorMarine
+HeroTomKazansky
+HeroMagellan
+HeroEdmundDukeTankMode
+HeroEdmundDukeTankModeTurret
+HeroEdmundDukeSiegeMode
+HeroEdmundDukeSiegeModeTurret
+HeroArcturusMengsk
+HeroHyperion
+HeroNoradII
+TerranSiegeTankSiegeMode
+TerranSiegeTankSiegeModeTurret
+TerranFirebat
+SpellScannerSweep
+TerranMedic
+ZergLarva
+ZergEgg
+ZergZergling
+ZergHydralisk
+ZergUltralisk
+ZergBroodling
+ZergDrone
+ZergOverlord
+ZergMutalisk
+ZergGuardian
+ZergQueen
+ZergDefiler
+ZergScourge
+HeroTorrasque
+HeroMatriarch
+ZergInfestedTerran
+HeroInfestedKerrigan
+HeroUncleanOne
+HeroHunterKiller
+HeroDevouringOne
+HeroKukulzaMutalisk
+HeroKukulzaGuardian
+HeroYggdrasill
+TerranValkyrie
+ZergCocoon
+ProtossCorsair
+ProtossDarkTemplar
+ZergDevourer
+ProtossDarkArchon
+ProtossProbe
+ProtossZealot
+ProtossDragoon
+ProtossHighTemplar
+ProtossArchon
+ProtossShuttle
+ProtossScout
+ProtossArbiter
+ProtossCarrier
+ProtossInterceptor
+HeroDarkTemplar
+HeroZeratul
+HeroTassadarZeratulArchon
+HeroFenixZealot
+HeroFenixDragoon
+HeroTassadar
+HeroMojo
+HeroWarbringer
+HeroGantrithor
+ProtossReaver
+ProtossObserver
+ProtossScarab
+HeroDanimoth
+HeroAldaris
+HeroArtanis
+CritterRhynadon
+CritterBengalaas
+SpecialCargoShip
+SpecialMercenaryGunship
+CritterScantid
+CritterKakaru
+CritterRagnasaur
+CritterUrsadon
+ZergLurkerEgg
+HeroRaszagal
+HeroSamirDuran
+HeroAlexeiStukov
+SpecialMapRevealer
+HeroGerardDuGalle
+ZergLurker
+HeroInfestedDuran
+SpellDisruptionWeb
+TerranCommandCenter
+TerranComsatStation
+TerranNuclearSilo
+TerranSupplyDepot
+TerranRefinery
+TerranBarracks
+TerranAcademy
+TerranFactory
+TerranStarport
+TerranControlTower
+TerranScienceFacility
+TerranCovertOps
+TerranPhysicsLab
+UnusedTerran1
+TerranMachineShop
+UnusedTerran2
+TerranEngineeringBay
+TerranArmory
+TerranMissileTurret
+TerranBunker
+SpecialCrashedNoradII
+SpecialIonCannon
+PowerupUrajCrystal
+PowerupKhalisCrystal
+ZergInfestedCommandCenter
+ZergHatchery
+ZergLair
+ZergHive
+ZergNydusCanal
+ZergHydraliskDen
+ZergDefilerMound
+ZergGreaterSpire
+ZergQueensNest
+ZergEvolutionChamber
+ZergUltraliskCavern
+ZergSpire
+ZergSpawningPool
+ZergCreepColony
+ZergSporeColony
+UnusedZerg1
+ZergSunkenColony
+SpecialOvermindWithShell
+SpecialOvermind
+ZergExtractor
+SpecialMatureChrysalis
+SpecialCerebrate
+SpecialCerebrateDaggoth
+UnusedZerg2
+ProtossNexus
+ProtossRoboticsFacility
+ProtossPylon
+ProtossAssimilator
+UnusedProtoss1
+ProtossObservatory
+ProtossGateway
+UnusedProtoss2
+ProtossPhotonCannon
+ProtossCitadelofAdun
+ProtossCyberneticsCore
+ProtossTemplarArchives
+ProtossForge
+ProtossStargate
+SpecialStasisCellPrison
+ProtossFleetBeacon
+ProtossArbiterTribunal
+ProtossRoboticsSupportBay
+ProtossShieldBattery
+SpecialKhaydarinCrystalForm
+SpecialProtossTemple
+SpecialXelNagaTemple
+ResourceMineralField
+ResourceMineralFieldType2
+ResourceMineralFieldType3
+UnusedCave
+UnusedCaveIn
+UnusedCantina
+UnusedMiningPlatform
+UnusedIndependantCommandCenter
+SpecialIndependantStarport
+UnusedIndependantJumpGate
+UnusedRuins
+UnusedKhaydarinCrystalFormation
+ResourceVespeneGeyser
+SpecialWarpGate
+SpecialPsiDisrupter
+UnusedZergMarker
+UnusedTerranMarker
+UnusedProtossMarker
+SpecialZergBeacon
+SpecialTerranBeacon
+SpecialProtossBeacon
+SpecialZergFlagBeacon
+SpecialTerranFlagBeacon
+SpecialProtossFlagBeacon
+SpecialPowerGenerator
+SpecialOvermindCocoon
+SpellDarkSwarm
+SpecialFloorMissileTrap
+SpecialFloorHatch
+SpecialUpperLevelDoor
+SpecialRightUpperLevelDoor
+SpecialPitDoor
+SpecialRightPitDoor
+SpecialFloorGunTrap
+SpecialWallMissileTrap
+SpecialWallFlameTrap
+SpecialRightWallMissileTrap
+SpecialRightWallFlameTrap
+SpecialStartLocation
+PowerupFlag
+PowerupYoungChrysalis
+PowerupPsiEmitter
+PowerupDataDisk
+PowerupKhaydarinCrystal
+PowerupMineralClusterType1
+PowerupMineralClusterType2
+PowerupProtossGasOrbType1
+PowerupProtossGasOrbType2
+PowerupZergGasSacType1
+PowerupZergGasSacType2
+PowerupTerranGasTankType1
+PowerupTerranGasTankType2
+None
+AllUnits
+Men
+Buildings
+Factories
 ```

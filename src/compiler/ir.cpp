@@ -1061,6 +1061,90 @@ namespace Langums
 
             EmitInstruction(new IRMoveInstruction(playerId, unitId, regId, isLiteral, srcLocName, dstLocName), instructions);
         }
+        else if (fnName == "order")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
+            }
+
+            if (fnCall->GetChildCount() != 5)
+            {
+                throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
+            }
+
+            auto unitName = (ASTIdentifier*)arg0.get();
+            auto unitId = UnitNameToId(unitName->GetName());
+            if (unitId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
+            }
+
+            auto arg1 = fnCall->GetArgument(1);
+            if (arg1->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
+            }
+
+            auto playerName = (ASTIdentifier*)arg1.get();
+            auto playerId = PlayerNameToId(playerName->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
+            }
+
+            auto arg2 = fnCall->GetArgument(2);
+            if (arg2->GetType() != ASTNodeType::Identifier)
+            {
+                throw IRCompilerException(SafePrintf("Something other than an identifier passed as third argument to %(), expected order type", fnName));
+            }
+
+            auto order = (ASTIdentifier*)arg2.get();
+            auto orderType = order->GetName();
+            CHK::TriggerActionState orderValue;
+            if (orderType == "Move")
+            {
+                orderValue = CHK::TriggerActionState::Move;
+            }
+            else if (orderType == "Attack")
+            {
+                orderValue = CHK::TriggerActionState::Attack;
+            }
+            else if (orderType == "Patrol")
+            {
+                orderValue = CHK::TriggerActionState::Patrol;
+            }
+            else
+            {
+                throw IRCompilerException(SafePrintf("Invalid order passed as third argument to %(), expected Move, Attack or Patrol", fnName));
+            }
+
+            auto arg3 = fnCall->GetArgument(3);
+            if (arg3->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
+            }
+
+            auto srcLocationName = (ASTStringLiteral*)arg3.get();
+            auto srcLocName = srcLocationName->GetValue();
+
+            auto arg4 = fnCall->GetArgument(4);
+            if (arg4->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
+            }
+
+            auto dstLocationName = (ASTStringLiteral*)arg4.get();
+            auto dstLocName = dstLocationName->GetValue();
+
+            EmitInstruction(new IROrderInstruction(playerId, unitId, orderValue, srcLocName, dstLocName), instructions);
+        }
         else if (fnName == "move_loc")
         {
             if (!fnCall->HasChildren())

@@ -698,6 +698,39 @@ namespace Langums
                     m_Triggers.push_back(finishTrigger.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::Order)
+            {
+                auto order = (IROrderInstruction*)instruction.get();
+
+                auto srcLocName = order->GetSrcLocationName();
+                auto locationStringId = m_StringsChunk->FindString(srcLocName);
+                if (locationStringId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
+                }
+
+                auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+
+                if (srcLocationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
+                }
+
+                auto dstLocName = order->GetDstLocationName();
+                locationStringId = m_StringsChunk->FindString(dstLocName);
+                if (locationStringId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
+                }
+
+                auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+                if (dstLocationId == -1)
+                {
+                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
+                }
+
+                current.CodeGen_OrderUnit(order->GetPlayerId(), order->GetUnitId(), order->GetOrder(), srcLocationId, dstLocationId);
+            }
             else if (instruction->GetType() == IRInstructionType::MoveLoc)
             {
                 auto move = (IRMoveLocInstruction*)instruction.get();

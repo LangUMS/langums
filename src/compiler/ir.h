@@ -14,6 +14,8 @@
 namespace Langums
 {
 
+    using namespace CHK;
+
     enum ReservedRegisters
     {
         Reg_InstructionCounter = 0,
@@ -81,6 +83,7 @@ namespace Langums
         Spawn, // spawns a unit
         Kill, // kills a unit
         Move, // moves a unit
+        Order, // orders a unit to move, attack or patrol
         MoveLoc, // moves a location
         EndGame, // ends the game in a victory or defeat for a given player
         CenterView, // centers the camera on a location for a given player
@@ -744,10 +747,10 @@ namespace Langums
         {
             if (m_IsLiteralValue)
             {
-                return SafePrintf("SPAWN % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_LocationName);
+                return SafePrintf("SPAWN % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName);
             }
 
-            return SafePrintf("SPAWN % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
+            return SafePrintf("SPAWN % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -794,10 +797,10 @@ namespace Langums
         {
             if (m_IsLiteralValue)
             {
-                return SafePrintf("KILL % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_LocationName);
+                return SafePrintf("KILL % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName);
             }
 
-            return SafePrintf("KILL % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
+            return SafePrintf("KILL % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -844,10 +847,10 @@ namespace Langums
         {
             if (m_IsLiteralValue)
             {
-                return SafePrintf("MOVE % % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegId, m_SrcLocationName, m_DstLocationName);
+                return SafePrintf("MOVE % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_SrcLocationName, m_DstLocationName);
             }
 
-            return SafePrintf("MOVE % % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_SrcLocationName, m_DstLocationName);
+            return SafePrintf("MOVE % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_SrcLocationName, m_DstLocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -889,6 +892,65 @@ namespace Langums
         std::string m_DstLocationName;
     };
 
+    class IROrderInstruction : public IIRInstruction
+    {
+        public:
+        IROrderInstruction(uint8_t playerId, uint8_t unitId, TriggerActionState order, const std::string& srcLocation, const std::string& dstLocation) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_Order(order),
+            m_SrcLocationName(srcLocation), m_DstLocationName(dstLocation), IIRInstruction(IRInstructionType::Order) {}
+
+        std::string DebugDump() const
+        {
+            std::string order;
+            switch (m_Order)
+            {
+            case TriggerActionState::Move:
+                order = "Move";
+                break;
+            case TriggerActionState::Attack:
+                order = "Attack";
+                break;
+            case TriggerActionState::Patrol:
+                order = "Patrol";
+                break;
+            }
+
+            return SafePrintf("ORDER % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], order, m_SrcLocationName, m_DstLocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+        
+        TriggerActionState GetOrder() const
+        {
+            return m_Order;
+        }
+
+        const std::string& GetSrcLocationName() const
+        {
+            return m_SrcLocationName;
+        }
+
+        const std::string& GetDstLocationName() const
+        {
+            return m_DstLocationName;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        TriggerActionState m_Order;
+        std::string m_SrcLocationName;
+        std::string m_DstLocationName;
+    };
+
     class IRMoveLocInstruction : public IIRInstruction
     {
         public:
@@ -897,7 +959,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("MOVLOC % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_SrcLocationName, m_DstLocationName);
+            return SafePrintf("MOVLOC % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_SrcLocationName, m_DstLocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -956,7 +1018,7 @@ namespace Langums
                 break;
             }
 
-            return SafePrintf("END % %", CHK::PlayersByName[m_PlayerMask], condition);
+            return SafePrintf("END % %", PlayersByName[m_PlayerMask], condition);
         }
 
         uint8_t GetPlayerMask() const
@@ -983,7 +1045,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("CNTRVIEW % %", CHK::PlayersByName[m_PlayerId], m_LocationName);
+            return SafePrintf("CNTRVIEW % %", PlayersByName[m_PlayerId], m_LocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -1010,7 +1072,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("PING % %", CHK::PlayersByName[m_PlayerId], m_LocationName);
+            return SafePrintf("PING % %", PlayersByName[m_PlayerId], m_LocationName);
         }
 
         uint8_t GetPlayerId() const
@@ -1031,7 +1093,7 @@ namespace Langums
     class IRSetResourceInstruction : public IIRInstruction
     {
         public:
-        IRSetResourceInstruction(uint8_t playerId, CHK::ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
+        IRSetResourceInstruction(uint8_t playerId, ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
             m_PlayerId(playerId), m_ResourceType(resourceType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
             IIRInstruction(IRInstructionType::SetResource) {}
 
@@ -1047,7 +1109,7 @@ namespace Langums
                 qty = RegisterIdToString(m_RegId);
             }
 
-            return SafePrintf("SETRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+            return SafePrintf("SETRSRC % % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas", qty);
         }
 
         uint8_t GetPlayerId() const
@@ -1055,7 +1117,7 @@ namespace Langums
             return m_PlayerId;
         }
 
-        CHK::ResourceType GetResourceType() const
+        ResourceType GetResourceType() const
         {
             return m_ResourceType;
         }
@@ -1072,7 +1134,7 @@ namespace Langums
 
         private:
         uint8_t m_PlayerId;
-        CHK::ResourceType m_ResourceType;
+        ResourceType m_ResourceType;
         uint32_t m_RegId;
         bool m_IsValueLiteral;
     };
@@ -1080,7 +1142,7 @@ namespace Langums
     class IRIncResourceInstruction : public IIRInstruction
     {
         public:
-        IRIncResourceInstruction(uint8_t playerId, CHK::ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
+        IRIncResourceInstruction(uint8_t playerId, ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
             m_PlayerId(playerId), m_ResourceType(resourceType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
             IIRInstruction(IRInstructionType::IncResource) {}
 
@@ -1096,7 +1158,7 @@ namespace Langums
                 qty = RegisterIdToString(m_RegId);
             }
 
-            return SafePrintf("INCRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+            return SafePrintf("INCRSRC % % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas", qty);
         }
 
         uint8_t GetPlayerId() const
@@ -1104,7 +1166,7 @@ namespace Langums
             return m_PlayerId;
         }
 
-        CHK::ResourceType GetResourceType() const
+        ResourceType GetResourceType() const
         {
             return m_ResourceType;
         }
@@ -1121,7 +1183,7 @@ namespace Langums
 
         private:
         uint8_t m_PlayerId;
-        CHK::ResourceType m_ResourceType;
+        ResourceType m_ResourceType;
         uint32_t m_RegId;
         bool m_IsValueLiteral;
     };
@@ -1129,7 +1191,7 @@ namespace Langums
     class IRDecResourceInstruction : public IIRInstruction
     {
         public:
-        IRDecResourceInstruction(uint8_t playerId, CHK::ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
+        IRDecResourceInstruction(uint8_t playerId, ResourceType resourceType, uint32_t regId, bool isLiteralValue) :
             m_PlayerId(playerId), m_ResourceType(resourceType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
             IIRInstruction(IRInstructionType::DecResource) {}
 
@@ -1145,7 +1207,7 @@ namespace Langums
                 qty = RegisterIdToString(m_RegId);
             }
 
-            return SafePrintf("DECRSRC % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", qty);
+            return SafePrintf("DECRSRC % % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas", qty);
         }
 
         uint8_t GetPlayerId() const
@@ -1153,7 +1215,7 @@ namespace Langums
             return m_PlayerId;
         }
 
-        CHK::ResourceType GetResourceType() const
+        ResourceType GetResourceType() const
         {
             return m_ResourceType;
         }
@@ -1170,7 +1232,7 @@ namespace Langums
 
         private:
         uint8_t m_PlayerId;
-        CHK::ResourceType m_ResourceType;
+        ResourceType m_ResourceType;
         uint32_t m_RegId;
         bool m_IsValueLiteral;
     };
@@ -1242,7 +1304,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("BRING % % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_LocationName, (int)m_Comparison, (int)m_Quantity);
+            return SafePrintf("BRING % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_LocationName, (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const
@@ -1281,12 +1343,12 @@ namespace Langums
     class IRAccumCondInstruction : public IIRInstruction
     {
         public:
-        IRAccumCondInstruction(uint8_t playerId, CHK::ResourceType resourceType, ConditionComparison comparison, uint32_t quantity) :
+        IRAccumCondInstruction(uint8_t playerId, ResourceType resourceType, ConditionComparison comparison, uint32_t quantity) :
             m_PlayerId(playerId), m_ResourceType(resourceType), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::AccumCond) {}
 
         std::string DebugDump() const
         {
-            return SafePrintf("ACCUM % % % %", CHK::PlayersByName[m_PlayerId], m_ResourceType == CHK::ResourceType::Ore ? "Minerals" : "Gas", (int)m_Comparison, (int)m_Quantity);
+            return SafePrintf("ACCUM % % % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas", (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const
@@ -1294,7 +1356,7 @@ namespace Langums
             return m_PlayerId;
         }
 
-        CHK::ResourceType GetResourceType() const
+        ResourceType GetResourceType() const
         {
             return m_ResourceType;
         }
@@ -1311,7 +1373,7 @@ namespace Langums
 
         private:
         uint8_t m_PlayerId;
-        CHK::ResourceType m_ResourceType;
+        ResourceType m_ResourceType;
         ConditionComparison m_Comparison;
         uint32_t m_Quantity;
     };
@@ -1350,7 +1412,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("CMDS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+            return SafePrintf("CMDS % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const
@@ -1388,7 +1450,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("KILLS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+            return SafePrintf("KILLS % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const
@@ -1426,7 +1488,7 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("DEATHS % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
+            return SafePrintf("DEATHS % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], (int)m_Comparison, (int)m_Quantity);
         }
 
         uint8_t GetPlayerId() const
