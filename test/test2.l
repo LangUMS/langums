@@ -9,8 +9,16 @@ fn main() {
     print("6 > 5");
   }
   
-  if (foo >= 4) {
-    print("6 >= 4");
+  if (foo < 2) {
+    print("6 < 2");
+  }
+  
+  if (foo <= 7) {
+    print("6 <= 7");
+  } 
+  
+  if (foo <= 4) {
+    print("6 <= 4");
   }
   
   if (foo >= 13) {

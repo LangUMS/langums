@@ -466,7 +466,7 @@ namespace Langums
         {
             if (!ignoreReturnValue)
             {
-                EmitInstruction(new IRRnd256Instruction(), m_Instructions);
+                EmitInstruction(new IRRnd256Instruction(), instructions);
             }
         }
         else if (fnName == "end")
@@ -1667,32 +1667,28 @@ namespace Langums
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
-            EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 3), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
-            EmitInstruction(new IRJmpInstruction(2), instructions);
+            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 4), instructions);
             EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
+            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
         }
         else if (op == OperatorType::NotEquals)
         {
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
-            EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 3), instructions);
+            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 3), instructions);
+            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
             EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
-            EmitInstruction(new IRJmpInstruction(2), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
         }
         else if (op == OperatorType::LessThanOrEquals)
         {
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
-            EmitInstruction(new IRJmpInstruction(2), instructions);
             EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
+            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
         }
         else if (op == OperatorType::LessThan)
         {
@@ -1721,10 +1717,9 @@ namespace Langums
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
-            EmitInstruction(new IRJmpInstruction(2), instructions);
             EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
+            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
         }
         else
         {
