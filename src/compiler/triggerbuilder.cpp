@@ -106,6 +106,28 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Cond_LeastResources(unsigned int playerId, CHK::ResourceType resourceType)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::LeastResources;
+        condition.m_Arg0 = (uint8_t)resourceType;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Cond_MostResources(unsigned int playerId, CHK::ResourceType resourceType)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::MostResources;
+        condition.m_Arg0 = (uint8_t)resourceType;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Cond_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity)
     {
         using namespace CHK;

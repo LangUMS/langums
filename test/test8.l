@@ -6,6 +6,10 @@ killed_most(Player4, ZergQueen) => {
   print("Player 4 has killed the most queens");
 }
 
+most_resources(Player5, Minerals) => {
+  print("Player5 has the most minerals.");
+}
+
 fn spawn_units<T>(T, qty) {
   talking_portrait(T, 5);
   spawn(T, Player1, qty, "TestLocation");

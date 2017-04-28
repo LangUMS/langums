@@ -363,6 +363,48 @@ namespace Langums
 
                         EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity->GetValue()), m_Instructions);
                     }
+                    else if (name == "least_resources" || name == "most_resources")
+                    {
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
+                        }
+
+                        auto playerName = (ASTIdentifier*)arg0.get();
+                        auto playerId = PlayerNameToId(playerName->GetName());
+
+                        auto arg1 = condition->GetArgument(1);
+                        if (arg1->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected resource type", name));
+                        }
+
+                        auto resourceType = ((ASTIdentifier*)arg1.get())->GetName();
+
+                        CHK::ResourceType resType;
+                        if (resourceType == "Minerals")
+                        {
+                            resType = CHK::ResourceType::Ore;
+                        }
+                        else if (resourceType == "Gas")
+                        {
+                            resType = CHK::ResourceType::Gas;
+                        }
+                        else
+                        {
+                            throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Minerals or Gas", resourceType, name));
+                        }
+
+                        if (name == "least_resources")
+                        {
+                            EmitInstruction(new IRLeastResCondInstruction(playerId, resType), m_Instructions);
+                        }
+                        else if (name == "most_resources")
+                        {
+                            EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions);
+                        }
+                    }
                     else if (name == "elapsed_time")
                     {
                         auto arg0 = condition->GetArgument(0);

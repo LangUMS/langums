@@ -89,6 +89,8 @@ namespace Langums
         Event,
         BringCond,      // Bring trigger condition
         AccumCond,      // Accumulate trigger condition
+        LeastResCond,   // Player has the least quantity of a resource 
+        MostResCond,    // Player has the most quantity of a resource
         TimeCond,       // Elapsed time trigger condition
         CmdCond,        // Player commands a quantity of units condition
         CmdLeastCond,   // Player commands the least quantity of units condition
@@ -1682,6 +1684,58 @@ namespace Langums
         ResourceType m_ResourceType;
         ConditionComparison m_Comparison;
         uint32_t m_Quantity;
+    };
+
+    class IRLeastResCondInstruction : public IIRInstruction
+    {
+        public:
+        IRLeastResCondInstruction(uint8_t playerId, ResourceType resourceType) :
+            m_PlayerId(playerId), m_ResourceType(resourceType), IIRInstruction(IRInstructionType::LeastResCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("LEASTRES % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas");
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ResourceType GetResourceType() const
+        {
+            return m_ResourceType;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ResourceType m_ResourceType;
+    };
+
+    class IRMostResCondInstruction : public IIRInstruction
+    {
+        public:
+        IRMostResCondInstruction(uint8_t playerId, ResourceType resourceType) :
+            m_PlayerId(playerId), m_ResourceType(resourceType), IIRInstruction(IRInstructionType::MostResCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("MOSTRES % %", PlayersByName[m_PlayerId], m_ResourceType == ResourceType::Ore ? "Minerals" : "Gas");
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ResourceType GetResourceType() const
+        {
+            return m_ResourceType;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ResourceType m_ResourceType;
     };
 
     class IRTimeCondInstruction : public IIRInstruction

@@ -273,6 +273,8 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 |-----------------------------------------------------------------|-------------------------------------------------------------------------------|
 | `bring(Player, Comparison, Quantity, Unit, Location)`           | When a player owns a quantity of units at location.                           |
 | `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.                                   |
+| `most_resources(Player, ResourceType)`                          | When a player owns the most of a given resource.                              |
+| `least_resources(Player, ResourceType)`                         | When a player owns the least of a given resource.                             |
 | `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.                                    |
 | `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.                                     |
 | `commands_least(Player, Unit, optional: Location)`              | When a player commands the least number of units at an optional location.     |

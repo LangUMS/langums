@@ -115,6 +115,18 @@ namespace Langums
                             accum->GetQuantity()
                         );
                     }
+                    else if (condition->GetType() == IRInstructionType::LeastResCond)
+                    {
+                        auto leastRes = (IRLeastResCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(leastRes->GetPlayerId() + 1);
+                        eventTrigger.Cond_LeastResources(leastRes->GetPlayerId(), leastRes->GetResourceType());
+                    }
+                    else if (condition->GetType() == IRInstructionType::MostResCond)
+                    {
+                        auto mostRes = (IRMostResCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(mostRes->GetPlayerId() + 1);
+                        eventTrigger.Cond_MostResources(mostRes->GetPlayerId(), mostRes->GetResourceType());
+                    }
                     else if (condition->GetType() == IRInstructionType::TimeCond)
                     {
                         auto time = (IRTimeCondInstruction*)condition.get();
@@ -1519,6 +1531,8 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::Event ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||
+                instruction->GetType() == IRInstructionType::LeastResCond ||
+                instruction->GetType() == IRInstructionType::MostResCond ||
                 instruction->GetType() == IRInstructionType::TimeCond ||
                 instruction->GetType() == IRInstructionType::KillCond ||
                 instruction->GetType() == IRInstructionType::KillMostCond ||
