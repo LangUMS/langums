@@ -1817,6 +1817,38 @@ namespace Langums
                 auto stringId = m_StringsChunk->InsertString(name);
                 current.Action_SetNextScenario(stringId);
             }
+            else if (instruction->GetType() == IRInstructionType::Leaderboard)
+            {
+                auto leaderboard = (IRLeaderboardInstruction*)instruction.get();
+                auto stringId = m_StringsChunk->InsertString(leaderboard->GetText());
+
+                auto type = leaderboard->GetLeaderboardType();
+                if (type == LeaderboardType::Control)
+                {
+                    current.Action_LeaderboardControl(stringId, leaderboard->GetUnitId());
+                }
+                else if (type == LeaderboardType::ControlAtLocation)
+                {
+                    auto locationId = GetLocationIdByName(leaderboard->GetLocationName());
+                    current.Action_LeaderboardControlAtLocation(stringId, leaderboard->GetUnitId(), locationId);
+                }
+                else if (type == LeaderboardType::Greed)
+                {
+                    current.Action_LeaderboardGreed(stringId);
+                }
+                else if (type == LeaderboardType::Kills)
+                {
+                    current.Action_LeaderboardKills(stringId, leaderboard->GetUnitId());
+                }
+                else if (type == LeaderboardType::Points)
+                {
+                    current.Action_LeaderboardPoints(stringId, leaderboard->GetScoreType());
+                }
+                else if (type == LeaderboardType::Resources)
+                {
+                    current.Action_LeaderboardResources(stringId, leaderboard->GetResourceType());
+                }
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

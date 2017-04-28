@@ -98,6 +98,8 @@ namespace Langums
         SetObj,         // sets the mission objectives
         PauseGame,      // pauses the game (singleplayer)
         NextScen,       // sets the next scenario (singleplayer)
+        Leaderboard,    // shows the leaderboard
+        SetGoal,        // sets the leaderboard goal
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -2046,6 +2048,110 @@ namespace Langums
         std::string m_Name;
     };
 
+    enum class LeaderboardType
+    {
+        ControlAtLocation = 0,
+        Control,
+        Greed,
+        Kills,
+        Points,
+        Resources
+    };
+
+    class IRLeaderboardInstruction : public IIRInstruction
+    {
+        public:
+        IRLeaderboardInstruction(const std::string& text, LeaderboardType type) :
+            m_Text(text), m_LeaderboardType(type), IIRInstruction(IRInstructionType::Leaderboard) {}
+
+        std::string DebugDump() const
+        {
+            std::string type;
+
+            switch (m_LeaderboardType)
+            {
+            case LeaderboardType::ControlAtLocation:
+                type = "ControlAtLocation";
+                break;
+            case LeaderboardType::Control:
+                type = "Control";
+                break;
+            case LeaderboardType::Greed:
+                type = "Greed";
+                break;
+            case LeaderboardType::Kills:
+                type = "Kills";
+                break;
+            case LeaderboardType::Points:
+                type = "Points";
+                break;
+            case LeaderboardType::Resources:
+                type = "Resources";
+                break;
+            }
+
+            return SafePrintf("LDRBOARD % %", m_Text, type);
+        }
+
+        void SetUnitId(uint8_t unitId)
+        {
+            m_UnitId = unitId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        void SetScoreType(ScoreType scoreType)
+        {
+            m_ScoreType = scoreType;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        void SetLocationName(const std::string& locationName)
+        {
+            m_LocationName = locationName;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        void SetResourceType(ResourceType resourceType)
+        {
+            m_ResourceType = resourceType;
+        }
+
+        ResourceType GetResourceType() const
+        {
+            return m_ResourceType;
+        }
+
+        const std::string& GetText() const
+        {
+            return m_Text;
+        }
+
+        LeaderboardType GetLeaderboardType() const
+        {
+            return m_LeaderboardType;
+        }
+
+        private:
+        LeaderboardType m_LeaderboardType;
+        ScoreType m_ScoreType;
+        ResourceType m_ResourceType;
+        uint8_t m_UnitId;
+        std::string m_Text;
+        std::string m_LocationName;
+    };
+
     class IREventInstruction : public IIRInstruction
     {
         public:
@@ -2831,6 +2937,7 @@ namespace Langums
         std::string ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::ScoreType ParseScoreTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        LeaderboardType ParseLeaderboardType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         AllianceStatus ParseAllianceStatusArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);

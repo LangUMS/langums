@@ -85,6 +85,12 @@ namespace Langums
         void Action_SetInvincibility(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId);
         void Action_RunAIScript(unsigned int playerId, unsigned int scriptName, int locationId);
         void Action_SetAllianceStatus(unsigned int playerId, unsigned int targetPlayerId, AllianceStatus status);
+        void Action_LeaderboardControl(unsigned int stringId, unsigned int unitId);
+        void Action_LeaderboardControlAtLocation(unsigned int stringId, unsigned int unitId, unsigned int locationId);
+        void Action_LeaderboardResources(unsigned int stringId, CHK::ResourceType resourceType);
+        void Action_LeaderboardKills(unsigned int stringId, unsigned int unitId);
+        void Action_LeaderboardPoints(unsigned int stringId, CHK::ScoreType scoreType);
+        void Action_LeaderboardGreed(unsigned int stringId);
 
         const CHK::Trigger& GetTrigger()
         {

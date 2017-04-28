@@ -855,4 +855,64 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_LeaderboardControl(unsigned int stringId, unsigned int unitId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderBoardControl;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = unitId;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_LeaderboardControlAtLocation(unsigned int stringId, unsigned int unitId, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderBoardControlAtLocation;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = unitId;
+        action.m_Source = locationId + 1;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_LeaderboardResources(unsigned int stringId, CHK::ResourceType resourceType)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderBoardResources;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = (uint16_t)resourceType;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_LeaderboardKills(unsigned int stringId, unsigned int unitId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderBoardKills;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = unitId;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_LeaderboardPoints(unsigned int stringId, CHK::ScoreType scoreType)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderBoardPoints;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = (uint16_t)scoreType;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_LeaderboardGreed(unsigned int stringId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderboardGreed;
+        action.m_TriggerText = stringId + 1;
+        m_HasChanges = true;
+    }
+
 }

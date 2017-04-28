@@ -711,6 +711,55 @@ namespace Langums
 
             EmitInstruction(new IRNextScenInstruction(stringLiteral->GetValue()), instructions);
         }
+        else if (fnName == "show_leaderboard")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("show_leaderboard() called without arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Invalid argument type for argument 1 in call to \"%\", expected string literal", fnName));
+            }
+
+            auto& text = ((ASTStringLiteral*)arg0.get())->GetValue();
+            auto type = ParseLeaderboardType(fnCall->GetArgument(1), fnName, 1);
+
+            auto showLeaderboard = new IRLeaderboardInstruction(text, type);
+
+            if (type == LeaderboardType::Control)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetUnitId(unitId);
+            }
+            else if (type == LeaderboardType::ControlAtLocation)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetUnitId(unitId);
+
+                auto locationName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
+                showLeaderboard->SetLocationName(locationName);
+            }
+            else if (type == LeaderboardType::Kills)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetUnitId(unitId);
+            }
+            else if (type == LeaderboardType::Points)
+            {
+                auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetScoreType(scoreType);
+            }
+            else if (type == LeaderboardType::Resources)
+            {
+                auto resourceType = ParseResourceTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetResourceType(resourceType);
+            }
+
+            EmitInstruction(showLeaderboard, instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())
@@ -1727,7 +1776,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in \"%\", expected player name", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in \"%\", expected player name", argIndex, fnName));
         }
 
         auto identifier = (ASTIdentifier*)node.get();
@@ -1735,7 +1784,7 @@ namespace Langums
         auto playerId = PlayerNameToId(name);
         if (playerId == -1)
         {
-            throw new IRCompilerException(SafePrintf("Invalid player name \"%\" given as argument % in \"%\"", name, argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid player name \"%\" given as argument % in \"%\"", name, argIndex, fnName));
         }
 
         return playerId;
@@ -1745,7 +1794,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
         }
 
         auto identifier = (ASTIdentifier*)node.get();
@@ -1766,7 +1815,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
         }
 
         return comparison;
@@ -1776,7 +1825,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::NumberLiteral)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected quantity", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected quantity", argIndex, fnName));
         }
 
         auto numberLiteral = (ASTNumberLiteral*)node.get();
@@ -1787,7 +1836,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected unit type", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected unit type", argIndex, fnName));
         }
 
         auto identifier = (ASTIdentifier*)node.get();
@@ -1807,7 +1856,7 @@ namespace Langums
 
         if (node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected AI script type", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected AI script type", argIndex, fnName));
         }
 
         auto identifier = (ASTIdentifier*)node.get();
@@ -1824,14 +1873,14 @@ namespace Langums
             }
         }
 
-        throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected AI script type", name, argIndex, fnName));
+        throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected AI script type", name, argIndex, fnName));
     }
 
     std::string IRCompiler::ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
         }
 
         std::string locationName;
@@ -1848,7 +1897,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
         }
     }
 
@@ -1856,7 +1905,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
         }
 
         std::string name;
@@ -1886,7 +1935,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Minerals or Gas", name, argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Minerals or Gas", name, argIndex, fnName));
         }
     }
 
@@ -1894,7 +1943,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected score type", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected score type", argIndex, fnName));
         }
 
         std::string name;
@@ -1944,7 +1993,57 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected score type", name, argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected score type", name, argIndex, fnName));
+        }
+    }
+
+    LeaderboardType IRCompiler::ParseLeaderboardType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected leaderboard type", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "ControlAtLocation")
+        {
+            return LeaderboardType::ControlAtLocation;
+        }
+        else if (name == "Control")
+        {
+            return LeaderboardType::Control;
+        }
+        else if (name == "Greed")
+        {
+            return LeaderboardType::Greed;
+        }
+        else if (name == "Kills")
+        {
+            return LeaderboardType::Kills;
+        }
+        else if (name == "Points")
+        {
+            return LeaderboardType::Points;
+        }
+        else if (name == "Resources")
+        {
+            return LeaderboardType::Resources;
+        }
+        else
+        {
+            throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected leaderboard type", name, argIndex, fnName));
         }
     }
 
@@ -1952,7 +2051,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", argIndex, fnName));
         }
 
         std::string name;
@@ -1982,7 +2081,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", name, argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", name, argIndex, fnName));
         }
     }
 
@@ -1990,7 +2089,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
         }
 
         std::string name;
@@ -2020,7 +2119,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
         }
     }
 
@@ -2028,7 +2127,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
         }
 
         std::string name;
@@ -2058,7 +2157,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
         }
     }
 
@@ -2066,7 +2165,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
         }
 
         std::string name;
@@ -2096,7 +2195,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
         }
     }
 
@@ -2104,7 +2203,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
         }
 
         std::string name;
@@ -2138,7 +2237,7 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Health, Energy, Shields or Hangar", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Health, Energy, Shields or Hangar", argIndex, fnName));
         }
     }
 
@@ -2185,7 +2284,7 @@ namespace Langums
             return UnitPropType::Invincible;
         }
 
-        throw new IRCompilerException(SafePrintf("Invalid unit property type \"%\"", propName));
+        throw IRCompilerException(SafePrintf("Invalid unit property type \"%\"", propName));
     }
 
     int IRCompiler::ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,

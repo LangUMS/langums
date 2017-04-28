@@ -35,6 +35,7 @@ Table of Contents
     * [UnitProperty](#unitproperty)
     * [Unit](#unit)
     * [AIScript](#aiscript)
+    * [LeaderboardType](#leaderboardtype)
 
 ### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
 
@@ -223,47 +224,48 @@ fn main() {
 
 Note: Arguments named `QuantityExpression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
 
-| Function prototype                                                     | Description                                               |
-|------------------------------------------------------------------------|-----------------------------------------------------------|
-| `poll_events()`                                                        | Runs any associated event handlers.                       |
-| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.                |
-| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).     |
-| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                       |
-| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                              |
-| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                            |
-| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                               |
-| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                             |
-| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                     |
-| `center_view(Player, Location)`                                        | Centers the view on a location for a player.              |
-| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.       |
-| `spawn(Unit, Player, QuantityExpression, Location, optional: Props)`   | Spawns units at a location with optional unit properties. |
-| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                      |
-| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                    |
-| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                 |
-| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                  |
-| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.         |
-| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                            |
-| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.             |
-| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.               |
-| `set_countdown(Expression)`                                            | Sets the countdown timer.                                 |
-| `pause_countdown()`                                                    | Pauses the countdown timer.                               |
-| `unpause_countdown()`                                                  | Unpauses the countdown timer.                             |
-| `mute_unit_speech()`                                                   | Mutes unit speech.                                        |
-| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                      |
-| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)               |
-| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)            |
-| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)     |
-| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.    |
-| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                               |
-| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.        |
-| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                        |
-| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.             |
-| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                              |
-| `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)         |
-| `pause_game()`                                                         | Pauses the game (singleplayer only)                       |
-| `unpause_game()`                                                       | Unpauses the game (singleplayer only)                     |
-| `set_next_scenario(Text)`                                              | Sets the next map to run (singleplayer only)              |
-| More to be added ...                                                   |                                                           |
+| Function prototype                                                     | Description                                                                                  |
+|------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| `poll_events()`                                                        | Runs any associated event handlers.                                                          |
+| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.                                                   |
+| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).                                        |
+| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                                                          |
+| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                                                                 |
+| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                                                               |
+| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                                                                  |
+| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                                                                |
+| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                                                        |
+| `center_view(Player, Location)`                                        | Centers the view on a location for a player.                                                 |
+| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.                                          |
+| `spawn(Unit, Player, QuantityExpression, Location, optional: Props)`   | Spawns units at a location with optional unit properties.                                    |
+| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                                                         |
+| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                                                       |
+| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                                                    |
+| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                                                     |
+| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.                                            |
+| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                                                               |
+| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.                                                |
+| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.                                                  |
+| `set_countdown(Expression)`                                            | Sets the countdown timer.                                                                    |
+| `pause_countdown()`                                                    | Pauses the countdown timer.                                                                  |
+| `unpause_countdown()`                                                  | Unpauses the countdown timer.                                                                |
+| `mute_unit_speech()`                                                   | Mutes unit speech.                                                                           |
+| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                                                         |
+| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)                                                  |
+| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)                                               |
+| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)                                        |
+| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.                                       |
+| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                                                                  |
+| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.                                           |
+| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                                                           |
+| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.                                                |
+| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                                                                 |
+| `show_leaderboard(Text, LeaderboardType, ...)`                         | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
+| `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)                                            |
+| `pause_game()`                                                         | Pauses the game (singleplayer only)                                                          |
+| `unpause_game()`                                                       | Unpauses the game (singleplayer only)                                                        |
+| `set_next_scenario(Text)`                                              | Sets the next map to run (singleplayer only)                                                 |
+| More to be added ...                                                   |                                                                                              |
 
 ## Built-in event conditions
 
@@ -327,6 +329,19 @@ fn main() {
     poll_events();
   }
 }
+```
+
+## Variants of the show_leaderboard() built-in
+
+The `show_leaderboard()` built-in has several variants that take different arguments. They are listed below.
+
+```
+show_leaderboard("My Leaderboard", Control, Unit)
+show_leaderboard("My Leaderboard", ControlAtLocation, Unit, Location)
+show_leaderboard("My Leaderboard", Kills, Unit)
+show_leaderboard("My Leaderboard", Points, ScoreType)
+show_leaderboard("My Leaderboard", Resources, ResourceType)
+show_leaderboard("My Leaderboard", Greed)
 ```
 
 ## Preprocessor
@@ -901,23 +916,28 @@ EnterTransport
 ExitTransport
 ```
 
+### LeaderboardType
+
+```
+ControlAtLocation
+Control
+Greed
+Kills
+Points
+Resources
+```
+
 ## Stuff that's not implemented yet
 
 #### Built-ins
 
 ```
-Leader Board (Control)
-Leader Board (Control At Location)
-Leader Board (Resources)
-Leader Board (Kills)
-Leader Board (Points)
 Leaderboard Computer Players
 Leaderboard Goal (Control)
 Leaderboard Goal (Control At Location)
 Leaderboard Goal (Resources)
 Leaderboard Goal (Kills)
 Leaderboard Goal (Points)
-Leaderboard (Greed)
 Play WAV
 Transmission
 ```
