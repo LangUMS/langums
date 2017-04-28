@@ -729,3 +729,47 @@ Men
 Buildings
 Factories
 ```
+
+## Stuff that's not implemented yet
+
+### Conditions
+
+```
+Highest Score(Score)
+Lowest Score(Score)
+Score(Player, Comparison, Score, QNumber)
+```
+
+### Actions
+
+```
+Create Unit with Properties(Player, Unit, Number, Loc, UnitProp)
+Set Mission Objectives(Text)
+Run AI Script(AIScript)
+Run AI Script At Location(AIScript)
+Mute Unit Speech
+Unmute Unit Speech
+Set Next Scenario(Text) (Single player only)
+Set Doodad State(Player, TUnit, Loc, State)
+Set Invincibility(Player, TUnit, Loc, State)
+Pause Timer
+Unpause Timer
+Set Alliance Status(Player, AllyStatus)
+Leader Board (Control) (Text, TUnit)
+Leader Board (Control At Location) (Text, TUnit, Loc)
+Leader Board (Resources) (Text, ResType)
+Leader Board (Kills) (Text, TUnit)
+Leader Board (Points) (Text, Score)
+Set Score(Player, Number, Modifier, Score)
+Leaderboard Computer Players(State)
+Leaderboard Goal (Control) (Text, TUnit, Number)
+Leaderboard Goal (Control At Location) (Text, TUnit, Number, Loc)
+Leaderboard Goal (Resources) (Text, TUnit, Number, ResType)
+Leaderboard Goal (Kills) (Text, TUnit, Number)
+Leaderboard Goal (Points) (Text, Number, Score)
+Leaderboard (Greed) (Number)
+Pause Game (Single player only)
+Unpause Game (Single player only)
+Play WAV(Wav, WavTime)
+Transmission(Text, Unit, Loc, Time, Modifier, Wave, WavTime)
+```
