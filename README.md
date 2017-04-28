@@ -1,9 +1,9 @@
 ## LangUMS
 
-LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
+LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: Brood War.
 
-It supercedes the trigger functionality offered by editors such as SCMDraft 2 and the official Blizzard one.
-You still need an editor to make the actual map, place locations and units and such but the triggers are added by LangUMS.
+It supercedes the trigger functionality in editors such as SCMDraft 2 and the official StarEdit.
+You will still want to use an editor to make the actual map, place locations and units but the triggers are done by LangUMS.
 
 Table of Contents
 =================
@@ -15,6 +15,7 @@ Table of Contents
   * [Built-in event conditions](#built-in-event-conditions)
   * [Spawning units with properties](#spawning-units-with-properties)
   * [Preprocessor](#preprocessor)
+  * [Template functions](#template-functions)
   * [Examples](#examples)
   * [FAQ](#faq)
   * [Limitations](#limitations)
@@ -62,7 +63,7 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 - Single primitive type - unsigned 32-bit int
 - Local (block scoped) and global variables
 - Functions with arguments and a return value
-- Expressions with stack-based evaluation e.g. `((foo + 42) - bar)`
+- Expressions e.g. `((foo + 42) - bar)`
 - Unsigned integer arithmetic with overflow detection
 - Postfix increment and decrement operators - `x++`, `y--`
 - Arithmetic operators - `+`, `-`, `/`, `*`
@@ -80,13 +81,17 @@ The "hello world" program for LangUMS would look like:
 
 ```
 fn main() {
-  print("Hello World!"); // prints Hello World! for Player 1
+  print("Hello World!"); // prints Hello World! for all players
 }
 ```
 
-Which will print `Hello World!` on Player1's screen.
+The example above will print `Hello World!` on every player's screen.
 
-Note: All statements must end with a semicolon (`;`). Block statements (code enclosed in `{}`) do not need a semicolon at the end. C-style comments with `//` are supported.
+Important notes:
+
+* All statements must end with a semicolon (`;`).
+* Block statements (code enclosed in `{}`) do not need a semicolon at the end.
+* C-style comments with `//` are supported.
 
 The more complex example below will give 36 minerals total to Player1. It declares a global variable called `foo`, a local variable `bar` and then calls the `add_resource()` built-in within a while loop.
 The quantity argument for `add_resource()` is the expression `foo + 2`. Some built-ins support expressions for some of their arguments.
@@ -134,34 +139,6 @@ fn main() {
   spawn_units(count, wave);
 }
 ```
-
-## Template functions
-
-Some built-in functions take special kinds of values like player names, unit names or locations. Those can't be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
-
-```
-fn spawn_units<T, L>(T, L, qty) {
-  talking_portrait(T, 5);
-  spawn(T, Player1, qty, L);
-  order(T, Player1, Move, L, "TestLocation2");
-}
-
-fn main() {
-  spawn_units(TerranMarine, "TestLocation", 5);
-}
-```
-
-`fn spawn_units<T>(T, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
-
-```
-fn spawn_units(qty) {
-  talking_portrait(TerranMarine, 5);
-  spawn(TerranMarine, Player1, qty, "TestLocation");
-  order(TerranMarine, Player1, Move, "TestLocation", "TestLocation2");
-}
-````
-
-The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `QuantityExpression` type can and should be passed as a template argument.
 
 ## Event handlers
 
@@ -283,6 +260,8 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.             |
 | `set_mission_objectives(Text)`                                         | Sets the mission objectives.                              |
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)         |
+| `pause_game()`                                                         | Pauses the game (singleplayer only)                       |
+| `unpause_game()`                                                       | Unpauses the game (singleplayer only)                     |
 | More to be added ...                                                   |                                                           |
 
 ## Built-in event conditions
@@ -309,7 +288,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 
 ## Spawning units with properties
 
-Due to the way map data is structured spawning units with different properties like health and energy is not straightforward. LangUMS offers a flexible way to deal with this issue. Using the `unit` construct you can declare up to 64 different property lists. A unit property declaration that sets the unit health to 50% is shown below.
+Due to the way map data is structured spawning units with different properties like health and energy is not straightforward. LangUMS offers a flexible way to deal with this issue. Using the `unit` construct you can add up to 64 different unit declarations in your code. A unit declaration that sets the unit's health to 50% is shown below.
 
 ```
 unit MyUnitProps {
@@ -317,7 +296,7 @@ unit MyUnitProps {
 }
 ```
 
-You can mix and match properties from the [UnitProperty](#unitproperty) enumeration e.g. here is a unit property declaration that sets the unit's energy to 0% and makes it invincible.
+You can mix and match any properties from the [UnitProperty](#unitproperty) constants. Here is a unit declaration that sets the unit's energy to 0% and makes it invincible.
 
 ```
 unit MyInvincibleUnit {
@@ -326,13 +305,13 @@ unit MyInvincibleUnit {
 }
 ```
 
-After you have your unit property declarations you can use them to spawn units by passing the name as fifth property to the `spawn()` built-in e.g.
+After you have your unit declarations you can use them to spawn units by passing the name as the fifth property to the `spawn()` built-in e.g.
 
 ```
 spawn(TerranMarine, Player1, 1, "TestLocation", MyUnitProps);
 ```
 
-Here is a full example that spawns a burrowed lurker at 10% health for Player1.
+Below is a full example that spawns a burrowed lurker at 10% health for Player1.
 
 ```
 unit LurkerType1 {
@@ -357,6 +336,34 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - `#undef KEY` will remove an already existing macro definition
 - `#include filename` will fetch the contents of `filename` and copy/ paste them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
 
+## Template functions
+
+Some built-in functions take special kinds of values like player names, unit names or locations. Those can't be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
+
+```
+fn spawn_units<T, L>(T, L, qty) {
+  talking_portrait(T, 5);
+  spawn(T, Player1, qty, L);
+  order(T, Player1, Move, L, "TestLocation2");
+}
+
+fn main() {
+  spawn_units(TerranMarine, "TestLocation", 5);
+}
+```
+
+`fn spawn_units<T>(T, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
+
+```
+fn spawn_units(qty) {
+  talking_portrait(TerranMarine, 5);
+  spawn(TerranMarine, Player1, qty, "TestLocation");
+  order(TerranMarine, Player1, Move, "TestLocation", "TestLocation2");
+}
+````
+
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `QuantityExpression` type can and should be passed as a template argument.
+
 ## Examples
 
 [Look at the test/ folder here for examples.](https://github.com/AlexanderDzhoganov/langums/tree/master/test)
@@ -366,8 +373,8 @@ Feel free to contribute your own.
 
 #### How does the code generation work?
 
-LangUMS is compiled into an intermediate representation (IR) which is then optimized and emitted as trigger chains.
-It's a kind of wacky virtual machine.
+LangUMS is compiled into a linearized intermediate representation. The IR is then optimized and emitted as trigger chains.
+Think of it as a kind of wacky virtual machine.
 
 #### Code documentation?
 
@@ -403,7 +410,7 @@ At the moment control returns back to the start of `main()` if for some reason y
 
 #### How to put text consisting of several lines in the code?
 
-Use multi-line strings with `"""` e.g.
+You can add multi-line strings in the code with `"""` e.g.
 
 ```
 set_mission_objectives("""My multi-line string
@@ -456,13 +463,13 @@ A sample file with the default mappings [is available here](https://github.com/A
 
 #### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
 
-You can manipulate your existing death counters with the death counter built-in functions e.g.
+You can manipulate your existing death counts with the death count built-ins e.g.
 
 ```
 set_deaths(Player5, TerranMarine, foo);
 ```
 
-Will set the death counter for Player5's marines to the value of variable `foo`.
+will set the death counter for Player5's marines to the value of variable `foo`.
 
 ## For project contributors
 
@@ -913,6 +920,4 @@ Leaderboard (Greed)
 Play WAV
 Transmission
 Set Next Scenario
-Pause Game
-Unpause Game
 ```

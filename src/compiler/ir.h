@@ -96,6 +96,7 @@ namespace Langums
         AIScript,       // runs an ai script
         SetAlly,        // sets alliance status between two players
         SetObj,         // sets the mission objectives
+        PauseGame,      // pauses the game (singleplayer)
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -1999,6 +2000,30 @@ namespace Langums
 
         private:
         std::string m_Text;
+    };
+
+    class IRPauseGameInstruction : public IIRInstruction
+    {
+        public:
+        IRPauseGameInstruction(bool unpause) : m_Unpause(unpause), IIRInstruction(IRInstructionType::PauseGame) {}
+
+        std::string DebugDump() const
+        {
+            if (m_Unpause)
+            {
+                return "UNPAUSE";
+            }
+
+            return "PAUSE";
+        }
+
+        bool IsUnpause() const
+        {
+            return m_Unpause;
+        }
+
+        private:
+        bool m_Unpause;
     };
 
     class IREventInstruction : public IIRInstruction

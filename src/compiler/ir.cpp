@@ -690,6 +690,10 @@ namespace Langums
 
             EmitInstruction(new IRSetObjInstruction(stringLiteral->GetValue()), instructions);
         }
+        else if (fnName == "pause_game" || fnName == "unpause_game")
+        {
+            EmitInstruction(new IRPauseGameInstruction(fnName == "unpause_game"), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

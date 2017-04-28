@@ -1798,6 +1798,18 @@ namespace Langums
                 auto stringId = m_StringsChunk->InsertString(setObj->GetText());
                 current.Action_SetMissionObjectives(stringId);
             }
+            else if (instruction->GetType() == IRInstructionType::PauseGame)
+            {
+                auto pause = (IRPauseGameInstruction*)instruction.get();
+                if (pause->IsUnpause())
+                {
+                    current.Action_UnpauseGame();
+                }
+                else
+                {
+                    current.Action_PauseGame();
+                }
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||
