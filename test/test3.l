@@ -6,8 +6,12 @@ elapsed_time(AtLeast, 5) => {
   print("5 seconds have elapsed!");
 }
 
+fn give_minerals<T>(T, qty) {
+  add_resource(T, Minerals, qty);
+}
+
 fn main() {  
-  add_resource(Player1, Minerals, 25);
+  give_minerals<Player1>(50);
   
   while (true) {
     poll_events();

@@ -8,6 +8,7 @@
 #include "libchk/chk.h"
 #include "parser/preprocessor.h"
 #include "parser/parser.h"
+#include "parser/template_instantiator.h"
 #include "parser/ast_optimizer.h"
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
@@ -240,6 +241,11 @@ int main(int argc, char* argv[])
         {
             ast = astOptimizer.Process(ast);
         }
+    }
+    catch (const TemplateInstantiatorException& ex)
+    {
+        LOG_EXITERR("Template instantation error - %", ex.what());
+        return -1;
     }
     catch (const ParserException& ex)
     {

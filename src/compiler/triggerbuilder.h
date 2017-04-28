@@ -82,7 +82,7 @@ namespace Langums
         unsigned int m_NextAction = 0;
         CHK::Trigger m_Trigger;
         IIRInstruction* m_Instruction = nullptr;
-        uint8_t m_PlayerMask = 128;
+        uint8_t m_PlayerMask = 7;
     };
 
 }

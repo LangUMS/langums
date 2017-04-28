@@ -141,6 +141,7 @@
     <ClCompile Include="..\src\parser\ast_optimizer.cpp" />
     <ClCompile Include="..\src\parser\parser.cpp" />
     <ClCompile Include="..\src\parser\preprocessor.cpp" />
+    <ClCompile Include="..\src\parser\template_instantiator.cpp" />
     <ClCompile Include="..\src\scomp\bzip2\blocksort.c" />
     <ClCompile Include="..\src\scomp\bzip2\bzlib.c" />
     <ClCompile Include="..\src\scomp\bzip2\compress_bzip2.c" />
@@ -203,6 +204,7 @@
     <ClInclude Include="..\src\parser\ast_optimizer.h" />
     <ClInclude Include="..\src\parser\parser.h" />
     <ClInclude Include="..\src\parser\preprocessor.h" />
+    <ClInclude Include="..\src\parser\template_instantiator.h" />
     <ClInclude Include="..\src\scomp\bzip2\bzlib.h" />
     <ClInclude Include="..\src\scomp\bzip2\bzlib_private.h" />
     <ClInclude Include="..\src\scomp\huffman.h" />

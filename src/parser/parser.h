@@ -74,6 +74,7 @@ namespace Langums
         std::unique_ptr<IASTNode> BlockStatement();
         std::unique_ptr<IASTNode> IfStatement();
         std::unique_ptr<IASTNode> WhileStatement();
+        std::unique_ptr<IASTNode> TemplateFunction();
         std::unique_ptr<IASTNode> FunctionDeclaration();
         std::unique_ptr<IASTNode> GlobalVariableDeclaration();
 

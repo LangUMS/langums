@@ -30,6 +30,7 @@ namespace Langums
     {
         Unit = 0,
         FunctionDeclaration,
+        TemplateFunction,
         BlockStatement,
         Identifier,
         StringLiteral,
@@ -223,6 +224,11 @@ namespace Langums
         {
             return m_FunctionName;
         }
+        
+        void SetFunctionName(const std::string& fnName)
+        {
+            m_FunctionName = fnName;
+        }
 
         const std::shared_ptr<IASTNode>& GetArgument(int index) const
         {
@@ -312,6 +318,43 @@ namespace Langums
         private:
         std::string m_Name;
         std::vector<std::string> m_Args;
+    };
+
+    class ASTTemplateFunction : public IASTNode
+    {
+        public:
+        ASTTemplateFunction(const std::string& name, const std::vector<std::string>& args, const std::vector<std::string>& templateArgs) :
+            m_Name(name), m_Args(args), m_TemplateArgs(templateArgs), IASTNode(ASTNodeType::TemplateFunction) {}
+
+        const std::string& GetName() const
+        {
+            return m_Name;
+        }
+
+        size_t GetArgumentCount() const
+        {
+            return m_Args.size();
+        }
+
+        const std::vector<std::string>& GetArguments() const
+        {
+            return m_Args;
+        }
+
+        size_t GetTemplateArgumentCount() const
+        {
+            return m_TemplateArgs.size();
+        }
+
+        const std::vector<std::string>& GetTemplateArguments() const
+        {
+            return m_TemplateArgs;
+        }
+
+        private:
+        std::string m_Name;
+        std::vector<std::string> m_Args;
+        std::vector<std::string> m_TemplateArgs;
     };
 
     class ASTVariableDeclaration : public IASTNode

@@ -1,6 +1,6 @@
 ## LangUMS
 
-LangUMS is a procedural imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
+LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
 
 It supercedes the trigger functionality offered by editors such as SCMDraft 2 and the official Blizzard one.
 You still need an editor to make the actual map, preplace locations and units, etc. but the triggers are added by LangUMS.
@@ -128,6 +128,35 @@ fn main() {
   spawn_units(count, wave);
 }
 ```
+
+## Template functions
+
+Some built-in functions take special kinds of values like player names, unit names or some quantities. Those can't be stored within LangUMS variables so there is a special language facility to help you handle them. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. If it sounds complicated, it's not. Just take a look at the example below.
+
+```
+fn spawn_units<T>(T, qty) {
+  talking_portrait(T, 5);
+  spawn(T, Player1, qty, "TestLocation");
+  order(T, Player1, Move, "TestLocation", "TestLocation2");
+}
+
+fn main() {
+  spawn_units(TerranMarine, 5);
+}
+```
+
+`spawn_units<T>(T, qty)` defines a template function called `spawn_units()` that takes two arguments `T` and `qty`. The `<T>` part tells the compiler that the T "variable" is special.
+Later when `spawn_units(TerranMarine, 5);` is called, the actual function is instantiated from the template and called instead. In this example the instantiated function would look like:
+
+```
+fn spawn_units(qty) {
+  talking_portrait(TerranMarine, 5);
+  spawn(TerranMarine, Player1, qty, "TestLocation");
+  order(TerranMarine, Player1, Move, "TestLocation", "TestLocation2");
+}
+````
+
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need.
 
 ## Event handlers
 
@@ -312,8 +341,8 @@ No, but thanks for asking.
 
 - One player (out of the 8 possible) must be reserved for LangUMS (unless you are using the `--reg` option). By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
 - There are about 240 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
-- All functions are inlined at the moment, which does increase code size quite a bit if you have many long functions. This will change in the near future.
-- Currently you have can have up to 240 event handlers, this limitation will be lifted in the future.
+- All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions. This also means that recursion of any kind is not supported.
+- Currently you can have up to 240 event handlers, this limitation will be lifted in the future.
 - Multiplication and division can take many cycles to complete, especially with very large numbers.
 - In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 

@@ -7,8 +7,6 @@ namespace Langums
     {
         m_Instructions = std::move(instructions);
 
-        while (EliminateRedundantPushPopPairs()) {}
-
         return std::move(m_Instructions);
     }
 
@@ -23,25 +21,7 @@ namespace Langums
             auto& current = m_Instructions[i];
             auto& next = m_Instructions[i + 1];
             
-            if (current->GetType() == IRInstructionType::Pop &&
-                next->GetType() == IRInstructionType::Push)
-            {
-                auto pop = (IRPopInstruction*)current.get();
-                auto push = (IRPushInstruction*)next.get();
-
-                if (jmpTargets[i] || jmpTargets[i + 1])
-                {
-                    continue; // we shouldn't optimize out jmp targets
-                }
-
-                if (push->GetRegisterId() == pop->GetRegisterId())
-                {
-                    m_Instructions[i] = std::make_unique<IRNopInstruction>();
-                    m_Instructions[i + 1] = std::make_unique<IRNopInstruction>();
-                    madeChanges = true;
-                }
-            }
-            else if (current->GetType() == IRInstructionType::Push &&
+            if (current->GetType() == IRInstructionType::Push &&
                 next->GetType() == IRInstructionType::Pop)
             {
                 auto push = (IRPushInstruction*)current.get();
@@ -57,13 +37,6 @@ namespace Langums
 
                     m_Instructions[i] = std::make_unique<IRNopInstruction>();
                     m_Instructions[i + 1] = std::make_unique<IRNopInstruction>();
-                    madeChanges = true;
-                }
-                else if (push->IsValueLiteral())
-                {
-                    auto regId = push->GetRegisterId();
-                    m_Instructions[i + 1] = std::make_unique<IRSetRegInstruction>(pop->GetRegisterId(), regId);
-                    m_Instructions[i] = std::make_unique<IRNopInstruction>();
                     madeChanges = true;
                 }
             }

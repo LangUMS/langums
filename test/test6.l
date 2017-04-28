@@ -1,10 +1,9 @@
 fn spawn_units(wave) {
   print("hello");
   return 5;
-  print("bar");
 }
 
 fn main() {
-  spawn_units(2);
-  spawn_units(3);
+  var foo = spawn_units(2);
+  var bar = 5 + foo;
 }

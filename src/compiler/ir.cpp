@@ -2259,7 +2259,7 @@ namespace Langums
                 auto jmp = (IRJmpInstruction*)instruction.get();
                 if (jmp->GetOffset() == JMP_TO_END_OFFSET_CONSTANT)
                 {
-                    jmp->SetOffset(std::min(endOffset + 1, instructions.size() - 1));
+                    jmp->SetOffset(endOffset + 1);
                 }
             }
         }

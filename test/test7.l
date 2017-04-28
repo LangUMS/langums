@@ -1,16 +1,15 @@
-#define LUCKY_NUMBER 110
+#define LUCKY_NUMBER 90
 
 countdown(Exactly, 0) => {
-  set_countdown(3);
+  set_countdown(2 + rnd256() / 80);
   
-  var foo = rnd256();
-  if (foo >= LUCKY_NUMBER) {
+  if (rnd256() >= LUCKY_NUMBER) {
     print("lucky you");
-    spawn(TerranMarine, Player1, 1, "TestLocation");
+    spawn(TerranMarine, Player1, 1 + rnd256() / 40, "TestLocation");
     order(TerranMarine, Player1, Attack, "TestLocation", "TestLocation2");
   } else {
     print("try again next time");
-    spawn(TerranMarine, Player2, 1, "TestLocation2");
+    spawn(TerranMarine, Player2, 1 + rnd256() / 40, "TestLocation2");
     order(TerranMarine, Player2, Attack, "TestLocation2", "TestLocation");
   }
 }

@@ -183,7 +183,7 @@ namespace Langums
             {
                 if (targetIndex >= (int)instructions.size())
                 {
-                    throw CompilerException(SafePrintf("Malformed IR. Trying to jump past last instruction (target address: %)", targetIndex));
+                    targetIndex = (int)instructions.size() - 1;
                 }
 
                 auto target = instructions[targetIndex].get();
@@ -427,6 +427,12 @@ namespace Langums
             {
                 auto jmp = (IRJmpInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
                 auto targetInstruction = instructions[targetIndex].get();
 
                 m_Triggers.push_back(current.GetTrigger());
@@ -446,6 +452,10 @@ namespace Langums
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
 
                 auto retAddress = nextAddress++;
 
@@ -473,6 +483,10 @@ namespace Langums
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
 
                 auto retAddress = nextAddress++;
                 auto ifFalse = current;
@@ -492,6 +506,11 @@ namespace Langums
             {
                 auto jmp = (IRJmpIfSwNotSetInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
                 auto targetInstruction = instructions[targetIndex].get();;
 
                 auto switchId = jmp->GetSwitchId();
@@ -514,6 +533,11 @@ namespace Langums
             {
                 auto jmp = (IRJmpIfSwSetInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
                 auto targetInstruction = instructions[targetIndex].get();;
 
                 auto switchId = jmp->GetSwitchId();

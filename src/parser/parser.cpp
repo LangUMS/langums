@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "preprocessor.h"
+#include "template_instantiator.h"
 
 namespace Langums
 {
@@ -8,7 +9,11 @@ namespace Langums
     {
         m_Buffer = input;
         m_CurrentChar = 0;
-        return Unit();
+
+        auto unit = Unit();
+        TemplateInstantiator templateInstantiator;
+        templateInstantiator.Process(unit);
+        return unit;
     }
 
     ExpressionToken Parser::Token()
@@ -95,8 +100,26 @@ namespace Langums
 
             if (PeekKeyword("fn"))
             {
-                auto functionDef = FunctionDeclaration();
-                unit->AddChild(std::move(functionDef));
+                auto i = 0;
+                auto c = Peek(i);
+                while (c != '(' && c != '<')
+                {
+                    i++;
+                    c = Peek(i);
+                }
+
+                if (c == '(')
+                {
+                    unit->AddChild(FunctionDeclaration());
+                }
+                else if(c == '<')
+                {
+                    unit->AddChild(TemplateFunction());
+                }
+                else
+                {
+                    throw ParserException(m_CurrentChar, "Unexpected input");
+                }
             }
             else if (PeekKeyword("global"))
             {
@@ -623,6 +646,75 @@ namespace Langums
         whileStatement->AddChild(BlockStatement());
 
         return std::unique_ptr<IASTNode>(whileStatement);
+    }
+
+    std::unique_ptr<IASTNode> Parser::TemplateFunction()
+    {
+        Whitespace();
+        Keyword("fn");
+        Whitespace();
+
+        auto functionName = Identifier();
+
+        Symbol('<');
+        Whitespace();
+
+        std::vector<std::string> templateArgs;
+
+        while (true)
+        {
+            auto c = Peek();
+            if (c == '>')
+            {
+                break;
+            }
+
+            templateArgs.push_back(Identifier());
+            Whitespace();
+
+            c = Peek();
+            if (c == ',')
+            {
+                Next();
+                Whitespace();
+            }
+        }
+
+        Symbol('>');
+        Whitespace();
+        Symbol('(');
+        Whitespace();
+
+        std::vector<std::string> args;
+
+        while (true)
+        {
+            auto c = Peek();
+            if (c == ')')
+            {
+                break;
+            }
+
+            args.push_back(Identifier());
+            Whitespace();
+
+            c = Peek();
+            if (c == ',')
+            {
+                Next();
+                Whitespace();
+            }
+        }
+
+        Whitespace();
+        Symbol(')');
+        Whitespace();
+
+        auto templateDeclaration = new ASTTemplateFunction(functionName, args, templateArgs);
+        templateDeclaration->AddChild(BlockStatement());
+        Whitespace();
+
+        return std::unique_ptr<IASTNode>(templateDeclaration);
     }
 
     std::unique_ptr<IASTNode> Parser::FunctionDeclaration()

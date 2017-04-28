@@ -191,6 +191,9 @@
     <ClCompile Include="..\src\compiler\registermap_parser.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\parser\template_instantiator.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -351,6 +354,9 @@
     </ClInclude>
     <ClInclude Include="..\src\compiler\registermap_parser.h">
       <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parser\template_instantiator.h">
+      <Filter>parser</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
