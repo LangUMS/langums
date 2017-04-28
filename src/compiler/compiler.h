@@ -36,8 +36,6 @@ namespace Langums
             m_TriggersOwner = owner;
         }
 
-        void SetDefaultRegistersOwner(uint8_t owner);
-
         void SetCustomRegisterDefinitions(const std::vector<RegisterDef>& defs)
         {
             g_RegisterMap = defs;
@@ -57,7 +55,6 @@ namespace Langums
         uint32_t m_CopyBatchSize = 65536u;
         uint32_t m_HyperTriggerCount = 5;
         uint8_t m_TriggersOwner = 1;
-        uint8_t m_DefaultRegistersOwner = 7;
 
         CHK::File* m_File = nullptr;
         CHK::CHKStringsChunk* m_StringsChunk = nullptr;

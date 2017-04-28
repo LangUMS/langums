@@ -37,7 +37,6 @@ int main(int argc, char* argv[])
         ("preserve-triggers", "Preserves already existing triggers in the map. (Use with caution!)", cxxopts::value<bool>())
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
         ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
-        ("registers-owner", "The index of the player whose death counts will be used as memory (default: 8)", cxxopts::value<unsigned int>())
         ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues)", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
@@ -327,19 +326,6 @@ int main(int argc, char* argv[])
     LOG_F("Emitted % instructions.", instructions.size());
 
     Compiler compiler;
-
-    if (opts.count("registers-owner") > 0)
-    {
-        auto registersOwner = opts["registers-owner"].as<unsigned int>();
-        if (registersOwner < 1 || registersOwner > 8)
-        {
-            LOG_EXITERR("\n(!) registers-owner must be between 1 and 8");
-            return 1;
-        }
-
-        LOG_F("Registers owner: %", registersOwner);
-        compiler.SetDefaultRegistersOwner(registersOwner);
-    }
 
     if (opts.count("triggers-owner") > 0)
     {

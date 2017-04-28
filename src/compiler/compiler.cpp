@@ -1,4 +1,5 @@
 #include <cctype>
+#include <algorithm>
 
 #include "../log.h"
 #include "compiler.h"
@@ -8,25 +9,29 @@ namespace Langums
 
     Compiler::Compiler()
     {
-        SetDefaultRegistersOwner(m_DefaultRegistersOwner);
-    }
-
-    void Compiler::SetDefaultRegistersOwner(uint8_t owner)
-    {
-        m_DefaultRegistersOwner = owner;
-
         g_RegisterMap.clear();
 
-        for (auto i = 0; i < MAX_REGISTER_INDEX; i++)
+        std::vector<uint8_t> unused;
+        for (auto q = 0; q < sizeof(UnusedUnitTypes); q++)
         {
-            RegisterDef def;
-            def.m_PlayerId = m_DefaultRegistersOwner;
-            def.m_Index = i;
-            g_RegisterMap.push_back(def);
+            unused.push_back((uint8_t)UnusedUnitTypes[q]);
+        }
+
+        std::sort(unused.begin(), unused.end());
+
+        for (auto i = 0; i < 8; i++)
+        {
+            for (auto unitId : unused)
+            {
+                RegisterDef def;
+                def.m_PlayerId = 7;
+                def.m_Index = unitId;
+                g_RegisterMap.push_back(def);
+            }
         }
     }
 
-    bool Compiler::Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers)
+    bool Compiler::Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, File& chk, bool preserveTriggers)
     {
         using namespace CHK;
 
@@ -46,7 +51,7 @@ namespace Langums
             throw CompilerException("No locations chunk found in scenario file");
         }
 
-        m_StackPointer = g_RegisterMap.size() - 2;
+        m_StackPointer = g_RegisterMap.size() - 1;
 
         for (auto i = 0u; i < instructions.size(); i++) // emit event triggers first
         {
@@ -66,7 +71,7 @@ namespace Langums
                 eventTrigger.CodeGen_TestSwitch(Switch_EventsMutex, false);
 
                 auto switchId = evnt->GetSwitchId();
-                eventTrigger.CodeGen_SetSwitch(switchId, CHK::TriggerActionState::SetSwitch);
+                eventTrigger.CodeGen_SetSwitch(switchId, TriggerActionState::SetSwitch);
 
                 for (auto q = 0u; q < conditionsCount; q++)
                 {
@@ -91,7 +96,7 @@ namespace Langums
 
                         eventTrigger.CodeGen_Bring(
                             bring->GetPlayerId(),
-                            (CHK::TriggerComparisonType)bring->GetComparison(),
+                            (TriggerComparisonType)bring->GetComparison(),
                             bring->GetUnitId(),
                             locationId,
                             bring->GetQuantity()
@@ -103,7 +108,7 @@ namespace Langums
 
                         eventTrigger.CodeGen_Accumulate(
                             accum->GetPlayerId(),
-                            (CHK::TriggerComparisonType)accum->GetComparison(),
+                            (TriggerComparisonType)accum->GetComparison(),
                             accum->GetResourceType(),
                             accum->GetQuantity()
                         );
@@ -112,27 +117,27 @@ namespace Langums
                     {
                         auto time = (IRTimeCondInstruction*)condition.get();
 
-                        eventTrigger.CodeGen_ElapsedTime((CHK::TriggerComparisonType)time->GetComparison(), time->GetQuantity());
+                        eventTrigger.CodeGen_ElapsedTime((TriggerComparisonType)time->GetComparison(), time->GetQuantity());
                     }
                     else if (condition->GetType() == IRInstructionType::CmdCond)
                     {
                         auto cmd = (IRCmdCondInstruction*)condition.get();
-                        eventTrigger.CodeGen_Commands(cmd->GetPlayerId(), (CHK::TriggerComparisonType)cmd->GetComparison(), cmd->GetUnitId(), cmd->GetQuantity());
+                        eventTrigger.CodeGen_Commands(cmd->GetPlayerId(), (TriggerComparisonType)cmd->GetComparison(), cmd->GetUnitId(), cmd->GetQuantity());
                     }
                     else if (condition->GetType() == IRInstructionType::KillCond)
                     {
                         auto kill = (IRKillCondInstruction*)condition.get();
-                        eventTrigger.CodeGen_Kills(kill->GetPlayerId(), (CHK::TriggerComparisonType)kill->GetComparison(), kill->GetUnitId(), kill->GetQuantity());
+                        eventTrigger.CodeGen_Kills(kill->GetPlayerId(), (TriggerComparisonType)kill->GetComparison(), kill->GetUnitId(), kill->GetQuantity());
                     }
                     else if (condition->GetType() == IRInstructionType::DeathCond)
                     {
                         auto death = (IRDeathCondInstruction*)condition.get();
-                        eventTrigger.CodeGen_Deaths(death->GetPlayerId(), (CHK::TriggerComparisonType)death->GetComparison(), death->GetUnitId(), death->GetQuantity());
+                        eventTrigger.CodeGen_Deaths(death->GetPlayerId(), (TriggerComparisonType)death->GetComparison(), death->GetUnitId(), death->GetQuantity());
                     }
                     else if (condition->GetType() == IRInstructionType::CountdownCond)
                     {
                         auto countdown = (IRCountdownCondInstruction*)condition.get();
-                        eventTrigger.CodeGen_Countdown((CHK::TriggerComparisonType)countdown->GetComparison(), countdown->GetTime());
+                        eventTrigger.CodeGen_Countdown((TriggerComparisonType)countdown->GetComparison(), countdown->GetTime());
                     }
                 }
 
@@ -191,7 +196,7 @@ namespace Langums
             }
         }
 
-        std::unordered_map<CHK::Trigger*, IIRInstruction*> jmpPatchups;
+        std::unordered_map<Trigger*, IIRInstruction*> jmpPatchups;
 
         auto nextAddress = 0u;
         auto current = TriggerBuilder(nextAddress++, nullptr, m_TriggersOwner);
@@ -400,7 +405,7 @@ namespace Langums
 
                 for (auto i = 0; i < 8; i++)
                 {
-                    current.CodeGen_SetSwitch(Switch_Random0 + i, CHK::TriggerActionState::RandomizeSwitch);
+                    current.CodeGen_SetSwitch(Switch_Random0 + i, TriggerActionState::RandomizeSwitch);
                 }
 
                 auto stackTop = m_StackPointer--;
@@ -1532,7 +1537,7 @@ namespace Langums
         return true;
     }
 
-    void Compiler::CodeGen_Always(CHK::TriggerCondition& retCondition)
+    void Compiler::CodeGen_Always(TriggerCondition& retCondition)
     {
         using namespace CHK;
 
@@ -1584,13 +1589,13 @@ namespace Langums
         return copyAddress;
     }
 
-    void Compiler::CodeGen_PreserveTrigger(CHK::TriggerAction& retAction)
+    void Compiler::CodeGen_PreserveTrigger(TriggerAction& retAction)
     {
         using namespace CHK;
         retAction.m_ActionType = TriggerActionType::PreserveTrigger;
     }
 
-    void Compiler::CodeGen_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction)
+    void Compiler::CodeGen_Wait(unsigned int milliseconds, TriggerAction& retAction)
     {
         using namespace CHK;
         retAction.m_Group = 7;
@@ -1599,22 +1604,25 @@ namespace Langums
         retAction.m_Flags = 16;
     }
 
-    void Compiler::CodeGen_JumpTo(unsigned int address, CHK::TriggerAction& retAction)
+    void Compiler::CodeGen_JumpTo(unsigned int address, TriggerAction& retAction)
     {
         using namespace CHK;
         retAction.m_ActionType = TriggerActionType::SetDeaths;
-        retAction.m_Group = 7;
         retAction.m_Modifier = (uint8_t)TriggerActionState::SetTo;
+
+        auto& regDef = g_RegisterMap[Reg_InstructionCounter];
+
         retAction.m_Flags = 16;
+        retAction.m_Group = regDef.m_PlayerId;
+        retAction.m_Arg1 = regDef.m_Index;
         retAction.m_Arg0 = address;
-        retAction.m_Arg1 = Reg_InstructionCounter;
     }
 
-    int Compiler::GetLastTriggerActionId(const CHK::Trigger& trigger)
+    int Compiler::GetLastTriggerActionId(const Trigger& trigger)
     {
         auto index = 0;
 
-        while (trigger.m_Actions[index].m_ActionType != CHK::TriggerActionType::NoAction)
+        while (trigger.m_Actions[index].m_ActionType != TriggerActionType::NoAction)
         {
             index++;
             if (index >= 64)

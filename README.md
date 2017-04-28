@@ -34,7 +34,7 @@ Table of Contents
 ### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
 ### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
 ### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
-### [Discord channel](https://discord.gg/BcY23) for support and discussion.
+### [Discord channel](https://discord.gg/TNehfve) for support and discussion.
 
 ## Usage
 
@@ -131,22 +131,21 @@ fn main() {
 
 ## Template functions
 
-Some built-in functions take special kinds of values like player names, unit names or some quantities. Those can't be stored within LangUMS variables so there is a special language facility to help you handle them. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. If it sounds complicated, it's not. Just take a look at the example below.
+Some built-in functions take special kinds of values like player names, unit names or locations. Those can't be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
 
 ```
-fn spawn_units<T>(T, qty) {
+fn spawn_units<T, L>(T, L, qty) {
   talking_portrait(T, 5);
-  spawn(T, Player1, qty, "TestLocation");
-  order(T, Player1, Move, "TestLocation", "TestLocation2");
+  spawn(T, Player1, qty, L);
+  order(T, Player1, Move, L, "TestLocation2");
 }
 
 fn main() {
-  spawn_units(TerranMarine, 5);
+  spawn_units(TerranMarine, "TestLocation", 5);
 }
 ```
 
-`spawn_units<T>(T, qty)` defines a template function called `spawn_units()` that takes two arguments `T` and `qty`. The `<T>` part tells the compiler that the T "variable" is special.
-Later when `spawn_units(TerranMarine, 5);` is called, the actual function is instantiated from the template and called instead. In this example the instantiated function would look like:
+`fn spawn_units<T>(T, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
 
 ```
 fn spawn_units(qty) {
@@ -156,7 +155,7 @@ fn spawn_units(qty) {
 }
 ````
 
-The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need.
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `QuantityExpression` type can and should be passed as a template argument.
 
 ## Event handlers
 
@@ -313,9 +312,9 @@ Yes. Use the `--preserve-triggers` option.
 
 With the `--triggers-owner` command-line option.
 
-#### How do you change which player's death counts are used for storage?
+#### How do you change which death counts are used for storage?
 
-Use the `--registers-owner` command-line option.
+Use the `--reg` command-line option to pass a registers file. See `Integrating with existing maps` for more info.
 
 #### Some piece of code behaves weirdly or is clearly executed wrong. What can I do?
 
@@ -339,12 +338,11 @@ No, but thanks for asking.
 
 ## Limitations
 
-- One player (out of the 8 possible) must be reserved for LangUMS (unless you are using the `--reg` option). By default player 8 is used for this. This player's stuff needs to remain untouched for LangUMS to do its work. Spawning units for this player will lead to undefined behavior. You can use all other players freely. Preplaced units for this player are also not allowed. You can use the `--registers-owner` option to select the reserved player.
-- There are about 240 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
-- All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions. This also means that recursion of any kind is not supported.
+- There are about 410 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
+- All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions that are called from many places. Recursion of any kind is not allowed.
 - Currently you can have up to 240 event handlers, this limitation will be lifted in the future.
-- Multiplication and division can take many cycles to complete, especially with very large numbers.
-- In general avoid using huge numbers. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
+- Multiplication and division can take many cycles to complete especially with very large numbers.
+- Avoid using huge numbers in general. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 
 ## Integration with existing maps
 
@@ -375,6 +373,7 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_reg
 ```
 
 A sample file with the default mappings [is available here](https://github.com/AlexanderDzhoganov/langums/blob/master/registermap.txt?raw=true).
+[Here you can find](https://github.com/AlexanderDzhoganov/langums#unit) a list of all unit types.
 
 #### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
 
@@ -403,6 +402,7 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 
 #### Backend (IR)
 
+- [IR language](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.h)
 - [IR generation](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.cpp)
 - [IR optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_optimizer.cpp)
 
@@ -416,7 +416,6 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 - else-if statement
 - for loop
 - Arrays
-- Template-like metaprogramming facilities
 - Improved AST/ IR optimization
 - Multiple execution threads
 

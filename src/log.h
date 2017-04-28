@@ -2,7 +2,7 @@
 #define __LOG_H
 
 #define LOG(s) ::Log::Log::Instance()->LogMessage(s)
-#define LOG_F(s, ...) ::Log::Log::Instance()->LogMessage(::SafePrintf(s, __VA_ARGS__))
+#define LOG_F(s, ...) ::Log::Log::Instance()->LogMessage(SafePrintf(s, __VA_ARGS__))
 #define LOG_DEINIT() ::Log::Log::Instance()->Destroy()
 #define LOG_EXITERR(s, ...) LOG_F(s, __VA_ARGS__); ::Log::Log::Instance()->Destroy()
 

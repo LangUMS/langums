@@ -92,7 +92,7 @@ namespace Langums
         TimeCond,       // Elapsed time trigger condition
         CmdCond,        // Player commands a quantity of units condition
         KillCond,       // Player has killed a quantity of units condition
-        DeathCond,      // Player has lots a quantity of units condition
+        DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
     };
 

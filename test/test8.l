@@ -6,4 +6,8 @@ fn spawn_units<T>(T, qty) {
 
 fn main() {
   spawn_units(TerranMarine, 5);
+  
+  while(true) {
+    poll_events();
+  }
 }
