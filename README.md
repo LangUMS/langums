@@ -260,6 +260,10 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.            |
 | `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.              |
 | `set_countdown(Expression)`                                            | Sets the countdown timer.                                |
+| `pause_countdown()`                                                    | Pauses the countdown timer.                              |
+| `unpause_countdown()`                                                  | Unpauses the countdown timer.                            |
+| `mute_unit_speech()`                                                   | Mutes unit speech.                                       |
+| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                     |
 | `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)              |
 | `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)           |
 | `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)    |
@@ -747,13 +751,9 @@ Create Unit with Properties(Player, Unit, Number, Loc, UnitProp)
 Set Mission Objectives(Text)
 Run AI Script(AIScript)
 Run AI Script At Location(AIScript)
-Mute Unit Speech
-Unmute Unit Speech
 Set Next Scenario(Text) (Single player only)
 Set Doodad State(Player, TUnit, Loc, State)
 Set Invincibility(Player, TUnit, Loc, State)
-Pause Timer
-Unpause Timer
 Set Alliance Status(Player, AllyStatus)
 Leader Board (Control) (Text, TUnit)
 Leader Board (Control At Location) (Text, TUnit, Loc)

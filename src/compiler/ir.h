@@ -80,7 +80,9 @@ namespace Langums
         SetResource,    // sets the resource count for a given resource for a given player
         IncResource,    // increments the resource count for a given resource for a given player
         DecResource,    // decrements the resource count for a given resource for a given player
-        SetCountdown,   // sets the countdown timer, 
+        SetCountdown,   // sets the countdown timer,
+        PauseCountdown, // pauses/ unpauses the countdown timer
+        MuteUnitSpeech, // mutes/ unmutes unit speech
         SetDeaths,      // sets the death count for a given unit
         IncDeaths,      // increments the death count for a given unit
         DecDeaths,      // decrements the death count for a given unit
@@ -1427,6 +1429,53 @@ namespace Langums
         private:
         uint32_t m_RegisterId;
         bool m_IsValueLiteral;
+    };
+
+    class IRPauseCountdownInstruction : public IIRInstruction
+    {
+        public:
+        IRPauseCountdownInstruction(bool unpause) :
+            m_Unpause(unpause), IIRInstruction(IRInstructionType::PauseCountdown) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("SETCNDWN %", m_Unpause ? "[UNPAUSE]" : "[PAUSE]");
+        }
+
+        bool IsUnpause() const
+        {
+            return m_Unpause;
+        }
+
+        private:
+        bool m_Unpause;
+    };
+
+    class IRMuteUnitSpeechInstruction : public IIRInstruction
+    {
+        public:
+        IRMuteUnitSpeechInstruction(bool unmute) :
+            m_Unmute(unmute), IIRInstruction(IRInstructionType::MuteUnitSpeech) {}
+
+        std::string DebugDump() const
+        {
+            if (m_Unmute)
+            {
+                return "UNMUTE";
+            }
+            else
+            {
+                return "MUTE";
+            }
+        }
+
+        bool IsUnmute() const
+        {
+            return m_Unmute;
+        }
+
+        private:
+        bool m_Unmute;
     };
 
     class IRSetDeathsInstruction : public IIRInstruction

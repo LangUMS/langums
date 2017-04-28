@@ -1237,6 +1237,32 @@ namespace Langums
                     m_Triggers.push_back(finishAdd.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::PauseCountdown)
+            {
+                auto pauseCountdown = (IRPauseCountdownInstruction*)instruction.get();
+
+                if (pauseCountdown->IsUnpause())
+                {
+                    current.Action_UnpauseCountdown();
+                }
+                else
+                {
+                    current.Action_PauseCountdown();
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::MuteUnitSpeech)
+            {
+                auto muteUnit = (IRMuteUnitSpeechInstruction*)instruction.get();
+
+                if (muteUnit->IsUnmute())
+                {
+                    current.Action_UnmuteUnitSpeech();
+                }
+                else
+                {
+                    current.Action_MuteUnitSpeech();
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::SetDeaths)
             {
                 auto setDeaths = (IRSetDeathsInstruction*)instruction.get();

@@ -667,6 +667,54 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_PauseCountdown()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::PauseTimer;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_UnpauseCountdown()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::UnpauseTimer;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_PauseGame()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::PauseGame;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_UnpauseGame()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::UnpauseGame;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_MuteUnitSpeech()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::MuteUnitSpeech;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_UnmuteUnitSpeech()
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::UnmuteUnitSpeech;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Action_TalkingPortrait(unsigned int unitId, unsigned int time)
     {
         using namespace CHK;

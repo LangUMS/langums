@@ -68,6 +68,12 @@ namespace Langums
         void Action_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ResourceType resourceType);
         void Action_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState action);
         void Action_SetCountdown(unsigned int time, CHK::TriggerActionState action);
+        void Action_PauseCountdown();
+        void Action_UnpauseCountdown();
+        void Action_PauseGame();
+        void Action_UnpauseGame();
+        void Action_MuteUnitSpeech();
+        void Action_UnmuteUnitSpeech();
         void Action_TalkingPortrait(unsigned int unitId, unsigned int time);
 
         const CHK::Trigger& GetTrigger()

@@ -383,6 +383,22 @@ namespace Langums
 
             EmitInstruction(new IRSetCountdownInstruction(regId, isLiteral), instructions);
         }
+        else if (fnName == "pause_countdown()")
+        {
+            EmitInstruction(new IRPauseCountdownInstruction(false), instructions);
+        }
+        else if (fnName == "unpause_countdown()")
+        {
+            EmitInstruction(new IRPauseCountdownInstruction(true), instructions);
+        }
+        else if (fnName == "mute_unit_speech()")
+        {
+            EmitInstruction(new IRMuteUnitSpeechInstruction(false), instructions);
+        }
+        else if (fnName == "unmute_unit_speech()")
+        {
+            EmitInstruction(new IRMuteUnitSpeechInstruction(true), instructions);
+        }
         else if (fnName == "set_deaths")
         {
             if (!fnCall->HasChildren())
