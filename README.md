@@ -80,7 +80,7 @@ You can try out all of the examples below using the [test.scx map from here](htt
 Every program must contain a `main()` function which is the entry point where the code starts executing immediately after the map starts.
 The "hello world" program for LangUMS would look like:
 
-```
+```c
 fn main() {
   print("Hello World!"); // prints Hello World! for all players
 }
@@ -97,7 +97,7 @@ Important notes:
 The more complex example below will give 36 minerals total to Player1. It declares a global variable called `foo`, a local variable `bar` and then calls the `add_resource()` built-in within a while loop.
 The quantity argument for `add_resource()` is the expression `foo + 2`. Some built-ins support expressions for some of their arguments.
 
-```
+```c
 global foo = 10;
 
 fn main() {
@@ -112,7 +112,7 @@ fn main() {
 
 You can define your own functions that accept arguments and return a value.
 
-```
+```c
 fn get_unit_count(wave) {
   return 10 + wave * 5;
 }
@@ -152,14 +152,15 @@ other functions from it, set global variables, call built-ins.
 
 Here is an event handler that executes whenever Player1 brings 5 marines to the location named `BringMarinesHere`:
 
-```
+```c
 bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
   print("The marines have arrived!");
 }
 ```
 
 Once we have our handlers setup we need to call the built-in function `poll_events()` at regular intervals. The whole program demonstrating the event above would look like:
-```
+
+```c
 bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
   print("The marines have arrived!");
 }
@@ -176,7 +177,7 @@ so if you don't call `poll_events()` for a long time it will fire off all buffer
 
 A slighly more contrived example of events. Also demonstrates usage of the preprocessor `#define` directive.
 
-```
+```c
 #define MAX_SWAPS 3
 
 global allowedSwaps = MAX_SWAPS;
@@ -222,78 +223,131 @@ fn main() {
 
 ## Built-in functions
 
-Note: Arguments named `QuantityExpression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
+Notes:
 
-| Function prototype                                                     | Description                                                                                  |
-|------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `poll_events()`                                                        | Runs any associated event handlers.                                                          |
-| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.                                                   |
-| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).                                        |
-| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                                                          |
-| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                                                                 |
-| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                                                               |
-| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                                                                  |
-| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                                                                |
-| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                                                        |
-| `center_view(Player, Location)`                                        | Centers the view on a location for a player.                                                 |
-| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.                                          |
-| `spawn(Unit, Player, QuantityExpression, Location, optional: Props)`   | Spawns units at a location with optional unit properties.                                    |
-| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                                                         |
-| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                                                       |
-| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                                                    |
-| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                                                     |
-| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.                                            |
-| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                                                               |
-| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.                                                |
-| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.                                                  |
-| `set_countdown(Expression)`                                            | Sets the countdown timer.                                                                    |
-| `pause_countdown()`                                                    | Pauses the countdown timer.                                                                  |
-| `unpause_countdown()`                                                  | Unpauses the countdown timer.                                                                |
-| `mute_unit_speech()`                                                   | Mutes unit speech.                                                                           |
-| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                                                         |
-| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)                                                  |
-| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)                                               |
-| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)                                        |
-| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.                                       |
-| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                                                                  |
-| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.                                           |
-| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                                                           |
-| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.                                                |
-| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                                                                 |
-| `show_leaderboard(Text, LeaderboardType, ...)`                         | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
-| `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)                                            |
-| `pause_game()`                                                         | Pauses the game (singleplayer only)                                                          |
-| `unpause_game()`                                                       | Unpauses the game (singleplayer only)                                                        |
-| `set_next_scenario(Text)`                                              | Sets the next map to run (singleplayer only)                                                 |
-| More to be added ...                                                   |                                                                                              |
+* Arguments named `Expression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
+* Text arguments must be passed in `"` quotes e.g. "This is some text"
+* Location arguments can be passed without quotes if they do not contain spaces e.g. MyLocation, but "My Location" needs to be in quotes.
+
+### Misc functions
+
+| Function prototype                                                                          | Description                                                                                              |
+|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| poll_events()                                                                               | Runs any associated event handlers.                                                                      |
+| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all [Player](#player)s.                                                    |
+| random()                                                                                    | Returns a random value between 0 and 255 (inclusive).                                                    |
+| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for [Player](#player) with [EndCondition](#endcondition).                                  |
+| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two [Player](#player)s.                                                 |
+| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                                                             |
+| show_leaderboard(Text, [LeaderboardType](#leaderboardtype), ...)                            | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in)             |
+| show_leaderboard_goal(Text, [LeaderboardType](#leaderboardtype), Quantity, ...)             | Shows the leaderboard with a goal. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
+| sleep(Quantity)                                                                             | Waits for a given amount of milliseconds. (Use with care!)                                               |
+| pause_game()                                                                                | Pauses the game (singleplayer only)                                                                      |
+| unpause_game()                                                                              | Unpauses the game (singleplayer only)                                                                    |
+| set_next_scenario(Text)                                                                     | Sets the next map to run (singleplayer only)                                                             |
+
+### Unit functions
+
+| Function prototype                                                                               | Description                                                   |
+|--------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| spawn([Unit](#unit), [Player](#player), Expression, Location, optional: Props)                   | Spawns [Unit](#unit)s at a location with optional properties. |
+| kill([Unit](#unit), [Player](#player), Expression, optional: Location)                           | Kills [Unit](#unit)s at an optional location.                 |
+| remove([Unit](#unit), [Player](#player), Expression, optional: Location)                         | Removes [Unit](#unit)s at an optional location.               |
+| move([Unit](#unit), [Player](#player), Expression, SrcLocation, DstLocation)                     | Moves [Unit](#unit)s from one location to another.            |
+| order([Unit](#unit), [Player](#player), [Order](#order), SrcLocation, DstLocation)               | Orders a [Unit](#unit) to move, attack or patrol.             |
+| modify([Unit](#unit), [Player](#player), Expression, [UnitMod](#unitmod), ModQuantity, Location) | Modifies a [Unit](#unit)'s HP, SP, energy or hangar count.    |
+| give([Unit](#unit), [SrcPlayer](#player), [DstPlayer](#player), Expression, Location)            | Gives [Unit](#unit)s to another [Player](#player).            |
+| set_doodad([Player](#player), [Unit](#unit), [State](#state), Location)                          | Sets/ toggles doodad [State](#state).                         |
+| set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Sets/ toggles invincibility for [Unit](#unit)s at location.   |
+| run_ai_script([Player](#player), [AIScript](#aiscript), optional: Location)                      | Runs an AI script.                                            |
+
+### Resource functions
+
+| Function prototype                                                          | Description                                    |
+|-----------------------------------------------------------------------------|------------------------------------------------|
+| set_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Sets the resource count for [Player](#player). |
+| add_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Gives resources to a [Player](#player).        |
+| take_resource([Player](#player), [ResourceType](#resourcetype), Expression) | Takes resources from a [Player](#player).      |
+
+### Score functions
+
+| Function prototype                                                        | Description                                                    |
+|---------------------------------------------------------------------------|----------------------------------------------------------------|
+| set_score([Player](#player), [ScoreType](#scoretype), Expression)         | Sets the score of a [Player](#player).                         |
+| add_score([Player](#player), [ScoreType](#scoretype), Expression)         | Add to the score of a [Player](#player).                       |
+| subtract_score([Player](#player), [ScoreType](#scoretype), Expression)    | Subtracts from the score of a [Player](#player).               |
+| set_deaths([Player](#player), [Unit](#unit), Expression)                  | Sets the death count for a [Unit](#unit). (Caution!)           |
+| add_deaths([Player](#player), [Unit](#unit), Expression)                  | Adds to the death count for a [Unit](#unit). (Caution!)        |
+| remove_deaths([Player](#player), [Unit](#unit), Expression)               | Subtracts from the death count for a [Unit](#unit). (Caution!) |
+
+### UI functions
+
+| Function prototype                                                     | Description                                                        |
+|------------------------------------------------------------------------|--------------------------------------------------------------------|
+| center_view([Player](#player), Location)                               | Centers the view on a location for a [Player](#player).            |
+| ping([Player](#player), Location)                                      | Triggers a minimap ping on a location for a [Player](#player).     |
+| talking_portrait([Player](#player), [Unit](#unit), Quantity)           | Shows the [Unit](#unit) talking portrait for an amount of seconds. |
+
+### Location functions
+
+| Function prototype                                                     | Description                                            |
+|------------------------------------------------------------------------|--------------------------------------------------------|
+| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)   | Centers DstLocation on a [Unit](#unit) at SrcLocation. |
+
+### Game functions
+
+| Function prototype                                                     | Description                   |
+|------------------------------------------------------------------------|-------------------------------|
+| set_countdown(Expression)                                              | Sets the countdown timer.     |
+| pause_countdown()                                                      | Pauses the countdown timer.   |
+| unpause_countdown()                                                    | Unpauses the countdown timer. |
+| mute_unit_speech()                                                     | Mutes unit speech.            |
+| unmute_unit_speech()                                                   | Unmutes unit speech.          |
 
 ## Built-in event conditions
 
-| Event prototype                                                 | Description                                                                   |
-|-----------------------------------------------------------------|-------------------------------------------------------------------------------|
-| `bring(Player, Comparison, Quantity, Unit, Location)`           | When a player owns a quantity of units at location.                           |
-| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.                                   |
-| `most_resources(Player, ResourceType)`                          | When a player owns the most of a given resource.                              |
-| `least_resources(Player, ResourceType)`                         | When a player owns the least of a given resource.                             |
-| `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.                                    |
-| `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.                                     |
-| `commands_least(Player, Unit, optional: Location)`              | When a player commands the least number of units at an optional location.     |
-| `commands_most(Player, Unit, optional: Location)`               | When a player commands the most number of units at an optional location.      |
-| `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.                                   |
-| `killed_least(Player, Unit)`                                    | When a player has killed the lowest quantity of a given unit.                 |
-| `killed_most(Player, Unit)`                                     | When a player has killed the highest quantity of a given unit.                |
-| `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.                                     |
-| `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.                             |
-| `opponents(Player, Comparison, Quantity)`                       | When a player has a number of opponents remaining in the game.                |
-| `score(Player, ScoreType, Comparison, Quantity)`                | When a player's score reaches a given quantity.                               |
-| `lowest_score(Player, ScoreType)`                               | When a player has the lowest score.                                           |
-| `highest_score(Player, ScoreType)`                              | When a player has the highest score.                                          |
+### Unit conditions
+
+| Event prototype                                                                        | Description                                                                                   |
+|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| bring([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit), Location) | When a [Player](#player) owns a quantity of [Unit](#unit)s at location.                       |
+| commands([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))        | When a [Player](#player) commands a number of [Unit](#unit)s.                                 |
+| commands_least([Player](#player), [Unit](#unit), optional: Location)                   | When a [Player](#player) commands the least number of [Unit](#unit)s at an optional location. |
+| commands_most([Player](#player), [Unit](#unit), optional: Location)                    | When a [Player](#player) commands the most number of [Unit](#unit)s at an optional location.  |
+| killed([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a [Player](#player) has killed a number of [Unit](#unit)s.                               |
+| killed_least([Player](#player), [Unit](#unit))                                         | When a [Player](#player) has killed the lowest quantity of a given [Unit](#unit).             |
+| killed_most([Player](#player), [Unit](#unit))                                          | When a [Player](#player) has killed the highest quantity of a given [Unit](#unit).            |
+| deaths([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a [Player](#player) has lost a number of [Unit](#unit)s.                                 |
+
+### Resource conditions
+
+| Event prototype                                                                                   | Description                                                  |
+|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| accumulate([Player](#player), [Comparison](#comparison), Quantity, [ResourceType](#resourcetype)) | When a [Player](#player) owns a quantity of resources.       |
+| most_resources([Player](#player), [ResourceType](#resourcetype))                                  | When a [Player](#player) owns the most of a given resource.  |
+| least_resources([Player](#player), [ResourceType](#resourcetype))                                 | When a [Player](#player) owns the least of a given resource. |
+
+### Game conditions
+
+| Event prototype                                                   | Description                                                               |
+|-------------------------------------------------------------------|---------------------------------------------------------------------------|
+| elapsed_time([Comparison](#comparison), Quantity)                 | When a certain amount of time has elapsed.                                |
+| countdown([Comparison](#comparison), Quantity)                    | When the countdown timer reaches a amount of seconds.                     |
+| opponents([Player](#player), [Comparison](#comparison), Quantity) | When a [Player](#player) has a number of opponents remaining in the game. |
+
+### Score conditions
+
+| Event prototype                                                                        | Description                                                |
+|----------------------------------------------------------------------------------------|------------------------------------------------------------|
+| score([Player](#player), [ScoreType](#scoretype), [Comparison](#comparison), Quantity) | When a [Player](#player)'s score reaches a given quantity. |
+| lowest_score([Player](#player), [ScoreType](#scoretype))                               | When a [Player](#player) has the lowest score.             |
+| highest_score([Player](#player), [ScoreType](#scoretype))                              | When a [Player](#player) has the highest score.            |
 
 ## Spawning units with properties
 
 Due to the way map data is structured spawning units with different properties like health and energy is not straightforward. LangUMS offers a flexible way to deal with this issue. Using the `unit` construct you can add up to 64 different unit declarations in your code. A unit declaration that sets the unit's health to 50% is shown below.
 
-```
+```c
 unit MyUnitProps {
   Health = 50
 }
@@ -301,7 +355,7 @@ unit MyUnitProps {
 
 You can mix and match any properties from the [UnitProperty](#unitproperty) constants. Here is a unit declaration that sets the unit's energy to 0% and makes it invincible.
 
-```
+```c
 unit MyInvincibleUnit {
   Energy = 0,
   Invincible = true
@@ -310,13 +364,13 @@ unit MyInvincibleUnit {
 
 After you have your unit declarations you can use them to spawn units by passing the name as the fifth property to the `spawn()` built-in e.g.
 
-```
+```c
 spawn(TerranMarine, Player1, 1, "TestLocation", MyUnitProps);
 ```
 
 Below is a full example that spawns a burrowed lurker at 10% health for Player1.
 
-```
+```c
 unit LurkerType1 {
   Health = 10,
   Burrowed = true
@@ -335,13 +389,38 @@ fn main() {
 
 The `show_leaderboard()` built-in has several variants that take different arguments. They are listed below.
 
-```
+```c
 show_leaderboard("My Leaderboard", Control, Unit)
 show_leaderboard("My Leaderboard", ControlAtLocation, Unit, Location)
 show_leaderboard("My Leaderboard", Kills, Unit)
 show_leaderboard("My Leaderboard", Points, ScoreType)
 show_leaderboard("My Leaderboard", Resources, ResourceType)
 show_leaderboard("My Leaderboard", Greed)
+
+show_leaderboard_goal("My Leaderboard", Control, Quantity, Unit)
+show_leaderboard_goal("My Leaderboard", ControlAtLocation, Quantity, Unit, Location)
+show_leaderboard_goal("My Leaderboard", Kills, Quantity, Unit)
+show_leaderboard_goal("My Leaderboard", Points, Quantity, ScoreType)
+show_leaderboard_goal("My Leaderboard", Resources, Quantity, ResourceType)
+show_leaderboard_goal("My Leaderboard", Greed, Quantity)
+```
+
+Example usage of all of the above:
+
+```c
+show_leaderboard("My Leaderboard", Control, TerranMarine)
+show_leaderboard("My Leaderboard", ControlAtLocation, ZergZergling, "MyLocation")
+show_leaderboard("My Leaderboard", Kills, ZergHydralisk)
+show_leaderboard("My Leaderboard", Points, Buildings)
+show_leaderboard("My Leaderboard", Resources, Gas)
+show_leaderboard("My Leaderboard", Greed)
+
+show_leaderboard_goal("My Leaderboard", Control, 100, ZergZergling)
+show_leaderboard_goal("My Leaderboard", ControlAtLocation, 100, TerranMarine, "MyLocation")
+show_leaderboard_goal("My Leaderboard", Kills, 100, ZergHydralisk)
+show_leaderboard_goal("My Leaderboard", Points, 100, Units)
+show_leaderboard_goal("My Leaderboard", Resources, 100, Minerals)
+show_leaderboard_goal("My Leaderboard", Greed, 100)
 ```
 
 ## Preprocessor
@@ -356,7 +435,7 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 
 Some built-in functions take special kinds of values like player names, unit names or locations. Those can't be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
 
-```
+```c
 fn spawn_units<T, L>(T, L, qty) {
   talking_portrait(T, 5);
   spawn(T, Player1, qty, L);
@@ -370,7 +449,7 @@ fn main() {
 
 `fn spawn_units<T>(T, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
 
-```
+```c
 fn spawn_units(qty) {
   talking_portrait(TerranMarine, 5);
   spawn(TerranMarine, Player1, qty, "TestLocation");
@@ -378,7 +457,7 @@ fn spawn_units(qty) {
 }
 ````
 
-The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `QuantityExpression` type can and should be passed as a template argument.
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type can and should be passed as a template argument.
 
 ## Examples
 
@@ -481,7 +560,7 @@ A sample file with the default mappings [is available here](https://github.com/A
 
 You can manipulate your existing death counts with the death count built-ins e.g.
 
-```
+```c
 set_deaths(Player5, TerranMarine, foo);
 ```
 
@@ -933,11 +1012,6 @@ Resources
 
 ```
 Leaderboard Computer Players
-Leaderboard Goal (Control)
-Leaderboard Goal (Control At Location)
-Leaderboard Goal (Resources)
-Leaderboard Goal (Kills)
-Leaderboard Goal (Points)
 Play WAV
 Transmission
 ```

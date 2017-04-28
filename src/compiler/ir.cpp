@@ -727,7 +727,7 @@ namespace Langums
             auto& text = ((ASTStringLiteral*)arg0.get())->GetValue();
             auto type = ParseLeaderboardType(fnCall->GetArgument(1), fnName, 1);
 
-            auto showLeaderboard = new IRLeaderboardInstruction(text, type);
+            auto showLeaderboard = new IRLeaderboardInstruction(text, type, -1);
 
             if (type == LeaderboardType::Control)
             {
@@ -755,6 +755,56 @@ namespace Langums
             else if (type == LeaderboardType::Resources)
             {
                 auto resourceType = ParseResourceTypeArgument(fnCall->GetArgument(2), fnName, 2);
+                showLeaderboard->SetResourceType(resourceType);
+            }
+
+            EmitInstruction(showLeaderboard, instructions);
+        }
+        else if (fnName == "show_leaderboard_goal")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("show_leaderboard_goal() called without arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Invalid argument type for argument 1 in call to \"%\", expected string literal", fnName));
+            }
+
+            auto& text = ((ASTStringLiteral*)arg0.get())->GetValue();
+            auto type = ParseLeaderboardType(fnCall->GetArgument(1), fnName, 1);
+            auto goalQuantity = ParseQuantityArgument(fnCall->GetArgument(2), fnName, 2);
+
+            auto showLeaderboard = new IRLeaderboardInstruction(text, type, goalQuantity);
+
+            if (type == LeaderboardType::Control)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(3), fnName, 3);
+                showLeaderboard->SetUnitId(unitId);
+            }
+            else if (type == LeaderboardType::ControlAtLocation)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(3), fnName, 3);
+                showLeaderboard->SetUnitId(unitId);
+
+                auto locationName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
+                showLeaderboard->SetLocationName(locationName);
+            }
+            else if (type == LeaderboardType::Kills)
+            {
+                auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(3), fnName, 3);
+                showLeaderboard->SetUnitId(unitId);
+            }
+            else if (type == LeaderboardType::Points)
+            {
+                auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(3), fnName, 3);
+                showLeaderboard->SetScoreType(scoreType);
+            }
+            else if (type == LeaderboardType::Resources)
+            {
+                auto resourceType = ParseResourceTypeArgument(fnCall->GetArgument(3), fnName, 3);
                 showLeaderboard->SetResourceType(resourceType);
             }
 
