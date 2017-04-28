@@ -305,7 +305,7 @@ namespace Langums
                 m_PollEventsInstructions.clear();
             }
         }
-        else if (fnName == "rnd256")
+        else if (fnName == "rnd256" || fnName == "random")
         {
             if (!ignoreReturnValue)
             {

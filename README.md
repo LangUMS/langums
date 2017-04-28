@@ -3,7 +3,7 @@
 LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: BroodWar.
 
 It supercedes the trigger functionality offered by editors such as SCMDraft 2 and the official Blizzard one.
-You still need an editor to make the actual map, preplace locations and units, etc. but the triggers are added by LangUMS.
+You still need an editor to make the actual map, place locations and units and such but the triggers are added by LangUMS.
 
 Table of Contents
 =================
@@ -248,7 +248,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 |------------------------------------------------------------------------|----------------------------------------------------------|
 | `poll_events()`                                                        | Runs any associated event handlers.                      |
 | `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.               |
-| `rnd256()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
+| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
 | `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
 | `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                           |
