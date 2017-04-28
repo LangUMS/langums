@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <algorithm>
 
 #include "../ast/ast.h"
 #include "../libchk/chk.h"
@@ -422,12 +423,15 @@ namespace Langums
 
         std::string DebugDump() const
         {
+            auto msg = m_Message;
+            std::replace(msg.begin(), msg.end(), '\n', ' ');
+
             if (m_PlayerId == -1)
             {
-                return SafePrintf("MSG \"%\" [ALL]", m_Message);
+                return SafePrintf("MSG \"%\" [ALL]", msg);
             }
 
-            return SafePrintf("MSG \"%\" %", m_Message, m_PlayerId);
+            return SafePrintf("MSG \"%\" %", msg, m_PlayerId);
         }
 
         private:
@@ -1972,7 +1976,10 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("SETOBJ %", m_Text);
+            auto msg = m_Text;
+            std::replace(msg.begin(), msg.end(), '\n', ' ');
+
+            return SafePrintf("SETOBJ %", msg);
         }
 
         private:

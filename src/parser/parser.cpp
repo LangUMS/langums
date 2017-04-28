@@ -912,13 +912,35 @@ namespace Langums
         std::string value;
 
         auto c = Peek();
-        while (c != '"')
+        if (c == '"' && Peek(1) == '"')
         {
-            value.push_back(Next());
-            c = Peek();
-        }
+            Next();
+            Next();
 
-        Next();
+            // multi-line string
+
+            while (!PeekKeyword("\"\"\""))
+            {
+                value.push_back(Next());
+            }
+
+            Keyword("\"\"\"");
+        }
+        else
+        {
+            while (c != '"')
+            {
+                value.push_back(Next());
+                c = Peek();
+                if (c == '\n')
+                {
+                    throw ParserException(m_CurrentChar, "Invalid string value, expected '\"'");
+                }
+            }
+
+            Next();
+        }
+     
         return value;
     }
 

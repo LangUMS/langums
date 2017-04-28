@@ -357,6 +357,16 @@ next power of 2 of the largest number you use in your map. If uncertain leave it
 
 At the moment control returns back to the start of `main()` if for some reason you return from it. In most cases you want to be calling `poll_events()` in an infinite loop inside `main()` so this shouldn't be an issue.
 
+#### How to put text consisting of several lines in the code?
+
+Use multi-line strings with `"""` e.g.
+
+```
+set_mission_objectives("""My multi-line string
+This is a second line
+This is a third line""");
+```
+
 #### Do you plan to rewrite this in Rust?
 
 No, but thanks for asking.
