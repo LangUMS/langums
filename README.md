@@ -263,7 +263,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)              |
 | `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)           |
 | `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)    |
-| `talking_portrait(Unit, Seconds)`                                      | Shows the unit talking portrait for an amount of time.   |
+| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.   |
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
 | More to be added ...                                                   |                                                          |
 
@@ -439,16 +439,17 @@ Draw
 ### ResourceType
 
 ```
-Minerals
-Gas
+Minerals (or Ore)
+Gas (or Vespene)
+Both (or OreAndGas)
 ```
 
 ### Comparison
 
 ```
-AtLeast
-AtMost
-Exactly
+AtLeast (or LessOrEquals)
+AtMost (or GreaterOrEquals)
+Exactly or (Equals)
 ```
 
 ### Order

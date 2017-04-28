@@ -11,7 +11,7 @@ fn give_minerals<T>(T, qty) {
 }
 
 fn main() {  
-  give_minerals<Player1>(50);
+  give_minerals(Player1, 50);
   
   while (true) {
     poll_events();

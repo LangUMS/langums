@@ -450,14 +450,15 @@ namespace Langums
                 throw IRCompilerException("talking_portrait() called without arguments");
             }
 
-            if (fnCall->GetChildCount() != 2)
+            if (fnCall->GetChildCount() != 3)
             {
                 throw IRCompilerException("talking_portrait() takes exactly two arguments");
             }
 
-            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
-            auto time = ParseQuantityArgument(fnCall->GetArgument(1), fnName, 1);
-            EmitInstruction(new IRTalkInstruction(unitId, time * 1000), instructions);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
+            auto time = ParseQuantityArgument(fnCall->GetArgument(2), fnName, 2);
+            EmitInstruction(new IRTalkInstruction(playerId, unitId, time * 1000), instructions);
         }
         else if (fnName == "center_view")
         {

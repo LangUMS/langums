@@ -1540,7 +1540,40 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::Talk)
             {
                 auto talk = (IRTalkInstruction*)instruction.get();
-                current.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
+
+                auto playerId = talk->GetPlayerId();
+
+                if (playerId == m_TriggersOwner)
+                {
+                    current.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
+                    auto talkTrigger = TriggerBuilder(address, instruction.get(), playerId);
+
+                    if (all)
+                    {
+                        talkTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    talkTrigger.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
+
+                    auto retAddress = nextAddress++;
+                    talkTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(talkTrigger.GetTrigger());
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if
             (

@@ -1561,8 +1561,13 @@ namespace Langums
     class IRTalkInstruction : public IIRInstruction
     {
         public:
-        IRTalkInstruction(unsigned int unitId, unsigned int time) :
-            m_UnitId(unitId), m_Time(time), IIRInstruction(IRInstructionType::Talk) {}
+        IRTalkInstruction(uint8_t playerId, unsigned int unitId, unsigned int time) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_Time(time), IIRInstruction(IRInstructionType::Talk) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
 
         uint8_t GetUnitId() const
         {
@@ -1576,10 +1581,11 @@ namespace Langums
 
         std::string DebugDump() const
         {
-            return SafePrintf("TALK % %", CHK::UnitsByName[m_UnitId], m_Time);
+            return SafePrintf("TALK % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_Time);
         }
 
         private:
+        uint8_t m_PlayerId;
         uint8_t m_UnitId;
         uint32_t m_Time;
     };
