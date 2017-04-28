@@ -394,27 +394,32 @@ namespace Langums
     class IRDisplayMsgInstruction : public IIRInstruction
     {
         public:
-        IRDisplayMsgInstruction(const std::string& message, unsigned char playerMask) :
-            m_Message(message), m_PlayerMask(playerMask), IIRInstruction(IRInstructionType::DisplayMsg) {}
+        IRDisplayMsgInstruction(const std::string& message, int playerId) :
+            m_Message(message), m_PlayerId(playerId), IIRInstruction(IRInstructionType::DisplayMsg) {}
 
         const std::string& GetMessage() const
         {
             return m_Message;
         }
 
-        char GetPlayerMask() const
+        int GetPlayerId() const
         {
-            return m_PlayerMask;
+            return m_PlayerId;
         }
 
         std::string DebugDump() const
         {
-            return SafePrintf("MSG \"%\" %", m_Message, (int)m_PlayerMask);
+            if (m_PlayerId == -1)
+            {
+                return SafePrintf("MSG \"%\" [ALL]", m_Message);
+            }
+
+            return SafePrintf("MSG \"%\" %", m_Message, m_PlayerId);
         }
 
         private:
         std::string m_Message;
-        char m_PlayerMask;
+        int m_PlayerId;
     };
 
     class IRJmpInstruction : public IIRInstruction

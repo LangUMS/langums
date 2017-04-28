@@ -1207,7 +1207,7 @@ namespace Langums
             }
 
             auto msg = (ASTStringLiteral*)arg0.get();
-            auto playerId = 1;
+            auto playerId = -1;
 
             if (fnCall->GetChildCount() >= 2)
             {

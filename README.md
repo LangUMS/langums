@@ -243,7 +243,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | Function prototype                                                     | Description                                              |
 |------------------------------------------------------------------------|----------------------------------------------------------|
 | `poll_events()`                                                        | Runs any associated event handlers.                      |
-| `print(String, optional: Player)`                                      | Prints a message to a player, defaults to Player1.       |
+| `print(String, optional: Player)`                                      | Prints a message, defaults to all players.               |
 | `rnd256()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
 | `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |

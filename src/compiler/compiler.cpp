@@ -650,7 +650,7 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::DisplayMsg)
             {
                 auto displayMsgReg = (IRDisplayMsgInstruction*)instruction.get();
-                auto playerId = displayMsgReg->GetPlayerMask();
+                auto playerId = displayMsgReg->GetPlayerId();
                 auto stringId = m_StringsChunk->InsertString(displayMsgReg->GetMessage());
 
                 if (playerId == m_TriggersOwner)
@@ -663,7 +663,19 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto all = false;
+                    if (playerId == -1)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
                     auto msgTrigger = TriggerBuilder(address, instruction.get(), playerId);
+
+                    if (all)
+                    {
+                        msgTrigger.SetExecuteForAllPlayers();
+                    }
 
                     msgTrigger.Action_DisplayMsg(stringId);
 

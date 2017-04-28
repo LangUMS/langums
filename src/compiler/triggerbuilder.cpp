@@ -36,6 +36,14 @@ namespace Langums
         m_Trigger.m_ExecutionMask[playerId - 1] = 1;
     }
 
+    void TriggerBuilder::SetExecuteForAllPlayers()
+    {
+        for (auto i = 0; i < 8; i++)
+        {
+            m_Trigger.m_ExecutionMask[i] = 1;
+        }
+    }
+
     void TriggerBuilder::Cond_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison)
     {
         using namespace CHK;
