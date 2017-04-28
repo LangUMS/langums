@@ -215,6 +215,11 @@ namespace Langums
                         auto countdown = (IRCountdownCondInstruction*)condition.get();
                         eventTrigger.Cond_Countdown((TriggerComparisonType)countdown->GetComparison(), countdown->GetTime());
                     }
+                    else if (condition->GetType() == IRInstructionType::OpponentsCond)
+                    {
+                        auto opponents = (IROpponentsCondInstruction*)condition.get();
+                        eventTrigger.Cond_Opponents(opponents->GetPlayerId(), (TriggerComparisonType)opponents->GetComparison(), opponents->GetQuantity());
+                    }
                 }
 
                 m_Triggers.push_back(eventTrigger.GetTrigger());
@@ -1541,8 +1546,9 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::CmdCond ||
                 instruction->GetType() == IRInstructionType::CmdLeastCond ||
                 instruction->GetType() == IRInstructionType::CmdMostCond ||
-                instruction->GetType() == IRInstructionType::CountdownCond
-            )
+                instruction->GetType() == IRInstructionType::CountdownCond ||
+                instruction->GetType() == IRInstructionType::OpponentsCond
+                )
             {
                 continue;
             }

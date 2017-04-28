@@ -251,6 +251,18 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Cond_Opponents(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::Opponents;
+        condition.m_Quantity = quantity;
+        condition.m_Comparison = comparison;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Action_SetReg(unsigned int regId, int value)
     {
         using namespace CHK;

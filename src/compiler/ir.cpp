@@ -483,6 +483,54 @@ namespace Langums
 
                         EmitInstruction(new IRCountdownCondInstruction(comparison, quantity->GetValue()), m_Instructions);
                     }
+                    else if (name == "opponents")
+                    {
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
+                        }
+
+                        auto playerName = (ASTIdentifier*)arg0.get();
+                        auto playerId = PlayerNameToId(playerName->GetName());
+
+                        auto arg1 = condition->GetArgument(1);
+                        if (arg1->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException("Something other than an identifier passed as second argument to opponents(), expected comparison type");
+                        }
+
+                        auto comparisonType = (ASTIdentifier*)arg1.get();
+                        auto comparisonName = comparisonType->GetName();
+
+                        ConditionComparison comparison;
+                        if (comparisonName == "AtLeast")
+                        {
+                            comparison = ConditionComparison::AtLeast;
+                        }
+                        else if (comparisonName == "AtMost")
+                        {
+                            comparison = ConditionComparison::AtMost;
+                        }
+                        else if (comparisonName == "Exactly")
+                        {
+                            comparison = ConditionComparison::Exactly;
+                        }
+                        else
+                        {
+                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
+                        }
+
+                        auto arg2 = condition->GetArgument(2);
+                        if (arg2->GetType() != ASTNodeType::NumberLiteral)
+                        {
+                            throw IRCompilerException("Something other than a number literal passed as second argument to opponents(), expected quantity");
+                        }
+
+                        auto quantity = (ASTNumberLiteral*)arg2.get();
+
+                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity->GetValue()), m_Instructions);
+                    }
                     else
                     {
                         throw IRCompilerException(SafePrintf("Unknown condition type \"%\"", name));

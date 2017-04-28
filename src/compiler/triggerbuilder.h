@@ -37,6 +37,7 @@ namespace Langums
         void Cond_KillsMost(unsigned int playerId, unsigned int unitId);
         void Cond_Deaths(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity);
         void Cond_Countdown(CHK::TriggerComparisonType comparison, unsigned int time);
+        void Cond_Opponents(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int quantity);
 
         void Action_SetReg(unsigned int regId, int value);
         void Action_IncReg(unsigned int regId, int amount);

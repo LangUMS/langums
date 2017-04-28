@@ -284,6 +284,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `killed_most(Player, Unit)`                                     | When a player has killed the highest quantity of a given unit.                |
 | `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.                                     |
 | `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.                             |
+| `opponents(Player, Comparison, Quantity)`                       | When a player has a number of opponents remaining in the game.                |
 | More to be added ...                                            |                                                                               |
 
 ## Preprocessor

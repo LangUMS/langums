@@ -10,6 +10,10 @@ most_resources(Player5, Minerals) => {
   print("Player5 has the most minerals.");
 }
 
+opponents(Player1, AtLeast, 1) => {
+  print("i have at least one opponent");
+}
+
 fn spawn_units<T>(T, qty) {
   talking_portrait(T, 5);
   spawn(T, Player1, qty, "TestLocation");

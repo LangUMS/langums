@@ -100,6 +100,7 @@ namespace Langums
         KillMostCond,   // Player hast the most units killed
         DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
+        OpponentsCond,  // Opponents condition
     };
 
     enum class ConditionComparison
@@ -2018,6 +2019,38 @@ namespace Langums
         private:
         ConditionComparison m_Comparison;
         uint32_t m_Time;
+    };
+
+    class IROpponentsCondInstruction : public IIRInstruction
+    {
+        public:
+        IROpponentsCondInstruction(uint8_t playerId, ConditionComparison comparison, uint32_t quantity) :
+            m_PlayerId(playerId), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::OpponentsCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("OPPONENTS % % %", PlayersByName[m_PlayerId], (int)m_Comparison, m_Quantity);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ConditionComparison GetComparison() const
+        {
+            return m_Comparison;
+        }
+
+        uint32_t GetQuantity() const
+        {
+            return m_Quantity;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ConditionComparison m_Comparison;
+        uint32_t m_Quantity;
     };
 
     class IRCompilerException : public std::exception
