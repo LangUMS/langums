@@ -620,7 +620,7 @@ namespace Langums
                 auto playerId = displayMsgReg->GetPlayerId();
                 auto stringId = m_StringsChunk->InsertString(displayMsgReg->GetMessage());
 
-                if (playerId == m_TriggersOwner)
+                if (playerId + 1 == m_TriggersOwner)
                 {
                     current.Action_DisplayMsg(stringId);
                 }
@@ -1015,7 +1015,7 @@ namespace Langums
                 auto locationId = GetLocationIdByName(centerView->GetLocationName());
                 auto playerId = centerView->GetPlayerId();
 
-                if (playerId == m_TriggersOwner)
+                if (playerId + 1 == m_TriggersOwner)
                 {
                     current.Action_CenterView(locationId + 1);
                 }
@@ -1396,7 +1396,7 @@ namespace Langums
 
                 auto playerId = talk->GetPlayerId();
 
-                if (playerId == m_TriggersOwner)
+                if (playerId + 1 == m_TriggersOwner)
                 {
                     current.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
                 }
@@ -1441,6 +1441,51 @@ namespace Langums
                 auto locationId = GetLocationIdByName(setInvincible->GetLocationName());
 
                 current.Action_SetInvincibility(setInvincible->GetPlayerId(), setInvincible->GetUnitId(), setInvincible->GetState(), locationId);
+            }
+            else if (instruction->GetType() == IRInstructionType::AIScript)
+            {
+                auto aiScript = (IRAIScriptInstruction*)instruction.get();
+
+                auto playerId = aiScript->GetPlayerId();
+
+                auto locationId = -1;
+                auto& locName = aiScript->GetLocationName();
+                if (locName.length() > 0)
+                {
+                    locationId = GetLocationIdByName(locName);
+                }
+
+                if (playerId + 1 == m_TriggersOwner)
+                {
+                    current.Action_RunAIScript(playerId + 1, aiScript->GetScriptName(), locationId);
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
+                    auto aiTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+
+                    if (all)
+                    {
+                        aiTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    aiTrigger.Action_RunAIScript(playerId + 1, aiScript->GetScriptName(), locationId);
+
+                    auto retAddress = nextAddress++;
+                    aiTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(aiTrigger.GetTrigger());
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if
             (

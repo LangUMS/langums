@@ -13,6 +13,7 @@
 #include "locationschunk.h"
 #include "ownrchunk.h"
 #include "dimchunk.h"
+#include "cuwpchunk.h"
 
 namespace CHK
 {

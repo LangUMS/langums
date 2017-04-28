@@ -194,6 +194,9 @@
     <ClCompile Include="..\src\parser\template_instantiator.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libchk\cuwpchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -357,6 +360,9 @@
     </ClInclude>
     <ClInclude Include="..\src\parser\template_instantiator.h">
       <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\cuwpchunk.h">
+      <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -186,8 +186,6 @@ int main(int argc, char* argv[])
     auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
     triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
 
-//    auto trigger1 = triggersChunk.GetTrigger(0);
-
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
     LOG_F("Pre-existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");

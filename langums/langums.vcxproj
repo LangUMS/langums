@@ -128,6 +128,7 @@
     <ClCompile Include="..\src\compiler\registermap_parser.cpp" />
     <ClCompile Include="..\src\compiler\triggerbuilder.cpp" />
     <ClCompile Include="..\src\libchk\chk.cpp" />
+    <ClCompile Include="..\src\libchk\cuwpchunk.cpp" />
     <ClCompile Include="..\src\libchk\dimchunk.cpp" />
     <ClCompile Include="..\src\libchk\locationschunk.cpp" />
     <ClCompile Include="..\src\libchk\ownrchunk.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="..\src\cxxopts.h" />
     <ClInclude Include="..\src\libchk\chk.h" />
     <ClInclude Include="..\src\libchk\constants.h" />
+    <ClInclude Include="..\src\libchk\cuwpchunk.h" />
     <ClInclude Include="..\src\libchk\dimchunk.h" />
     <ClInclude Include="..\src\libchk\enums.h" />
     <ClInclude Include="..\src\libchk\ichunk.h" />

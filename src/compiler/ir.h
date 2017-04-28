@@ -89,6 +89,7 @@ namespace Langums
         Talk,           // shows the unit talking portrait for an amount of time
         SetDoodad,      // sets the state of a doodad
         SetInvincible,  // sets invincibility for units
+        AIScript,       // runs an ai script
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -1717,6 +1718,39 @@ namespace Langums
         CHK::TriggerActionState m_State;
     };
 
+    class IRAIScriptInstruction : public IIRInstruction
+    {
+        public:
+        IRAIScriptInstruction(uint8_t playerId, unsigned int scriptName, const std::string& locationName) :
+            m_PlayerId(playerId), m_ScriptName(scriptName), m_LocationName(locationName), IIRInstruction(IRInstructionType::AIScript) {}
+        
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        unsigned int GetScriptName() const
+        {
+            return m_ScriptName;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        std::string DebugDump() const
+        {
+            std::string ai((char*)&m_ScriptName, 4);
+            return SafePrintf("AISCRIPT % % %", CHK::PlayersByName[m_PlayerId], ai, m_LocationName);
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint32_t m_ScriptName;
+        std::string m_LocationName;
+    };
+
     class IREventInstruction : public IIRInstruction
     {
         public:
@@ -2312,6 +2346,7 @@ namespace Langums
         ConditionComparison ParseComparisonArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         int ParseQuantityArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         uint8_t ParseUnitTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        uint32_t ParseAIScriptArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         std::string ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);

@@ -749,4 +749,24 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_RunAIScript(unsigned int playerId, unsigned int scriptName, int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        if (locationId == -1)
+        {
+            action.m_ActionType = TriggerActionType::RunAIScript;
+        }
+        else
+        {
+            action.m_ActionType = TriggerActionType::RunAIScriptAtLocation;
+            action.m_Source = locationId + 1;
+        }
+
+        action.m_Arg0 = scriptName;
+        action.m_Group = playerId + 1;
+        m_HasChanges = true;
+    }
+
 }

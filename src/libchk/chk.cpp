@@ -44,6 +44,10 @@ namespace CHK
             {
                 chunk = std::make_unique<CHKDimChunk>(bytes, type);
             }
+            else if (type == "UPRP")
+            {
+                chunk = std::make_unique<CHKCuwpChunk>(bytes, type);
+            }
             else if
             ( // skip all non-required chunks to lower file-size
                 type == "TYPE" ||

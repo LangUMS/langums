@@ -1,6 +1,9 @@
 fn main() {
-  set_doodad(Player1, TerranMarine, Toggle, "TestLocation");
-  print("hello world!");
-  print("foo bar", Player2);
-  print("baz", Player1);
+  spawn(TerranMarine, Player2, 1, "TestLocation");
+  spawn(TerranDropship, Player2, 1, "TestLocation");
+  run_ai_script(Player2, EnterTransport, "TestLocation");
+  
+  while (true) {
+    poll_events();
+  }
 }

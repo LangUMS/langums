@@ -29,6 +29,7 @@ Table of Contents
     * [State](#state)
     * [Player](#player)
     * [Unit](#unit)
+    * [AIScript](#aiscript)
 
 ### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
 
@@ -271,6 +272,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.   |
 | `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                              |
 | `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.       |
+| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                       |              
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
 | More to be added ...                                                   |                                                          |
 
@@ -745,6 +747,53 @@ Buildings
 Factories
 ```
 
+### AIScript
+
+```
+TerranCustomLevel
+ZergCustomLevel
+ProtossCustomLevel
+TerranExpansionCustomLevel
+ZergExpansionCustomLevel
+ProtossExpansionCustomLevel
+TerranCampaignEasy
+TerranCampaignMedium
+TerranCampaignDifficult
+TerranCampaignInsane
+TerranCampaignAreaTown
+ZergCampaignEasy
+ZergCampaignMedium
+ZergCampaignDifficult
+ZergCampaignInsane
+ZergCampaignAreaTown
+ProtossCampaignEasy
+ProtossCampaignMedium
+ProtossCampaignDifficult
+ProtossCampaignInsane
+ProtossCampaignAreaTown
+ExpansionTerranCampaignEasy
+ExpansionTerranCampaignMedium
+ExpansionTerranCampaignDifficult
+ExpansionTerranCampaignInsane
+ExpansionTerranCampaignAreaTown
+ExpansionZergCampaignEasy
+ExpansionZergCampaignMedium
+ExpansionZergCampaignDifficult
+ExpansionZergCampaignInsane
+ExpansionZergCampaignAreaTown
+ExpansionProtossCampaignEasy
+ExpansionProtossCampaignMedium
+ExpansionProtossCampaignDifficult
+ExpansionProtossCampaignInsane
+ExpansionProtossCampaignAreaTown
+SetPlayerToEnemy
+SetPlayerToAlly
+ValueThisAreaHigher
+EnterClosestBunker
+EnterTransport
+ExitTransport
+```
+
 ## Stuff that's not implemented yet
 
 ### Conditions
@@ -760,8 +809,6 @@ Score
 ```
 Create Unit with Properties
 Set Score
-Run AI Script
-Run AI Script At Location
 Set Mission Objectives
 Set Alliance Status
 Leader Board (Control)
