@@ -29,6 +29,9 @@ namespace Langums
         void Cond_Accumulate(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ResourceType resourceType, unsigned int quantity);
         void Cond_LeastResources(unsigned int playerId, CHK::ResourceType resourceType);
         void Cond_MostResources(unsigned int playerId, CHK::ResourceType resourceType);
+        void Cond_Score(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ScoreType scoreType, unsigned int quantity);
+        void Cond_LowestScore(unsigned int playerId, CHK::ScoreType scoreType);
+        void Cond_HighestScore(unsigned int playerId, CHK::ScoreType scoreType);
         void Cond_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity);
         void Cond_Commands(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity);
         void Cond_CommandsLeast(unsigned int playerId, unsigned int unitId, int locationId);

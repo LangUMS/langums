@@ -136,6 +136,41 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Cond_Score(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ScoreType scoreType, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::Score;
+        condition.m_Arg0 = (uint8_t)scoreType;
+        condition.m_Quantity = quantity;
+        condition.m_Comparison = comparison;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Cond_LowestScore(unsigned int playerId, CHK::ScoreType scoreType)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::LowestScore;
+        condition.m_Arg0 = (uint8_t)scoreType;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Cond_HighestScore(unsigned int playerId, CHK::ScoreType scoreType)
+    {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
+        condition.m_Condition = TriggerConditionType::HighestScore;
+        condition.m_Arg0 = (uint8_t)scoreType;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Cond_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity)
     {
         using namespace CHK;

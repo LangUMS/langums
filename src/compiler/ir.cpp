@@ -159,6 +159,29 @@ namespace Langums
                             EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions);
                         }
                     }
+                    else if (name == "score")
+                    {
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto scoreType = ParseScoreTypeArgument(condition->GetArgument(1), name, 1);
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(2), name, 2);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(3), name, 3);
+
+                        EmitInstruction(new IRScoreCondInstruction(playerId, scoreType, comparison, quantity), m_Instructions);
+                    }
+                    else if (name == "lowest_score" || name == "highest_score")
+                    {
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto scoreType = ParseScoreTypeArgument(condition->GetArgument(1), name, 1);
+
+                        if (name == "lowest_score")
+                        {
+                            EmitInstruction(new IRLowScoreCondInstruction(playerId, scoreType), m_Instructions);
+                        }
+                        else if (name == "highest_score")
+                        {
+                            EmitInstruction(new IRHiScoreCondInstruction(playerId, scoreType), m_Instructions);
+                        }
+                    }
                     else if (name == "elapsed_time")
                     {
                         auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);

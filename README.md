@@ -29,6 +29,7 @@ Table of Contents
     * [State](#state)
     * [AllianceStatus](#alliancestatus)
     * [Player](#player)
+    * [ScoreType](#scoretype)
     * [Unit](#unit)
     * [AIScript](#aiscript)
 
@@ -299,7 +300,9 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.                                     |
 | `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.                             |
 | `opponents(Player, Comparison, Quantity)`                       | When a player has a number of opponents remaining in the game.                |
-| More to be added ...                                            |                                                                               |
+| `score(Player, ScoreType, Comparison, Quantity)`                | When a player's score reaches a given quantity.                               |
+| `lowest_score(Player, ScoreType)`                               | When a player has the lowest score.                                           |
+| `highest_score(Player, ScoreType)`                              | When a player has the highest score.                                          |
 
 ## Preprocessor
 
@@ -479,7 +482,7 @@ Patrol
 ```
 Health,
 Energy,
-Shields,
+Shields
 Hangar
 ```
 
@@ -822,15 +825,7 @@ ExitTransport
 
 ## Stuff that's not implemented yet
 
-### Conditions
-
-```
-Highest Score
-Lowest Score
-Score
-```
-
-### Actions
+#### Built-ins
 
 ```
 Create Unit with Properties

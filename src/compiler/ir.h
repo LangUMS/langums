@@ -100,6 +100,9 @@ namespace Langums
         AccumCond,      // Accumulate trigger condition
         LeastResCond,   // Player has the least quantity of a resource 
         MostResCond,    // Player has the most quantity of a resource
+        ScoreCond,      // Score condition
+        HiScoreCond,    // Highest score conditiion
+        LowScoreCond,   // Lowest score condition
         TimeCond,       // Elapsed time trigger condition
         CmdCond,        // Player commands a quantity of units condition
         CmdLeastCond,   // Player commands the least quantity of units condition
@@ -109,7 +112,7 @@ namespace Langums
         KillMostCond,   // Player hast the most units killed
         DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
-        OpponentsCond,  // Opponents condition
+        OpponentsCond  // Opponents condition
     };
 
     enum class ConditionComparison
@@ -2113,6 +2116,96 @@ namespace Langums
         private:
         uint8_t m_PlayerId;
         ResourceType m_ResourceType;
+    };
+
+    class IRHiScoreCondInstruction : public IIRInstruction
+    {
+        public:
+        IRHiScoreCondInstruction(uint8_t playerId, ScoreType scoreType) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), IIRInstruction(IRInstructionType::HiScoreCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("HISCORE % %", PlayersByName[m_PlayerId], (int)m_ScoreType);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+    };
+
+    class IRLowScoreCondInstruction : public IIRInstruction
+    {
+        public:
+        IRLowScoreCondInstruction(uint8_t playerId, ScoreType scoreType) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), IIRInstruction(IRInstructionType::LowScoreCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("LOWSCORE % %", PlayersByName[m_PlayerId], (int)m_ScoreType);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+    };
+
+    class IRScoreCondInstruction : public IIRInstruction
+    {
+        public:
+        IRScoreCondInstruction(uint8_t playerId, ScoreType scoreType, ConditionComparison comparison, uint32_t quantity) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), m_Comparison(comparison), m_Quantity(quantity), IIRInstruction(IRInstructionType::ScoreCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("SCORE % % % %", PlayersByName[m_PlayerId], (int)m_ScoreType, (int)m_Comparison, (int)m_Quantity);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        ConditionComparison GetComparison() const
+        {
+            return m_Comparison;
+        }
+
+        uint32_t GetQuantity() const
+        {
+            return m_Quantity;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+        ConditionComparison m_Comparison;
+        uint32_t m_Quantity;
     };
 
     class IRTimeCondInstruction : public IIRInstruction

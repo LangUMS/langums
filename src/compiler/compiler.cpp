@@ -114,6 +114,29 @@ namespace Langums
                         eventTrigger.SetOwner(mostRes->GetPlayerId() + 1);
                         eventTrigger.Cond_MostResources(mostRes->GetPlayerId(), mostRes->GetResourceType());
                     }
+                    else if (condition->GetType() == IRInstructionType::ScoreCond)
+                    {
+                        auto score = (IRScoreCondInstruction*)condition.get();
+
+                        eventTrigger.Cond_Score(
+                            score->GetPlayerId(),
+                            (TriggerComparisonType)score->GetComparison(),
+                            score->GetScoreType(),
+                            score->GetQuantity()
+                        );
+                    }
+                    else if (condition->GetType() == IRInstructionType::LowScoreCond)
+                    {
+                        auto lowScore = (IRLowScoreCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(lowScore->GetPlayerId() + 1);
+                        eventTrigger.Cond_LowestScore(lowScore->GetPlayerId(), lowScore->GetScoreType());
+                    }
+                    else if (condition->GetType() == IRInstructionType::HiScoreCond)
+                    {
+                        auto highScore = (IRHiScoreCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(highScore->GetPlayerId() + 1);
+                        eventTrigger.Cond_LowestScore(highScore->GetPlayerId(), highScore->GetScoreType());
+                    }
                     else if (condition->GetType() == IRInstructionType::TimeCond)
                     {
                         auto time = (IRTimeCondInstruction*)condition.get();
@@ -1661,6 +1684,9 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::AccumCond ||
                 instruction->GetType() == IRInstructionType::LeastResCond ||
                 instruction->GetType() == IRInstructionType::MostResCond ||
+                instruction->GetType() == IRInstructionType::ScoreCond ||
+                instruction->GetType() == IRInstructionType::HiScoreCond ||
+                instruction->GetType() == IRInstructionType::LowScoreCond ||
                 instruction->GetType() == IRInstructionType::TimeCond ||
                 instruction->GetType() == IRInstructionType::KillCond ||
                 instruction->GetType() == IRInstructionType::KillMostCond ||
