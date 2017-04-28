@@ -17,7 +17,9 @@ namespace Langums
     class TriggerBuilder
     {
         public:
-        TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerMask);
+        TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerId);
+
+        void SetOwner(uint8_t playerId);
 
         void Cond_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison);
         void Cond_TestSwitch(unsigned int switchId, bool expectedState);

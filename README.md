@@ -269,16 +269,18 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 
 ## Built-in event conditions
 
-| Event prototype                                                 | Description                                           |
-|-----------------------------------------------------------------|-------------------------------------------------------|
-| `bring(Player, Comparison, Quantity, Unit, Location)`           | When a player owns a quantity of units at location.   |
-| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.           |
-| `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.            |
-| `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.             |
-| `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.           |
-| `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.             |
-| `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.     |
-| More to be added ...                                            |                                                       |
+| Event prototype                                                 | Description                                                                   |
+|-----------------------------------------------------------------|-------------------------------------------------------------------------------|
+| `bring(Player, Comparison, Quantity, Unit, Location)`           | When a player owns a quantity of units at location.                           |
+| `accumulate(Player, Comparison, Quantity, ResourceType)`        | When a player owns a quantity of resources.                                   |
+| `elapsed_time(Comparison, Quantity)`                            | When a certain amount of time has elapsed.                                    |
+| `commands(Player, Comparison, Quantity, Unit)`                  | When a player commands a number of units.                                     |
+| `commands_least(Player, Unit, optional: Location)`              | When a player commands the least number of units at an optional location.     |
+| `commands_most(Player, Unit, optional: Location)`               | When a player commands the most number of units at an optional location.      |
+| `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.                                   |
+| `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.                                     |
+| `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.                             |
+| More to be added ...                                            |                                                                               |
 
 ## Preprocessor
 

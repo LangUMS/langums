@@ -6,12 +6,12 @@ namespace Langums
     unsigned int g_RegistersOwnerPlayer = 7;
     std::vector<RegisterDef> g_RegisterMap;
 
-    TriggerBuilder::TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerMask)
-        : m_Address(address), m_Instruction(instruction), m_PlayerMask(playerMask)
+    TriggerBuilder::TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerId)
+        : m_Address(address), m_Instruction(instruction), m_PlayerMask(playerId)
     {
         using namespace CHK;
         m_Trigger.m_ExecutionFlags = 0;
-        m_Trigger.m_ExecutionMask[playerMask - 1] = 1;
+        m_Trigger.m_ExecutionMask[playerId - 1] = 1;
 
         // conditions
 
@@ -24,6 +24,16 @@ namespace Langums
 
         Action_PreserveTrigger();
         m_HasChanges = false;
+    }
+
+    void TriggerBuilder::SetOwner(uint8_t playerId)
+    {
+        for (auto i = 0; i < 28; i++)
+        {
+            m_Trigger.m_ExecutionMask[i] = 0;
+        }
+
+        m_Trigger.m_ExecutionMask[playerId - 1] = 1;
     }
 
     void TriggerBuilder::Cond_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison)
@@ -122,12 +132,42 @@ namespace Langums
 
     void TriggerBuilder::Cond_CommandsLeast(unsigned int playerId, unsigned int unitId, int locationId)
     {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
 
+        if (locationId == -1)
+        {
+            condition.m_Condition = TriggerConditionType::CommandTheLeast;
+        }
+        else
+        {
+            condition.m_Condition = TriggerConditionType::CommandTheLeastAt;
+            condition.m_Location = locationId + 1;
+        }
+        condition.m_UnitId = unitId;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
     }
 
     void TriggerBuilder::Cond_CommandsMost(unsigned int playerId, unsigned int unitId, int locationId)
     {
+        using namespace CHK;
+        auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
 
+        if (locationId == -1)
+        {
+            condition.m_Condition = TriggerConditionType::CommandTheMost;
+        }
+        else
+        {
+            condition.m_Condition = TriggerConditionType::CommandsTheMostAt;
+            condition.m_Location = locationId + 1;
+        }
+        condition.m_UnitId = unitId;
+        condition.m_Group = playerId;
+        condition.m_Flags = 16;
+        m_HasChanges = true;
     }
 
     void TriggerBuilder::Cond_Kills(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)

@@ -213,6 +213,53 @@ namespace Langums
                             EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
                         }
                     }
+                    else if (name == "commands_least" || name == "commands_most")
+                    {
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
+                        }
+
+                        auto playerName = (ASTIdentifier*)arg0.get();
+                        auto playerId = PlayerNameToId(playerName->GetName());
+
+                        auto arg1 = condition->GetArgument(1);
+                        if (arg1->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit type", name));
+                        }
+
+                        auto unitName = (ASTIdentifier*)arg1.get();
+                        auto unitId = UnitNameToId(unitName->GetName());
+                        if (unitId == -1)
+                        {
+                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
+                        }
+
+                        std::string locationName;
+
+                        if (condition->GetChildCount() > 2)
+                        {
+                            auto arg2 = condition->GetArgument(2);
+                            if (arg2->GetType() != ASTNodeType::StringLiteral)
+                            {
+                                throw IRCompilerException(SafePrintf("Something other than a string literal passed as third argument to %(), expected location name", name));
+                            }
+
+                            auto location = (ASTStringLiteral*)arg2.get();
+                            locationName = location->GetValue();
+                        }
+
+                        if (name == "commands_least")
+                        {
+                            EmitInstruction(new IRCmdLeastCondInstruction(playerId, unitId, locationName), m_Instructions);
+                        }
+                        else if (name == "commands_most")
+                        {
+                            EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions);
+                        }
+                    }
                     else if (name == "accumulate")
                     {
                         auto arg0 = condition->GetArgument(0);

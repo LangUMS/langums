@@ -82,16 +82,18 @@ namespace Langums
                     {
                         auto bring = (IRBringCondInstruction*)condition.get();
 
-                        auto locationStringId = m_StringsChunk->FindString(bring->GetLocationName());
+                        auto& locationName = bring->GetLocationName();
+
+                        auto locationStringId = m_StringsChunk->FindString(locationName);
                         if (locationStringId == -1)
                         {
-                            throw CompilerException(SafePrintf("Location \"%\" not found!", bring->GetLocationName()));
+                            throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
                         }
 
                         auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
                         if (locationId == -1)
                         {
-                            throw CompilerException(SafePrintf("Location \"%\" not found!", bring->GetLocationName()));
+                            throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
                         }
 
                         eventTrigger.Cond_Bring(
@@ -123,6 +125,56 @@ namespace Langums
                     {
                         auto cmd = (IRCmdCondInstruction*)condition.get();
                         eventTrigger.Cond_Commands(cmd->GetPlayerId(), (TriggerComparisonType)cmd->GetComparison(), cmd->GetUnitId(), cmd->GetQuantity());
+                    }
+                    else if (condition->GetType() == IRInstructionType::CmdLeastCond)
+                    {
+                        auto cmdLeast = (IRCmdLeastCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(cmdLeast->GetPlayerId() + 1);
+
+                        auto locationId = -1;
+                        auto& locationName = cmdLeast->GetLocationName();
+
+                        if (locationName.length() > 0)
+                        {
+                            auto locationStringId = m_StringsChunk->FindString(locationName);
+                            if (locationStringId == -1)
+                            {
+                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
+                            }
+
+                            locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+                            if (locationId == -1)
+                            {
+                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
+                            }
+                        }
+
+                        eventTrigger.Cond_CommandsLeast(cmdLeast->GetPlayerId(), cmdLeast->GetUnitId(), locationId);
+                    }
+                    else if (condition->GetType() == IRInstructionType::CmdMostCond)
+                    {
+                        auto cmdMost = (IRCmdMostCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(cmdMost->GetPlayerId() + 1);
+
+                        auto locationId = -1;
+                        auto& locationName = cmdMost->GetLocationName();
+
+                        if (locationName.length() > 0)
+                        {
+                            auto locationStringId = m_StringsChunk->FindString(locationName);
+                            if (locationStringId == -1)
+                            {
+                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
+                            }
+
+                            locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+                            if (locationId == -1)
+                            {
+                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
+                            }
+                        }
+
+                        eventTrigger.Cond_CommandsMost(cmdMost->GetPlayerId(), cmdMost->GetUnitId(), locationId);
                     }
                     else if (condition->GetType() == IRInstructionType::KillCond)
                     {
@@ -1459,6 +1511,8 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::KillCond ||
                 instruction->GetType() == IRInstructionType::DeathCond ||
                 instruction->GetType() == IRInstructionType::CmdCond ||
+                instruction->GetType() == IRInstructionType::CmdLeastCond ||
+                instruction->GetType() == IRInstructionType::CmdMostCond ||
                 instruction->GetType() == IRInstructionType::CountdownCond
             )
             {

@@ -1,3 +1,7 @@
+commands_least(Player3, TerranMarine, "TestLocation") => {
+  print("you have the most marines", Player3);
+}
+
 fn spawn_units<T>(T, qty) {
   talking_portrait(T, 5);
   spawn(T, Player1, qty, "TestLocation");

@@ -1750,7 +1750,7 @@ namespace Langums
     {
         public:
         IRCmdLeastCondInstruction(uint8_t playerId, uint8_t unitId, const std::string& locationName) :
-            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::CmdLeastCond) {}
+            m_PlayerId(playerId), m_UnitId(unitId), m_LocationName(locationName), IIRInstruction(IRInstructionType::CmdLeastCond) {}
 
         std::string DebugDump() const
         {
@@ -1782,7 +1782,7 @@ namespace Langums
     {
         public:
         IRCmdMostCondInstruction(uint8_t playerId, uint8_t unitId, const std::string& locationName) :
-            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::CmdMostCond) {}
+            m_PlayerId(playerId), m_UnitId(unitId), m_LocationName(locationName), IIRInstruction(IRInstructionType::CmdMostCond) {}
 
         std::string DebugDump() const
         {
