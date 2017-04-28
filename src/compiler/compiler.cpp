@@ -1810,6 +1810,13 @@ namespace Langums
                     current.Action_PauseGame();
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::NextScen)
+            {
+                auto nextScenario = (IRNextScenInstruction*)instruction.get();
+                auto& name = nextScenario->GetName();
+                auto stringId = m_StringsChunk->InsertString(name);
+                current.Action_SetNextScenario(stringId);
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

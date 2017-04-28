@@ -694,6 +694,23 @@ namespace Langums
         {
             EmitInstruction(new IRPauseGameInstruction(fnName == "unpause_game"), instructions);
         }
+        else if (fnName == "set_next_scenario")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_next_scenario() called without arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException("set_next_scenario() accepts a single string literal argument");
+            }
+
+            auto stringLiteral = (ASTStringLiteral*)arg0.get();
+
+            EmitInstruction(new IRNextScenInstruction(stringLiteral->GetValue()), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

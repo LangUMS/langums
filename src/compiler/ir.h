@@ -97,6 +97,7 @@ namespace Langums
         SetAlly,        // sets alliance status between two players
         SetObj,         // sets the mission objectives
         PauseGame,      // pauses the game (singleplayer)
+        NextScen,       // sets the next scenario (singleplayer)
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -2024,6 +2025,25 @@ namespace Langums
 
         private:
         bool m_Unpause;
+    };
+
+    class IRNextScenInstruction : public IIRInstruction
+    {
+        public:
+        IRNextScenInstruction(const std::string& name) : m_Name(name), IIRInstruction(IRInstructionType::NextScen) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("NEXTSCEN %", m_Name);
+        }
+
+        const std::string& GetName() const
+        {
+            return m_Name;
+        }
+
+        private:
+        std::string m_Name;
     };
 
     class IREventInstruction : public IIRInstruction

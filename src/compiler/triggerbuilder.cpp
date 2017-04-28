@@ -766,6 +766,15 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_SetNextScenario(unsigned int stringId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetNextScenario;
+        action.m_TriggerText = stringId + 1;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Action_MuteUnitSpeech()
     {
         using namespace CHK;

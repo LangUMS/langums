@@ -77,6 +77,7 @@ namespace Langums
         void Action_UnpauseCountdown();
         void Action_PauseGame();
         void Action_UnpauseGame();
+        void Action_SetNextScenario(unsigned int stringId);
         void Action_MuteUnitSpeech();
         void Action_UnmuteUnitSpeech();
         void Action_TalkingPortrait(unsigned int unitId, unsigned int time);

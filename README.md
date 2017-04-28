@@ -262,6 +262,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)         |
 | `pause_game()`                                                         | Pauses the game (singleplayer only)                       |
 | `unpause_game()`                                                       | Unpauses the game (singleplayer only)                     |
+| `set_next_scenario(Text)`                                              | Sets the next map to run (singleplayer only)              |
 | More to be added ...                                                   |                                                           |
 
 ## Built-in event conditions
@@ -919,5 +920,4 @@ Leaderboard Goal (Points)
 Leaderboard (Greed)
 Play WAV
 Transmission
-Set Next Scenario
 ```
