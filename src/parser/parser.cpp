@@ -887,9 +887,22 @@ namespace Langums
         Whitespace();
         Symbol('=');
         Whitespace();
-        auto value = NumberLiteral();
 
-        return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, value));
+        auto c = Peek();
+
+        if (PeekKeyword("true"))
+        {
+            Keyword("true");
+            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 1));
+        }
+
+        if (PeekKeyword("false"))
+        {
+            Keyword("false");
+            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 0));
+        }
+
+        return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, NumberLiteral()));
     }
 
     std::string Parser::Identifier()

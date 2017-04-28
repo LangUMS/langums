@@ -1,6 +1,6 @@
 unit LurkerType1 {
   Health = 10,
-  Burrowed = 1
+  Burrowed = true
 }
 
 fn main() {

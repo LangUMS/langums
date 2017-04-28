@@ -322,7 +322,7 @@ You can mix and match properties from the [UnitProperty](#unitproperty) enumerat
 ```
 unit MyInvincibleUnit {
   Energy = 0,
-  Invincible = 1
+  Invincible = true
 }
 ```
 
@@ -334,9 +334,10 @@ spawn(TerranMarine, Player1, 1, "TestLocation", MyUnitProps);
 
 Here is a full example that spawns a burrowed lurker at 10% health for Player1.
 
+```
 unit LurkerType1 {
   Health = 10,
-  Burrowed = 1
+  Burrowed = true
 }
 
 fn main() {
@@ -346,6 +347,7 @@ fn main() {
     poll_events();
   }
 }
+```
 
 ## Preprocessor
 
