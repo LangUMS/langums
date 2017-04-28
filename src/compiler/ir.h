@@ -87,6 +87,8 @@ namespace Langums
         IncDeaths,      // increments the death count for a given unit
         DecDeaths,      // decrements the death count for a given unit
         Talk,           // shows the unit talking portrait for an amount of time
+        SetDoodad,      // sets the state of a doodad
+        SetInvincible,  // sets invincibility for units
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -1639,6 +1641,82 @@ namespace Langums
         uint32_t m_Time;
     };
 
+    class IRSetDoodadInstruction : public IIRInstruction
+    {
+        public:
+        IRSetDoodadInstruction(uint8_t playerId, unsigned int unitId, const std::string& locationName, CHK::TriggerActionState state) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_LocationName(locationName), m_State(state), IIRInstruction(IRInstructionType::SetDoodad) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        CHK::TriggerActionState GetState() const
+        {
+            return m_State;
+        }
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("SETDOODAD % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_LocationName, (int)m_State);
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        std::string m_LocationName;
+        CHK::TriggerActionState m_State;
+    };
+
+    class IRSetInvincibleInstruction : public IIRInstruction
+    {
+        public:
+        IRSetInvincibleInstruction(uint8_t playerId, unsigned int unitId, const std::string& locationName, CHK::TriggerActionState state) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_LocationName(locationName), m_State(state), IIRInstruction(IRInstructionType::SetInvincible) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        CHK::TriggerActionState GetState() const
+        {
+            return m_State;
+        }
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("SETINVINC % % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_LocationName, (int)m_State);
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        std::string m_LocationName;
+        CHK::TriggerActionState m_State;
+    };
+
     class IREventInstruction : public IIRInstruction
     {
         public:
@@ -2238,7 +2316,9 @@ namespace Langums
         CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        CHK::TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         ModifyType ParseModifyType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+
         int ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,
             std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral);
 

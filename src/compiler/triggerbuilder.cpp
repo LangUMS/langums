@@ -725,4 +725,28 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_SetDoodadState(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetDoodadState;
+        action.m_Arg1 = unitId;
+        action.m_Group = playerId + 1;
+        action.m_Source = locationId + 1;
+        action.m_Modifier = (uint8_t)state;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_SetInvincibility(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetInvincibility;
+        action.m_Arg1 = unitId;
+        action.m_Group = playerId + 1;
+        action.m_Source = locationId + 1;
+        action.m_Modifier = (uint8_t)state;
+        m_HasChanges = true;
+    }
+
 }

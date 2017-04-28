@@ -75,6 +75,8 @@ namespace Langums
         void Action_MuteUnitSpeech();
         void Action_UnmuteUnitSpeech();
         void Action_TalkingPortrait(unsigned int unitId, unsigned int time);
+        void Action_SetDoodadState(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId);
+        void Action_SetInvincibility(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId);
 
         const CHK::Trigger& GetTrigger()
         {

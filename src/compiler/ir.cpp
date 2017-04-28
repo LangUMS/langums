@@ -476,6 +476,44 @@ namespace Langums
             auto time = ParseQuantityArgument(fnCall->GetArgument(2), fnName, 2);
             EmitInstruction(new IRTalkInstruction(playerId, unitId, time * 1000), instructions);
         }
+        else if (fnName == "set_doodad")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_doodad() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 4)
+            {
+                throw IRCompilerException("set_doodad() takes exactly four arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
+            auto state = ParseToggleState(fnCall->GetArgument(2), fnName, 2);
+            auto locationName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
+
+            EmitInstruction(new IRSetDoodadInstruction(playerId, unitId, locationName, state), instructions);
+        }
+        else if (fnName == "set_invincibility")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_invincibility() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 4)
+            {
+                throw IRCompilerException("set_invincibility() takes exactly four arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
+            auto state = ParseToggleState(fnCall->GetArgument(2), fnName, 2);
+            auto locationName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
+
+            EmitInstruction(new IRSetInvincibleInstruction(playerId, unitId, locationName, state), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())
@@ -1687,6 +1725,44 @@ namespace Langums
         else
         {
             throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+        }
+    }
+
+    CHK::TriggerActionState IRCompiler::ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Enable")
+        {
+            return CHK::TriggerActionState::SetSwitch;
+        }
+        else if (name == "Disable")
+        {
+            return CHK::TriggerActionState::ClearSwitch;
+        }
+        else if (name == "Toggle")
+        {
+            return CHK::TriggerActionState::ToggleSwitch;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Enable, Disable or Toggle", argIndex, fnName));
         }
     }
 

@@ -1428,6 +1428,20 @@ namespace Langums
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::SetDoodad)
+            {
+                auto setDoodad = (IRSetDoodadInstruction*)instruction.get();
+                auto locationId = GetLocationIdByName(setDoodad->GetLocationName());
+
+                current.Action_SetDoodadState(setDoodad->GetPlayerId(), setDoodad->GetUnitId(), setDoodad->GetState(), locationId);
+            }
+            else if (instruction->GetType() == IRInstructionType::SetInvincible)
+            {
+                auto setInvincible = (IRSetInvincibleInstruction*)instruction.get();
+                auto locationId = GetLocationIdByName(setInvincible->GetLocationName());
+
+                current.Action_SetInvincibility(setInvincible->GetPlayerId(), setInvincible->GetUnitId(), setInvincible->GetState(), locationId);
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

@@ -26,6 +26,7 @@ Table of Contents
     * [Comparison](#comparison)
     * [Order](#order)
     * [UnitMod](#unitmod)
+    * [State](#state)
     * [Player](#player)
     * [Unit](#unit)
 
@@ -268,6 +269,8 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)           |
 | `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)    |
 | `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.   |
+| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                              |
+| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.       |
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
 | More to be added ...                                                   |                                                          |
 
@@ -471,6 +474,14 @@ Health,
 Energy,
 Shields,
 Hangar
+```
+
+### State
+
+```
+Enable
+Disable
+Toggle
 ```
 
 ### Player
@@ -739,37 +750,35 @@ Factories
 ### Conditions
 
 ```
-Highest Score(Score)
-Lowest Score(Score)
-Score(Player, Comparison, Score, QNumber)
+Highest Score
+Lowest Score
+Score
 ```
 
 ### Actions
 
 ```
-Create Unit with Properties(Player, Unit, Number, Loc, UnitProp)
-Set Mission Objectives(Text)
-Run AI Script(AIScript)
-Run AI Script At Location(AIScript)
-Set Next Scenario(Text) (Single player only)
-Set Doodad State(Player, TUnit, Loc, State)
-Set Invincibility(Player, TUnit, Loc, State)
-Set Alliance Status(Player, AllyStatus)
-Leader Board (Control) (Text, TUnit)
-Leader Board (Control At Location) (Text, TUnit, Loc)
-Leader Board (Resources) (Text, ResType)
-Leader Board (Kills) (Text, TUnit)
-Leader Board (Points) (Text, Score)
-Set Score(Player, Number, Modifier, Score)
-Leaderboard Computer Players(State)
-Leaderboard Goal (Control) (Text, TUnit, Number)
-Leaderboard Goal (Control At Location) (Text, TUnit, Number, Loc)
-Leaderboard Goal (Resources) (Text, TUnit, Number, ResType)
-Leaderboard Goal (Kills) (Text, TUnit, Number)
-Leaderboard Goal (Points) (Text, Number, Score)
-Leaderboard (Greed) (Number)
-Pause Game (Single player only)
-Unpause Game (Single player only)
-Play WAV(Wav, WavTime)
-Transmission(Text, Unit, Loc, Time, Modifier, Wave, WavTime)
+Create Unit with Properties
+Set Score
+Run AI Script
+Run AI Script At Location
+Set Mission Objectives
+Set Alliance Status
+Leader Board (Control)
+Leader Board (Control At Location)
+Leader Board (Resources)
+Leader Board (Kills)
+Leader Board (Points)
+Leaderboard Computer Players
+Leaderboard Goal (Control)
+Leaderboard Goal (Control At Location)
+Leaderboard Goal (Resources)
+Leaderboard Goal (Kills)
+Leaderboard Goal (Points)
+Leaderboard (Greed)
+Play WAV
+Transmission
+Set Next Scenario
+Pause Game
+Unpause Game
 ```
