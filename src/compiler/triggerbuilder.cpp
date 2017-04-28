@@ -645,6 +645,18 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_SetScore(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState actionType, CHK::ScoreType scoreType)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetScore;
+        action.m_Arg1 = (uint16_t)scoreType;
+        action.m_Group = playerId;
+        action.m_Modifier = (uint8_t)actionType;
+        action.m_Arg0 = quantity;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Action_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState actionType)
     {
         using namespace CHK;

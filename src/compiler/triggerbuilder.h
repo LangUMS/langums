@@ -66,6 +66,7 @@ namespace Langums
         void Action_CenterView(unsigned int locationId);
         void Action_Ping(unsigned int locationId);
         void Action_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ResourceType resourceType);
+        void Action_SetScore(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState action, CHK::ScoreType scoreType);
         void Action_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState action);
         void Action_SetCountdown(unsigned int time, CHK::TriggerActionState action);
         void Action_PauseCountdown();

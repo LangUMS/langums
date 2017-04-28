@@ -80,6 +80,9 @@ namespace Langums
         SetResource,    // sets the resource count for a given resource for a given player
         IncResource,    // increments the resource count for a given resource for a given player
         DecResource,    // decrements the resource count for a given resource for a given player
+        SetScore,       // sets the score for a player
+        IncScore,       // increments the score for a player
+        DecScore,       // decrements the score for a player
         SetCountdown,   // sets the countdown timer,
         PauseCountdown, // pauses/ unpauses the countdown timer
         MuteUnitSpeech, // mutes/ unmutes unit speech
@@ -1402,6 +1405,153 @@ namespace Langums
         bool m_IsValueLiteral;
     };
 
+    class IRSetScoreInstruction : public IIRInstruction
+    {
+        public:
+        IRSetScoreInstruction(uint8_t playerId, ScoreType scoreType, uint32_t regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
+            IIRInstruction(IRInstructionType::SetScore) {}
+
+        std::string DebugDump() const
+        {
+            std::string qty;
+            if (m_IsValueLiteral)
+            {
+                qty = SafePrintf("%", m_RegId);
+            }
+            else
+            {
+                qty = RegisterIdToString(m_RegId);
+            }
+
+            return SafePrintf("SETSCORE % % %", PlayersByName[m_PlayerId], (int)m_ScoreType, qty);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+        uint32_t m_RegId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRIncScoreInstruction : public IIRInstruction
+    {
+        public:
+        IRIncScoreInstruction(uint8_t playerId, ScoreType scoreType, uint32_t regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
+            IIRInstruction(IRInstructionType::IncScore) {}
+
+        std::string DebugDump() const
+        {
+            std::string qty;
+            if (m_IsValueLiteral)
+            {
+                qty = SafePrintf("%", m_RegId);
+            }
+            else
+            {
+                qty = RegisterIdToString(m_RegId);
+            }
+
+            return SafePrintf("INCSCORE % % %", PlayersByName[m_PlayerId], (int)m_ScoreType, qty);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+        uint32_t m_RegId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRDecScoreInstruction : public IIRInstruction
+    {
+        public:
+        IRDecScoreInstruction(uint8_t playerId, ScoreType scoreType, uint32_t regId, bool isLiteralValue) :
+            m_PlayerId(playerId), m_ScoreType(scoreType), m_RegId(regId), m_IsValueLiteral(isLiteralValue),
+            IIRInstruction(IRInstructionType::DecScore) {}
+
+        std::string DebugDump() const
+        {
+            std::string qty;
+            if (m_IsValueLiteral)
+            {
+                qty = SafePrintf("%", m_RegId);
+            }
+            else
+            {
+                qty = RegisterIdToString(m_RegId);
+            }
+
+            return SafePrintf("DECSCORE % % %", PlayersByName[m_PlayerId], (int)m_ScoreType, qty);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        ScoreType GetScoreType() const
+        {
+            return m_ScoreType;
+        }
+
+        uint32_t GetRegisterId() const
+        {
+            return m_RegId;
+        }
+
+        bool IsValueLiteral() const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        ScoreType m_ScoreType;
+        uint32_t m_RegId;
+        bool m_IsValueLiteral;
+    };
+
     class IRSetCountdownInstruction : public IIRInstruction
     {
         public:
@@ -2403,6 +2553,7 @@ namespace Langums
         uint32_t ParseAIScriptArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         std::string ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        CHK::ScoreType ParseScoreTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         AllianceStatus ParseAllianceStatusArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);

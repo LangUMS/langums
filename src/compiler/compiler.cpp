@@ -1195,6 +1195,133 @@ namespace Langums
                     m_Triggers.push_back(finishAdd.GetTrigger());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::SetScore)
+            {
+                auto setScore = (IRSetScoreInstruction*)instruction.get();
+                auto playerId = setScore->GetPlayerId();
+
+                if (setScore->IsValueLiteral())
+                {
+                    auto quantity = setScore->GetRegisterId();
+                    current.Action_SetScore(playerId, quantity, TriggerActionState::SetTo, setScore->GetScoreType());
+                }
+                else
+                {
+                    auto regId = setScore->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! SetScore expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.Action_SetScore(playerId, 0, TriggerActionState::SetTo, setScore->GetScoreType());
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.Cond_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.Action_DecReg(regId, i);
+                        current.Action_SetScore(playerId, i, TriggerActionState::Add, setScore->GetScoreType());
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::IncScore)
+            {
+                auto incScore = (IRIncScoreInstruction*)instruction.get();
+                auto playerId = incScore->GetPlayerId();
+
+                if (incScore->IsValueLiteral())
+                {
+                    auto quantity = incScore->GetRegisterId();
+                    current.Action_SetScore(playerId, quantity, TriggerActionState::Add, incScore->GetScoreType());
+                }
+                else
+                {
+                    auto regId = incScore->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! IncScore expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.Cond_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.Action_DecReg(regId, i);
+                        current.Action_SetScore(playerId, i, TriggerActionState::Add, incScore->GetScoreType());
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::DecScore)
+            {
+                auto incScore = (IRIncScoreInstruction*)instruction.get();
+                auto playerId = incScore->GetPlayerId();
+
+                if (incScore->IsValueLiteral())
+                {
+                    auto quantity = incScore->GetRegisterId();
+                    current.Action_SetScore(playerId, quantity, TriggerActionState::Subtract, incScore->GetScoreType());
+                }
+                else
+                {
+                    auto regId = incScore->GetRegisterId();
+                    if (regId != Reg_StackTop)
+                    {
+                        throw CompilerException(SafePrintf("Malformed IR! DecScore expects the quantity on top of the stack."));
+                    }
+
+                    regId = ++m_StackPointer;
+
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto add = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                        add.Cond_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                        add.Action_DecReg(regId, i);
+                        current.Action_SetScore(playerId, i, TriggerActionState::Subtract, incScore->GetScoreType());
+                        m_Triggers.push_back(add.GetTrigger());
+                    }
+
+                    auto finishAdd = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    finishAdd.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    finishAdd.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(finishAdd.GetTrigger());
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::SetCountdown)
             {
                 auto setCountdown = (IRSetCountdownInstruction*)instruction.get();

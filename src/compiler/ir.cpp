@@ -366,6 +366,86 @@ namespace Langums
 
             EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isLiteral), instructions);
         }
+        else if (fnName == "set_score")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_score() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("set_score() takes exactly three arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(1), fnName, 1);
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions);
+        }
+        else if (fnName == "add_score")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("add_score() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("add_score() takes exactly three arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(1), fnName, 1);
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRIncScoreInstruction(playerId, scoreType, regId, isLiteral), instructions);
+        }
+        else if (fnName == "subtract_score")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("subtract_score() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("subtract_score() takes exactly three arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(1), fnName, 1);
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRDecScoreInstruction(playerId, scoreType, regId, isLiteral), instructions);
+        }
+        else if (fnName == "set_score")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_score() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("set_score() takes exactly three arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto scoreType = ParseScoreTypeArgument(fnCall->GetArgument(1), fnName, 1);
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions);
+        }
         else if (fnName == "set_countdown")
         {
             if (!fnCall->HasChildren())
@@ -1701,7 +1781,65 @@ namespace Langums
         }
         else
         {
-            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Minerals or Gas", argIndex, fnName));
+            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Minerals or Gas", name, argIndex, fnName));
+        }
+    }
+
+    CHK::ScoreType IRCompiler::ParseScoreTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected score type", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Total")
+        {
+            return CHK::ScoreType::Total;
+        }
+        else if (name == "Units")
+        {
+            return CHK::ScoreType::Units;
+        }
+        else if (name == "Buildings")
+        {
+            return CHK::ScoreType::Buildings;
+        }
+        else if (name == "UnitsAndBuildings")
+        {
+            return CHK::ScoreType::UnitsAndBuildings;
+        }
+        else if (name == "Kills")
+        {
+            return CHK::ScoreType::Kills;
+        }
+        else if (name == "Razings")
+        {
+            return CHK::ScoreType::Razings;
+        }
+        else if (name == "KillsAndRazings")
+        {
+            return CHK::ScoreType::KillsAndRazings;
+        }
+        else if (name == "Custom")
+        {
+            return CHK::ScoreType::Custom;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected score type", name, argIndex, fnName));
         }
     }
 

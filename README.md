@@ -251,6 +251,9 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
 | `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                           |
+| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                              |
+| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                            |
+| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                    |
 | `center_view(Player, Location)`                                        | Centers the view on a location for a player.             |
 | `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.      |
 | `spawn(Unit, Player, QuantityExpression, Location)`                    | Spawns units at a location.                              |
@@ -517,6 +520,19 @@ Force1
 Force2
 Force3
 Force4
+```
+
+### ScoreType
+
+```
+Total
+Units
+Buildings
+UnitsAndBuildings
+Kills
+Razings
+KillsAndRazings
+Custom
 ```
 
 ### Unit
@@ -818,7 +834,6 @@ Score
 
 ```
 Create Unit with Properties
-Set Score
 Set Mission Objectives
 Leader Board (Control)
 Leader Board (Control At Location)
