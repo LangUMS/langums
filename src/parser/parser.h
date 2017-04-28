@@ -81,6 +81,9 @@ namespace Langums
         std::unique_ptr<IASTNode> EventCondition();
         std::unique_ptr<IASTNode> EventDeclaration();
 
+        std::unique_ptr<IASTNode> UnitProperties();
+        std::unique_ptr<IASTNode> UnitProperty();
+
         OperatorType Operator();
         std::string Identifier();
         int NumberLiteral();

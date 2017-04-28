@@ -53,7 +53,7 @@ namespace Langums
         void Action_Wait(unsigned int milliseconds);
         void Action_Comment(unsigned int stringId);
         void Action_SetSwitch(unsigned int switchId, CHK::TriggerActionState state);
-        void Action_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId);
+        void Action_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId, int propsSlot);
         void Action_KillUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId);
         void Action_RemoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId);
         void Action_MoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int srcLocationId, unsigned int dstLocationId);

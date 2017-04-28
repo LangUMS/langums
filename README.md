@@ -13,6 +13,7 @@ Table of Contents
   * [Event handlers](#event-handlers)
   * [Built-in functions](#built-in-functions)
   * [Built-in event conditions](#built-in-event-conditions)
+  * [Spawning units with properties](#spawning-units-with-properties)
   * [Preprocessor](#preprocessor)
   * [Examples](#examples)
   * [FAQ](#faq)
@@ -30,6 +31,7 @@ Table of Contents
     * [AllianceStatus](#alliancestatus)
     * [Player](#player)
     * [ScoreType](#scoretype)
+    * [UnitProperty](#unitproperty)
     * [Unit](#unit)
     * [AIScript](#aiscript)
 
@@ -244,44 +246,44 @@ fn main() {
 
 Note: Arguments named `QuantityExpression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
 
-| Function prototype                                                     | Description                                              |
-|------------------------------------------------------------------------|----------------------------------------------------------|
-| `poll_events()`                                                        | Runs any associated event handlers.                      |
-| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.               |
-| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
-| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
-| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
-| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                           |
-| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                              |
-| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                            |
-| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                    |
-| `center_view(Player, Location)`                                        | Centers the view on a location for a player.             |
-| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.      |
-| `spawn(Unit, Player, QuantityExpression, Location)`                    | Spawns units at a location.                              |
-| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                     |
-| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                   |
-| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                |
-| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                 |
-| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.        |
-| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                           |
-| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.            |
-| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.              |
-| `set_countdown(Expression)`                                            | Sets the countdown timer.                                |
-| `pause_countdown()`                                                    | Pauses the countdown timer.                              |
-| `unpause_countdown()`                                                  | Unpauses the countdown timer.                            |
-| `mute_unit_speech()`                                                   | Mutes unit speech.                                       |
-| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                     |
-| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)              |
-| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)           |
-| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)    |
-| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.   |
-| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                              |
-| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.       |
-| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                       |
-| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.            |
-| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                             |
-| `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
-| More to be added ...                                                   |                                                          |
+| Function prototype                                                     | Description                                               |
+|------------------------------------------------------------------------|-----------------------------------------------------------|
+| `poll_events()`                                                        | Runs any associated event handlers.                       |
+| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.                |
+| `random()`                                                             | Returns a random value between 0 and 255 (inclusive).     |
+| `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                       |
+| `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                              |
+| `take_resource(Player, ResourceType, QuantityExpression)`              | Takes resources from a player.                            |
+| `set_score(Player, ScoreType, QuantityExpression)`                     | Sets the score of a player.                               |
+| `add_score(Player, ScoreType, QuantityExpression)`                     | Add to the score of a player.                             |
+| `subtract_score(Player, ScoreType, QuantityExpression)`                | Subtracts from the score of a player.                     |
+| `center_view(Player, Location)`                                        | Centers the view on a location for a player.              |
+| `ping(Player, Location)`                                               | Triggers a minimap ping on a location for a player.       |
+| `spawn(Unit, Player, QuantityExpression, Location, optional: Props)`   | Spawns units at a location with optional unit properties. |
+| `kill(Unit, Player, QuantityExpression, optional: Location)`           | Kills units at an optional location.                      |
+| `remove(Unit, Player, QuantityExpression, optional: Location)`         | Removes units at an optional location.                    |
+| `move(Unit, Player, QuantityExpression, SrcLocation, DstLocation)`     | Moves units from one location to another.                 |
+| `order(Unit, Player, Order, SrcLocation, DstLocation)`                 | Orders a unit to move, attack or patrol.                  |
+| `modify(Unit, Player, QuantityExpression, UnitMod, Percent, Location)` | Modifies a unit's HP, SP, energy or hangar count.         |
+| `give(Unit, SrcPlayer, DstPlayer, QuantityExpression, Location)`       | Gives units to another player.                            |
+| `move_loc(Unit, Player, SrcLocation, DstLocation)`                     | Centers DstLocation on a unit at SrcLocation.             |
+| `end(Player, EndCondition)`                                            | Ends the game for Player with EndCondition.               |
+| `set_countdown(Expression)`                                            | Sets the countdown timer.                                 |
+| `pause_countdown()`                                                    | Pauses the countdown timer.                               |
+| `unpause_countdown()`                                                  | Unpauses the countdown timer.                             |
+| `mute_unit_speech()`                                                   | Mutes unit speech.                                        |
+| `unmute_unit_speech()`                                                 | Unmutes unit speech.                                      |
+| `set_deaths(Player, Unit, QuantityExpression)`                         | Sets the death count for a unit. (Caution!)               |
+| `add_deaths(Player, Unit, QuantityExpression)`                         | Adds to the death count for a unit. (Caution!)            |
+| `remove_deaths(Player, Unit, QuantityExpression)`                      | Subtracts from the death count for a unit. (Caution!)     |
+| `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.    |
+| `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                               |
+| `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.        |
+| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                        |
+| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.             |
+| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                              |
+| `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)         |
+| More to be added ...                                                   |                                                           |
 
 ## Built-in event conditions
 
@@ -304,6 +306,46 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `score(Player, ScoreType, Comparison, Quantity)`                | When a player's score reaches a given quantity.                               |
 | `lowest_score(Player, ScoreType)`                               | When a player has the lowest score.                                           |
 | `highest_score(Player, ScoreType)`                              | When a player has the highest score.                                          |
+
+## Spawning units with properties
+
+Due to the way map data is structured spawning units with different properties like health and energy is not straightforward. LangUMS offers a flexible way to deal with this issue. Using the `unit` construct you can declare up to 64 different property lists. A unit property declaration that sets the unit health to 50% is shown below.
+
+```
+unit MyUnitProps {
+  Health = 50
+}
+```
+
+You can mix and match properties from the [UnitProperty](#unitproperty) enumeration e.g. here is a unit property declaration that sets the unit's energy to 0% and makes it invincible.
+
+```
+unit MyInvincibleUnit {
+  Energy = 0,
+  Invincible = 1
+}
+```
+
+After you have your unit property declarations you can use them to spawn units by passing the name as fifth property to the `spawn()` built-in e.g.
+
+```
+spawn(TerranMarine, Player1, 1, "TestLocation", MyUnitProps);
+```
+
+Here is a full example that spawns a burrowed lurker at 10% health for Player1.
+
+unit LurkerType1 {
+  Health = 10,
+  Burrowed = 1
+}
+
+fn main() {
+  spawn(ZergLurker, Player1, 1, "TestLocation", LurkerType1);
+  
+  while (true) {
+    poll_events();
+  }
+}
 
 ## Preprocessor
 
@@ -547,6 +589,21 @@ Kills
 Razings
 KillsAndRazings
 Custom
+```
+
+### UnitProperty
+
+```
+HitPoints (or Health)
+ShieldPoints (or Shields)
+Energy
+ResourceAmount
+HangarCount
+Cloaked
+Burrowed
+InTransit
+Hallucinated
+Invincible
 ```
 
 ### Unit
@@ -839,7 +896,6 @@ ExitTransport
 #### Built-ins
 
 ```
-Create Unit with Properties
 Leader Board (Control)
 Leader Board (Control At Location)
 Leader Board (Resources)

@@ -123,13 +123,15 @@ namespace Langums
             }
             else if (PeekKeyword("global"))
             {
-                auto globalDeclaration = GlobalVariableDeclaration();
-                unit->AddChild(std::move(globalDeclaration));
+                unit->AddChild(GlobalVariableDeclaration());
+            }
+            else if (PeekKeyword("unit"))
+            {
+                unit->AddChild(UnitProperties());
             }
             else
             {
-                auto eventDeclaration = EventDeclaration();
-                unit->AddChild(std::move(eventDeclaration));
+                unit->AddChild(EventDeclaration());
             }
         }
 
@@ -845,6 +847,49 @@ namespace Langums
         eventDeclaration->AddChild(BlockStatement());
 
         return std::unique_ptr<IASTNode>(eventDeclaration);
+    }
+
+    std::unique_ptr<IASTNode> Parser::UnitProperties()
+    {
+        Keyword("unit");
+        Whitespace();
+
+        auto name = Identifier();
+
+        Whitespace();
+        Symbol('{');
+        Whitespace();
+
+        auto unitProperties = new ASTUnitProperties(name);
+
+        unitProperties->AddChild(UnitProperty());
+        Whitespace();
+
+        auto c = Peek();
+        while (c == ',')
+        {
+            Next();
+            Whitespace();
+            unitProperties->AddChild(UnitProperty());
+            Whitespace();
+            c = Peek();
+        }
+
+        Symbol('}');
+        Whitespace();
+
+        return std::unique_ptr<IASTNode>(unitProperties);
+    }
+
+    std::unique_ptr<IASTNode> Parser::UnitProperty()
+    {
+        auto name = Identifier();
+        Whitespace();
+        Symbol('=');
+        Whitespace();
+        auto value = NumberLiteral();
+
+        return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, value));
     }
 
     std::string Parser::Identifier()

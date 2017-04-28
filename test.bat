@@ -8,3 +8,4 @@ langums.exe --src test/test.scx --dst test_7.scx --lang test/test7.l
 langums.exe --src test/test.scx --dst test_8.scx --lang test/test8.l
 langums.exe --src test/test.scx --dst test_9.scx --lang test/test9.l
 langums.exe --src test/test.scx --dst test_10.scx --lang test/test10.l
+langums.exe --src test/test.scx --dst test_11.scx --lang test/test_11.l

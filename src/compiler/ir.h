@@ -114,7 +114,10 @@ namespace Langums
         KillMostCond,   // Player hast the most units killed
         DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
-        OpponentsCond  // Opponents condition
+        OpponentsCond,  // Opponents condition
+        // unit properties
+        Unit,
+        UnitProp
     };
 
     enum class ConditionComparison
@@ -722,18 +725,24 @@ namespace Langums
     class IRSpawnInstruction : public IIRInstruction
     {
         public:
-        IRSpawnInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName) :
-            m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral), m_LocationName(locationName),
-            IIRInstruction(IRInstructionType::Spawn) {}
+        IRSpawnInstruction(uint8_t playerId, uint8_t unitId, uint32_t regId, bool isValueLiteral, const std::string& locationName, int propsSlot) :
+            m_PlayerId(playerId), m_UnitId(unitId), m_RegId(regId), m_IsLiteralValue(isValueLiteral),
+            m_LocationName(locationName), m_PropsSlot(propsSlot), IIRInstruction(IRInstructionType::Spawn) {}
 
         std::string DebugDump() const
         {
-            if (m_IsLiteralValue)
+            std::string props;
+            if (m_PropsSlot != -1)
             {
-                return SafePrintf("SPAWN % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName);
+                props = SafePrintf("[SLOT %]", m_PropsSlot);
             }
 
-            return SafePrintf("SPAWN % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName);
+            if (m_IsLiteralValue)
+            {
+                return SafePrintf("SPAWN % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_RegId, m_LocationName, props);
+            }
+
+            return SafePrintf("SPAWN % % % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], RegisterIdToString(m_RegId), m_LocationName, props);
         }
 
         uint8_t GetPlayerId() const
@@ -761,12 +770,18 @@ namespace Langums
             return m_LocationName;
         }
 
+        int GetPropsSlot() const
+        {
+            return m_PropsSlot;
+        }
+
         private:
         uint8_t m_PlayerId;
         uint8_t m_UnitId;
         uint32_t m_RegId;
         bool m_IsLiteralValue = false;
         std::string m_LocationName;
+        int m_PropsSlot;
     };
 
     class IRKillInstruction : public IIRInstruction
@@ -2550,6 +2565,102 @@ namespace Langums
         uint32_t m_Quantity;
     };
 
+    class IRUnitInstruction : public IIRInstruction
+    {
+        public:
+        IRUnitInstruction(unsigned int propertyCount) :
+            m_PropertyCount(propertyCount), IIRInstruction(IRInstructionType::Unit) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("UNIT %", m_PropertyCount);
+        }
+
+        unsigned int GetPropertyCount() const
+        {
+            return m_PropertyCount;
+        }
+
+        private:
+        unsigned int m_PropertyCount;
+    };
+
+    enum class UnitPropType
+    {
+        HitPoints = 0,
+        ShieldPoints,
+        Energy,
+        ResourceAmount,
+        HangarCount,
+        Cloaked,
+        Burrowed,
+        InTransit,
+        Hallucinated,
+        Invincible
+    };
+
+    class IRUnitPropInstruction : public IIRInstruction
+    {
+        public:
+        IRUnitPropInstruction(UnitPropType propType, unsigned int value) :
+            m_PropType(propType), m_Value(value), IIRInstruction(IRInstructionType::UnitProp) {}
+
+        std::string DebugDump() const
+        {
+            std::string type;
+
+            switch (m_PropType)
+            {
+            case UnitPropType::HitPoints:
+                type = "HitPoints";
+                break;
+            case UnitPropType::ShieldPoints:
+                type = "ShieldPoints";
+                break;
+            case UnitPropType::Energy:
+                type = "Energy";
+                break;
+            case UnitPropType::ResourceAmount:
+                type = "ResourceAmount";
+                break;
+            case UnitPropType::HangarCount:
+                type = "HangarCount";
+                break;
+            case UnitPropType::Cloaked:
+                type = "Cloaked";
+                break;
+            case UnitPropType::Burrowed:
+                type = "Burrowed";
+                break;
+            case UnitPropType::InTransit:
+                type = "InTransit";
+                break;
+            case UnitPropType::Hallucinated:
+                type = "Hallucinated";
+                break;
+            case UnitPropType::Invincible:
+                type = "Invincible";
+                break;
+            }
+
+            return SafePrintf("PROP % %", type, m_Value);
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        UnitPropType GetPropType() const
+        {
+            return m_PropType;
+        }
+
+        private:
+        UnitPropType m_PropType;
+        unsigned int m_Value;
+    };
+
     class IRCompilerException : public std::exception
     {
         public:
@@ -2680,6 +2791,7 @@ namespace Langums
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         ModifyType ParseModifyType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        UnitPropType ParseUnitPropType(const std::string& propName);
 
         int ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,
             std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral);
@@ -2687,6 +2799,8 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
         std::unordered_map<std::string, ASTFunctionDeclaration*> m_FunctionDeclarations;
         std::unordered_map<ASTFunctionDeclaration*, unsigned int> m_FunctionIndices;
+
+        std::unordered_map<std::string, unsigned int> m_UnitProperties;
 
         RegisterAliases m_GlobalAliases;
 

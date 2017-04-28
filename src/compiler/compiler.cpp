@@ -51,6 +51,16 @@ namespace Langums
             throw CompilerException("No locations chunk found in scenario file");
         }
 
+        m_CuwpChunk = &chk.GetFirstChunk<CHKCuwpChunk>("UPRP");
+        if (m_CuwpChunk == nullptr)
+        {
+            throw CompilerException("No CUWP slots chunk found in scenario file");
+        }
+
+        m_CuwpUsedChunk = &chk.GetFirstChunk<CHKCuwpUsedChunk>("UPUS");
+
+        auto nextCuwpSlot = 0;
+
         m_StackPointer = g_RegisterMap.size() - 1;
 
         for (auto i = 0u; i < instructions.size(); i++) // emit event triggers first
@@ -58,7 +68,112 @@ namespace Langums
             auto& instruction = instructions[i];
             auto type = instruction->GetType();
             
-            if (type == IRInstructionType::Event)
+            if (type == IRInstructionType::Unit)
+            {
+                auto unit = (IRUnitInstruction*)instruction.get();
+                auto propsCount = unit->GetPropertyCount();
+                if (propsCount == 0)
+                {
+                    throw CompilerException("Malformed input. Unit with zero properties");
+                }
+
+                auto slotIndex = nextCuwpSlot++;
+                if (m_CuwpUsedChunk != nullptr)
+                {
+                    slotIndex = m_CuwpUsedChunk->FindFreeSlot();
+
+                    if (slotIndex == -1)
+                    {
+                        throw CompilerException("All 64 unit slots are full");
+                    }
+
+                    m_CuwpUsedChunk->SetUsed(slotIndex, true);
+                }
+
+                auto slot = m_CuwpChunk->GetSlot(slotIndex);
+                memset(slot, 0, sizeof(CUWPSlot));
+
+                slot->m_OwnerId = 255;
+                slot->m_ValidSpecialProperties = 24;
+
+                i++;
+
+                for (auto q = 0u; q < propsCount; q++)
+                {
+                    auto prop = (IRUnitPropInstruction*)instructions[i].get();
+                    auto propType = prop->GetPropType();
+                    auto value = prop->GetValue();
+
+                    if (propType == UnitPropType::HitPoints)
+                    {
+                        slot->m_HitPoints = std::min(100u, value);
+                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::HitPointsIsValid;
+                    }
+                    else if (propType == UnitPropType::ShieldPoints)
+                    {
+                        slot->m_ShieldPoints = std::min(100u, value);
+                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::ShieldPointsIsValid;
+                    }
+                    else if (propType == UnitPropType::Energy)
+                    {
+                        slot->m_Energy = std::min(100u, value);
+                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::EnergyIsValid;
+                    }
+                    else if (propType == UnitPropType::ResourceAmount)
+                    {
+                        slot->m_ResourceAmount = value;
+                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::ResourceAmountIsValid;
+                    }
+                    else if (propType == UnitPropType::HangarCount)
+                    {
+                        slot->m_HangarCount = value;
+                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::HangarCountIsValid;
+                    }
+                    else if (propType == UnitPropType::Cloaked)
+                    {
+                        if (value)
+                        {
+                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Cloaked;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::CloakIsValid;
+                        }
+                    }
+                    else if (propType == UnitPropType::Burrowed)
+                    {
+                        if (value)
+                        {
+                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Burrowed;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::BurrowIsValid;
+                        }
+                    }
+                    else if (propType == UnitPropType::InTransit)
+                    {
+                        if (value)
+                        {
+                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::InTransit;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::InTransitIsValid;
+                        }
+                    }
+                    else if (propType == UnitPropType::Hallucinated)
+                    {
+                        if (value)
+                        {
+                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Hallucinated;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::HallucinatedIsValid;
+                        }
+                    }
+                    else if (propType == UnitPropType::Invincible)
+                    {
+                        if (value)
+                        {
+                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Invincible;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::InvincibleIsValid;
+                        }
+                    }
+
+                    i++;
+                }
+            }
+            else if (type == IRInstructionType::Event)
             {
                 auto evnt = (IREventInstruction*)instruction.get();
                 auto conditionsCount = evnt->GetConditionsCount();
@@ -683,12 +798,13 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::Spawn)
             {
                 auto spawn = (IRSpawnInstruction*)instruction.get();
+                auto unitSlot = spawn->GetPropsSlot();
 
                 auto locationId = GetLocationIdByName(spawn->GetLocationName());
                 
                 if (spawn->IsValueLiteral())
                 {
-                    current.Action_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), spawn->GetRegisterId(), locationId);
+                    current.Action_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), spawn->GetRegisterId(), locationId, unitSlot);
                 }
                 else
                 {
@@ -712,7 +828,7 @@ namespace Langums
                         auto spawnTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
                         spawnTrigger.Cond_TestReg(regId, i, TriggerComparisonType::AtLeast);
                         spawnTrigger.Action_DecReg(regId, i);
-                        spawnTrigger.Action_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), i, locationId);
+                        spawnTrigger.Action_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), i, locationId, unitSlot);
                         m_Triggers.push_back(spawnTrigger.GetTrigger());
                     }
 
@@ -1685,6 +1801,8 @@ namespace Langums
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||
+                instruction->GetType() == IRInstructionType::Unit ||
+                instruction->GetType() == IRInstructionType::UnitProp ||
                 instruction->GetType() == IRInstructionType::Event ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||

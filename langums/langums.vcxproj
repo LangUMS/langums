@@ -188,6 +188,7 @@
     <ClInclude Include="..\src\libchk\chk.h" />
     <ClInclude Include="..\src\libchk\constants.h" />
     <ClInclude Include="..\src\libchk\cuwpchunk.h" />
+    <ClInclude Include="..\src\libchk\cuwpusedchunk.h" />
     <ClInclude Include="..\src\libchk\dimchunk.h" />
     <ClInclude Include="..\src\libchk\enums.h" />
     <ClInclude Include="..\src\libchk\ichunk.h" />

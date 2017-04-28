@@ -61,6 +61,8 @@ namespace Langums
         CHK::File* m_File = nullptr;
         CHK::CHKStringsChunk* m_StringsChunk = nullptr;
         CHK::CHKLocationsChunk* m_LocationsChunk = nullptr;
+        CHK::CHKCuwpChunk* m_CuwpChunk = nullptr;
+        CHK::CHKCuwpUsedChunk* m_CuwpUsedChunk = nullptr;
 
         std::vector<CHK::Trigger> m_Triggers;
         std::set<IIRInstruction*> m_JumpTargets;

@@ -364,5 +364,8 @@
     <ClInclude Include="..\src\libchk\cuwpchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libchk\cuwpusedchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

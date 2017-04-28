@@ -14,6 +14,7 @@
 #include "ownrchunk.h"
 #include "dimchunk.h"
 #include "cuwpchunk.h"
+#include "cuwpusedchunk.h"
 
 namespace CHK
 {

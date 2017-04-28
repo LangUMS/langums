@@ -438,12 +438,21 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::Action_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
+    void TriggerBuilder::Action_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId, int propsSlot)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
 
-        action.m_ActionType = TriggerActionType::CreateUnit;
+        if (propsSlot == -1)
+        {
+            action.m_ActionType = TriggerActionType::CreateUnit;
+        }
+        else
+        {
+            action.m_ActionType = TriggerActionType::CreateUnitWithProperties;
+            action.m_Arg0 = propsSlot + 1;
+        }
+
         action.m_Source = locationId + 1;
         action.m_Group = playerId;
         action.m_Arg1 = unitId;

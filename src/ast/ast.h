@@ -44,7 +44,9 @@ namespace Langums
         ReturnStatement,
         VariableDeclaration,
         EventCondition,
-        EventDeclaration
+        EventDeclaration,
+        UnitProperties,
+        UnitProperty
     };
 
     class IASTNode
@@ -411,7 +413,7 @@ namespace Langums
         {
             if (index >= (int)GetChildCount() - 1)
             {
-                return GetChild(999); // intentional, will return null
+                return GetChild(-1); // intentional, will return null
             }
 
             return GetChild(index);
@@ -421,11 +423,53 @@ namespace Langums
         {
             return GetChild(GetChildCount() - 1);
         }
+    };
+
+    class ASTUnitProperties : public IASTNode
+    {
+        public:
+        ASTUnitProperties(const std::string& name) :
+            m_Name(name), IASTNode(ASTNodeType::UnitProperties) {}
+
+        unsigned int GetPropertiesCount() const
+        {
+            return GetChildCount();
+        }
+
+        const std::shared_ptr<IASTNode>& GetProperty(int index) const
+        {
+            return GetChild(index);
+        }
+
+        const std::string& GetName() const
+        {
+            return m_Name;
+        }
 
         private:
         std::string m_Name;
     };
 
+    class ASTUnitProperty : public IASTNode
+    {
+        public:
+        ASTUnitProperty(const std::string& name, unsigned int value) :
+            m_Name(name), m_Value(value), IASTNode(ASTNodeType::UnitProperty) {}
+
+        const std::string& GetName() const
+        {
+            return m_Name;
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        private:
+        std::string m_Name;
+        unsigned int m_Value;
+    };
 
 }
 

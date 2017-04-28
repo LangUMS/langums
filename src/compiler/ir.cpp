@@ -22,6 +22,8 @@ namespace Langums
 
         auto& unitNodes = ast->GetChildren();
 
+        auto nextUnitSlot = 0;
+
         for (auto& node : unitNodes)
         {
             if (node->GetType() == ASTNodeType::FunctionDeclaration)
@@ -35,6 +37,29 @@ namespace Langums
                 }
 
                 m_FunctionDeclarations.insert(std::make_pair(name, fn));
+            }
+            else if (node->GetType() == ASTNodeType::UnitProperties)
+            {
+                auto unitProps = (ASTUnitProperties*)node.get();
+                auto& name = unitProps->GetName();
+
+                if (m_UnitProperties.find(name) != m_UnitProperties.end())
+                {
+                    throw IRCompilerException(SafePrintf("Duplicate unit properties declaration \"%\"", name));
+                }
+
+                m_UnitProperties.insert(std::make_pair(name, nextUnitSlot++));
+
+                auto propsCount = unitProps->GetPropertiesCount();
+                EmitInstruction(new IRUnitInstruction(propsCount), m_Instructions);
+
+                for (auto i = 0u; i < propsCount; i++)
+                {
+                    auto unitProp = (ASTUnitProperty*)unitProps->GetProperty(i).get();
+                    auto propType = ParseUnitPropType(unitProp->GetName());
+                    
+                    EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions);
+                }
             }
         }
 
@@ -739,9 +764,9 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
             }
 
-            if (fnName == "spawn" && fnCall->GetChildCount() != 4)
+            if (fnName == "spawn" && (fnCall->GetChildCount() < 4 || fnCall->GetChildCount() > 5))
             {
-                throw IRCompilerException(SafePrintf("%() takes exactly 4 arguments", fnName));
+                throw IRCompilerException(SafePrintf("%() takes 4 or 5 arguments", fnName));
             }
             else if (fnName == "kill" && (fnCall->GetChildCount() < 3 || fnCall->GetChildCount() > 4))
             {
@@ -759,14 +784,33 @@ namespace Langums
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
             
             std::string locName;
-            if (fnCall->GetChildCount() == 4)
+            if (fnCall->GetChildCount() >= 4)
             {
                 locName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
             }
 
             if (fnName == "spawn")
             {
-                EmitInstruction(new IRSpawnInstruction(playerId, unitId, regId, isLiteral, locName), instructions);
+                auto propsSlot = -1;
+                if (fnCall->GetChildCount() == 5)
+                {
+                    auto arg4 = fnCall->GetArgument(4);
+                    if (arg4->GetType() != ASTNodeType::Identifier)
+                    {
+                        throw IRCompilerException(SafePrintf("Invalid argument type for argument 5 in call to \"%\", expected unit slot name", fnName));
+                    }
+
+                    auto& slotName = ((ASTIdentifier*)arg4.get())->GetName();
+
+                    if (m_UnitProperties.find(slotName) == m_UnitProperties.end())
+                    {
+                        throw IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument 5 in call to \"%\", slot with such name does not exist", slotName, fnName));
+                    }
+
+                    propsSlot = m_UnitProperties[slotName];
+                }
+
+                EmitInstruction(new IRSpawnInstruction(playerId, unitId, regId, isLiteral, locName, propsSlot), instructions);
             }
             else if (fnName == "kill")
             {
@@ -2075,6 +2119,52 @@ namespace Langums
         {
             throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Health, Energy, Shields or Hangar", argIndex, fnName));
         }
+    }
+
+    UnitPropType IRCompiler::ParseUnitPropType(const std::string& propName)
+    {
+        if (propName == "HitPoints" || propName == "Health")
+        {
+            return UnitPropType::HitPoints;
+        }
+        else if (propName == "ShieldPoints" || propName == "Shields")
+        {
+            return UnitPropType::ShieldPoints;
+        }
+        else if (propName == "Energy")
+        {
+            return UnitPropType::Energy;
+        }
+        else if (propName == "ResourceAmount")
+        {
+            return UnitPropType::ResourceAmount;
+        }
+        else if (propName == "HangarCount")
+        {
+            return UnitPropType::HangarCount;
+        }
+        else if (propName == "Cloaked")
+        {
+            return UnitPropType::Cloaked;
+        }
+        else if (propName == "Burrowed")
+        {
+            return UnitPropType::Burrowed;
+        }
+        else if (propName == "InTransit")
+        {
+            return UnitPropType::InTransit;
+        }
+        else if (propName == "Hallucinated")
+        {
+            return UnitPropType::Hallucinated;
+        }
+        else if (propName == "Invincible")
+        {
+            return UnitPropType::Invincible;
+        }
+
+        throw new IRCompilerException(SafePrintf("Invalid unit property type \"%\"", propName));
     }
 
     int IRCompiler::ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,
