@@ -763,7 +763,7 @@ namespace CHK
         "MAX"
     };
 
-    const std::string PlayersByName[12] = {
+    const std::string PlayersByName[27] = {
         "Player1",
         "Player2",
         "Player3",
@@ -775,7 +775,22 @@ namespace CHK
         "Player9",
         "Player10",
         "Player11",
-        "Player12"
+        "Player12",
+        "None",
+        "CurrentPlayer",
+        "Foes",
+        "Allies",
+        "NeutralPlayers",
+        "AllPlayers",
+        "Force1",
+        "Force2",
+        "Force3",
+        "Force4",
+        "Unused1",
+        "Unused2",
+        "Unused3",
+        "Unused4",
+        "NonAlliedVictoryPlayers"
     };
 
     const std::string ComparisonTypeByName[3] = {
