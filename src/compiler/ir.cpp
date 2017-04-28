@@ -532,6 +532,19 @@ namespace Langums
 
             EmitInstruction(new IRAIScriptInstruction(playerId, scriptName, locationName), instructions);
         }
+        else if (fnName == "set_alliance")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_alliance() called without arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto targetPlayerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            auto status = ParseAllianceStatusArgument(fnCall->GetArgument(2), fnName, 2);
+
+            EmitInstruction(new IRSetAllyInstruction(playerId, targetPlayerId, status), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())
@@ -1674,7 +1687,6 @@ namespace Langums
             name = identifier->GetName();
         }
 
-        CHK::ResourceType type;
         if (name == "Minerals" || name == "Ore")
         {
             return CHK::ResourceType::Ore;
@@ -1691,8 +1703,44 @@ namespace Langums
         {
             throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Minerals or Gas", argIndex, fnName));
         }
+    }
 
-        return type;
+    AllianceStatus IRCompiler::ParseAllianceStatusArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Ally")
+        {
+            return AllianceStatus::Ally;
+        }
+        else if (name == "Enemy")
+        {
+            return AllianceStatus::Enemy;
+        }
+        else if (name == "AlliedVictory")
+        {
+            return AllianceStatus::AlliedVictory;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value \"%\" for argument % in call to \"%\", expected Ally, Enemy or AlliedVictory", name, argIndex, fnName));
+        }
     }
 
     EndGameType IRCompiler::ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)

@@ -1457,7 +1457,7 @@ namespace Langums
 
                 if (playerId + 1 == m_TriggersOwner)
                 {
-                    current.Action_RunAIScript(playerId + 1, aiScript->GetScriptName(), locationId);
+                    current.Action_RunAIScript(playerId, aiScript->GetScriptName(), locationId);
                 }
                 else
                 {
@@ -1479,11 +1479,50 @@ namespace Langums
                         aiTrigger.SetExecuteForAllPlayers();
                     }
 
-                    aiTrigger.Action_RunAIScript(playerId + 1, aiScript->GetScriptName(), locationId);
+                    aiTrigger.Action_RunAIScript(playerId, aiScript->GetScriptName(), locationId);
 
                     auto retAddress = nextAddress++;
                     aiTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(aiTrigger.GetTrigger());
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::SetAlly)
+            {
+                auto setAlly = (IRSetAllyInstruction*)instruction.get();
+
+                auto playerId = setAlly->GetPlayerId();
+                auto targetPlayerId = setAlly->GetTargetPlayerId();
+
+                if (playerId + 1 == m_TriggersOwner)
+                {
+                    current.Action_SetAllianceStatus(playerId, targetPlayerId, setAlly->GetAllianceStatus());
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
+                    auto allyTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+
+                    if (all)
+                    {
+                        allyTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    allyTrigger.Action_SetAllianceStatus(playerId, targetPlayerId, setAlly->GetAllianceStatus());
+
+                    auto retAddress = nextAddress++;
+                    allyTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(allyTrigger.GetTrigger());
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }

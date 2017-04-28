@@ -78,6 +78,7 @@ namespace Langums
         void Action_SetDoodadState(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId);
         void Action_SetInvincibility(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState state, unsigned int locationId);
         void Action_RunAIScript(unsigned int playerId, unsigned int scriptName, int locationId);
+        void Action_SetAllianceStatus(unsigned int playerId, unsigned int targetPlayerId, AllianceStatus status);
 
         const CHK::Trigger& GetTrigger()
         {

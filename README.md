@@ -27,6 +27,7 @@ Table of Contents
     * [Order](#order)
     * [UnitMod](#unitmod)
     * [State](#state)
+    * [AllianceStatus](#alliancestatus)
     * [Player](#player)
     * [Unit](#unit)
     * [AIScript](#aiscript)
@@ -272,7 +273,8 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `talking_portrait(Player, Unit, Seconds)`                              | Shows the unit talking portrait for an amount of time.   |
 | `set_doodad(Player, Unit, State, Location)`                            | Sets/ toggles doodad state.                              |
 | `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.       |
-| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                       |              
+| `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                       |
+| `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.            |
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
 | More to be added ...                                                   |                                                          |
 
@@ -484,6 +486,14 @@ Hangar
 Enable
 Disable
 Toggle
+```
+
+### AllianceStatus
+
+```
+Ally
+Enemy
+AlliedVictory
 ```
 
 ### Player
@@ -810,7 +820,6 @@ Score
 Create Unit with Properties
 Set Score
 Set Mission Objectives
-Set Alliance Status
 Leader Board (Control)
 Leader Board (Control At Location)
 Leader Board (Resources)

@@ -90,6 +90,7 @@ namespace Langums
         SetDoodad,      // sets the state of a doodad
         SetInvincible,  // sets invincibility for units
         AIScript,       // runs an ai script
+        SetAlly,        // sets alliance status between two players
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -1751,6 +1752,59 @@ namespace Langums
         std::string m_LocationName;
     };
 
+    enum class AllianceStatus
+    {
+        Enemy = 0,
+        Ally,
+        AlliedVictory
+    };
+
+    class IRSetAllyInstruction : public IIRInstruction
+    {
+        public:
+        IRSetAllyInstruction(uint8_t playerId, uint8_t targetPlayerId, AllianceStatus status) :
+            m_PlayerId(playerId), m_TargetPlayerId(targetPlayerId), m_Status(status), IIRInstruction(IRInstructionType::SetAlly) {}
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetTargetPlayerId() const
+        {
+            return m_TargetPlayerId;
+        }
+
+        AllianceStatus GetAllianceStatus() const
+        {
+            return m_Status;
+        }
+
+        std::string DebugDump() const
+        {
+            std::string status;
+            switch (m_Status)
+            {
+            case AllianceStatus::Ally:
+                status = "[ALLY]";
+                break;
+            case AllianceStatus::Enemy:
+                status = "[ENEMY]";
+                break;
+            case AllianceStatus::AlliedVictory:
+                status = "[ALLIED VICTORY]";
+                break;
+            }
+
+            return SafePrintf("SETALLY % % %", CHK::PlayersByName[m_PlayerId], CHK::PlayersByName[m_TargetPlayerId], status);
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_TargetPlayerId;
+        AllianceStatus m_Status;
+    };
+
     class IREventInstruction : public IIRInstruction
     {
         public:
@@ -2349,6 +2403,7 @@ namespace Langums
         uint32_t ParseAIScriptArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         std::string ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        AllianceStatus ParseAllianceStatusArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);

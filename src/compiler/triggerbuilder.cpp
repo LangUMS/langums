@@ -769,4 +769,14 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_SetAllianceStatus(unsigned int playerId, unsigned int targetPlayerId, AllianceStatus status)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::SetAllianceStatus;
+        action.m_Group = targetPlayerId;
+        action.m_Arg1 = (uint16_t)status;
+        m_HasChanges = true;
+    }
+
 }
