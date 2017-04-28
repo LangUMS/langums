@@ -648,6 +648,23 @@ namespace Langums
 
             EmitInstruction(new IRSetAllyInstruction(playerId, targetPlayerId, status), instructions);
         }
+        else if (fnName == "set_mission_objectives")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_mission_objectives() called without arguments");
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException("set_mission_objectives() accepts a single string literal argument");
+            }
+
+            auto stringLiteral = (ASTStringLiteral*)arg0.get();
+
+            EmitInstruction(new IRSetObjInstruction(stringLiteral->GetValue()), instructions);
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

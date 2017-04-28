@@ -380,6 +380,17 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_SetMissionObjectives(unsigned int stringId)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+
+        action.m_ActionType = TriggerActionType::SetMissionObjectives;
+        action.m_TriggerText = stringId + 1;
+        action.m_Flags = 4;
+        m_HasChanges = true;
+    }
+
     void TriggerBuilder::Action_JumpTo(unsigned int address)
     {
         Action_SetReg(Reg_InstructionCounter, address);

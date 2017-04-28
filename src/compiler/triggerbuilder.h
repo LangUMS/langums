@@ -47,6 +47,7 @@ namespace Langums
         void Action_IncReg(unsigned int regId, int amount);
         void Action_DecReg(unsigned int regId, int amount);
         void Action_DisplayMsg(unsigned int stringId);
+        void Action_SetMissionObjectives(unsigned int stringId);
         void Action_JumpTo(unsigned int address);
         void Action_PreserveTrigger();
         void Action_Wait(unsigned int milliseconds);

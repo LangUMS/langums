@@ -1676,6 +1676,12 @@ namespace Langums
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::SetObj)
+            {
+                auto setObj = (IRSetObjInstruction*)instruction.get();
+                auto stringId = m_StringsChunk->InsertString(setObj->GetText());
+                current.Action_SetMissionObjectives(stringId);
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

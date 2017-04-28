@@ -247,7 +247,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | Function prototype                                                     | Description                                              |
 |------------------------------------------------------------------------|----------------------------------------------------------|
 | `poll_events()`                                                        | Runs any associated event handlers.                      |
-| `print(String, optional: Player)`                                      | Prints a message, defaults to all players.               |
+| `print(Text, optional: Player)`                                        | Prints a message, defaults to all players.               |
 | `rnd256()`                                                             | Returns a random value between 0 and 255 (inclusive).    |
 | `set_resource(Player, ResourceType, QuantityExpression)`               | Sets the resource count for player.                      |
 | `add_resource(Player, ResourceType, QuantityExpression)`               | Gives resources to a player.                             |
@@ -279,6 +279,7 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `set_invincibility(Player, Unit, State, Location)`                     | Sets/ toggles invincibility for units at location.       |
 | `run_ai_script(Player, AIScript, optional: Location)`                  | Runs an AI script.                                       |
 | `set_alliance(Player, TargetPlayer, AllianceStatus)`                   | Sets the alliance status between two players.            |
+| `set_mission_objectives(Text)`                                         | Sets the mission objectives.                             |
 | `sleep(Milliseconds)`                                                  | Waits for a specific amount of time. (Dangerous!)        |
 | More to be added ...                                                   |                                                          |
 
@@ -829,7 +830,6 @@ ExitTransport
 
 ```
 Create Unit with Properties
-Set Mission Objectives
 Leader Board (Control)
 Leader Board (Control At Location)
 Leader Board (Resources)

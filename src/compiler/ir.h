@@ -94,6 +94,7 @@ namespace Langums
         SetInvincible,  // sets invincibility for units
         AIScript,       // runs an ai script
         SetAlly,        // sets alliance status between two players
+        SetObj,         // sets the mission objectives
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -1956,6 +1957,26 @@ namespace Langums
         uint8_t m_PlayerId;
         uint8_t m_TargetPlayerId;
         AllianceStatus m_Status;
+    };
+
+    class IRSetObjInstruction : public IIRInstruction
+    {
+        public:
+        IRSetObjInstruction(const std::string& text) :
+            m_Text(text), IIRInstruction(IRInstructionType::SetObj) {}
+
+        const std::string& GetText() const
+        {
+            return m_Text;
+        }
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("SETOBJ %", m_Text);
+        }
+
+        private:
+        std::string m_Text;
     };
 
     class IREventInstruction : public IIRInstruction
