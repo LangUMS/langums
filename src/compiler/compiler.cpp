@@ -81,20 +81,7 @@ namespace Langums
                     if (condition->GetType() == IRInstructionType::BringCond)
                     {
                         auto bring = (IRBringCondInstruction*)condition.get();
-
-                        auto& locationName = bring->GetLocationName();
-
-                        auto locationStringId = m_StringsChunk->FindString(locationName);
-                        if (locationStringId == -1)
-                        {
-                            throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                        }
-
-                        auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                        if (locationId == -1)
-                        {
-                            throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                        }
+                        auto locationId = GetLocationIdByName(bring->GetLocationName());
 
                         eventTrigger.Cond_Bring(
                             bring->GetPlayerId(),
@@ -148,17 +135,7 @@ namespace Langums
 
                         if (locationName.length() > 0)
                         {
-                            auto locationStringId = m_StringsChunk->FindString(locationName);
-                            if (locationStringId == -1)
-                            {
-                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                            }
-
-                            locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                            if (locationId == -1)
-                            {
-                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                            }
+                            locationId = GetLocationIdByName(locationName);
                         }
 
                         eventTrigger.Cond_CommandsLeast(cmdLeast->GetPlayerId(), cmdLeast->GetUnitId(), locationId);
@@ -173,17 +150,7 @@ namespace Langums
 
                         if (locationName.length() > 0)
                         {
-                            auto locationStringId = m_StringsChunk->FindString(locationName);
-                            if (locationStringId == -1)
-                            {
-                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                            }
-
-                            locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                            if (locationId == -1)
-                            {
-                                throw CompilerException(SafePrintf("Location \"%\" not found!", locationName));
-                            }
+                            locationId = GetLocationIdByName(locationName);
                         }
 
                         eventTrigger.Cond_CommandsMost(cmdMost->GetPlayerId(), cmdMost->GetUnitId(), locationId);
@@ -664,7 +631,7 @@ namespace Langums
                     m_Triggers.push_back(current.GetTrigger());
 
                     auto all = false;
-                    if (playerId == -1)
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner;
@@ -694,17 +661,7 @@ namespace Langums
             {
                 auto spawn = (IRSpawnInstruction*)instruction.get();
 
-                auto locationStringId = m_StringsChunk->FindString(spawn->GetLocationName());
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", spawn->GetLocationName()));
-                }
-
-                auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (locationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", spawn->GetLocationName()));
-                }
+                auto locationId = GetLocationIdByName(spawn->GetLocationName());
                 
                 if (spawn->IsValueLiteral())
                 {
@@ -747,20 +704,10 @@ namespace Langums
                 auto kill = (IRKillInstruction*)instruction.get();
 
                 auto locationId = -1;
-                auto locName = kill->GetLocationName();
+                auto& locName = kill->GetLocationName();
                 if (locName.length() != 0)
                 {
-                    auto locationStringId = m_StringsChunk->FindString(kill->GetLocationName());
-                    if (locationStringId == -1)
-                    {
-                        throw CompilerException(SafePrintf("Location \"%\" not found!", kill->GetLocationName()));
-                    }
-
-                    locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                    if (locationId == -1)
-                    {
-                        throw CompilerException(SafePrintf("Location \"%\" not found!", kill->GetLocationName()));
-                    }
+                    locationId = GetLocationIdByName(locName);
                 }
 
                 if (kill->IsValueLiteral())
@@ -807,17 +754,7 @@ namespace Langums
                 auto locName = remove->GetLocationName();
                 if (locName.length() != 0)
                 {
-                    auto locationStringId = m_StringsChunk->FindString(remove->GetLocationName());
-                    if (locationStringId == -1)
-                    {
-                        throw CompilerException(SafePrintf("Location \"%\" not found!", remove->GetLocationName()));
-                    }
-
-                    auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                    if (locationId == -1)
-                    {
-                        throw CompilerException(SafePrintf("Location \"%\" not found!", remove->GetLocationName()));
-                    }
+                    locationId = GetLocationIdByName(locName);
                 }
 
                 if (remove->IsValueLiteral())
@@ -860,33 +797,8 @@ namespace Langums
             {
                 auto move = (IRMoveInstruction*)instruction.get();
 
-                auto srcLocName = move->GetSrcLocationName();
-                auto locationStringId = m_StringsChunk->FindString(srcLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-
-                if (srcLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto dstLocName = move->GetDstLocationName();
-                locationStringId = m_StringsChunk->FindString(dstLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-
-                if (dstLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
-                }
+                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName());
+                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName());
 
                 if (move->IsValueLiteral())
                 {
@@ -928,32 +840,8 @@ namespace Langums
             {
                 auto order = (IROrderInstruction*)instruction.get();
 
-                auto srcLocName = order->GetSrcLocationName();
-                auto locationStringId = m_StringsChunk->FindString(srcLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-
-                if (srcLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto dstLocName = order->GetDstLocationName();
-                locationStringId = m_StringsChunk->FindString(dstLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (dstLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
-                }
+                auto srcLocationId = GetLocationIdByName(order->GetSrcLocationName());
+                auto dstLocationId = GetLocationIdByName(order->GetDstLocationName());
 
                 current.Action_OrderUnit(order->GetPlayerId(), order->GetUnitId(), order->GetOrder(), srcLocationId, dstLocationId);
             }
@@ -961,18 +849,7 @@ namespace Langums
             {
                 auto modify = (IRModifyInstruction*)instruction.get();
 
-                auto locationStringId = m_StringsChunk->FindString(modify->GetLocationName());
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", modify->GetLocationName()));
-                }
-
-                auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (locationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", modify->GetLocationName()));
-                }
-
+                auto locationId = GetLocationIdByName(modify->GetLocationName());
                 auto playerId = modify->GetPlayerId();
                 auto unitId = modify->GetUnitId();
                 auto quantity = modify->GetRegisterId();
@@ -1048,18 +925,7 @@ namespace Langums
             {
                 auto give = (IRGiveInstruction*)instruction.get();
 
-                auto locationStringId = m_StringsChunk->FindString(give->GetLocationName());
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", give->GetLocationName()));
-                }
-
-                auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (locationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", give->GetLocationName()));
-                }
-
+                auto locationId = GetLocationIdByName(give->GetLocationName());
                 auto srcPlayerId = give->GetSrcPlayerId();
                 auto dstPlayerId = give->GetDstPlayerId();
                 auto unitId = give->GetUnitId();
@@ -1105,34 +971,9 @@ namespace Langums
             {
                 auto move = (IRMoveLocInstruction*)instruction.get();
 
-                auto srcLocName = move->GetSrcLocationName();
-                auto locationStringId = m_StringsChunk->FindString(srcLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto srcLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-
-                if (srcLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", srcLocName));
-                }
-
-                auto dstLocName = move->GetDstLocationName();
-                locationStringId = m_StringsChunk->FindString(dstLocName);
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
-                }
-
-                auto dstLocationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-
-                if (dstLocationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", dstLocName));
-                }
-
+                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName());
+                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName());
+                
                 current.Action_MoveLocation(move->GetPlayerId(), move->GetUnitId(), srcLocationId, dstLocationId);
             }
             else if (instruction->GetType() == IRInstructionType::EndGame)
@@ -1170,62 +1011,48 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::CenterView)
             {
                 auto centerView = (IRCenterViewInstruction*)instruction.get();
-                auto playerMask = centerView->GetPlayerId();
 
-                auto locName = centerView->GetLocationName();
-                if (locName.length() == 0)
+                auto locationId = GetLocationIdByName(centerView->GetLocationName());
+                auto playerId = centerView->GetPlayerId();
+
+                if (playerId == m_TriggersOwner)
                 {
-                    throw CompilerException(SafePrintf("Empty location \"%\" in center view instruction!", centerView->GetLocationName()));
+                    current.Action_CenterView(locationId + 1);
                 }
-
-                auto locationStringId = m_StringsChunk->FindString(centerView->GetLocationName());
-                if (locationStringId == -1)
+                else
                 {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", centerView->GetLocationName()));
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
+                    auto centerTrigger = TriggerBuilder(address, instruction.get(), playerId);
+
+                    if (all)
+                    {
+                        centerTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    centerTrigger.Action_CenterView(locationId + 1);
+
+                    auto retAddress = nextAddress++;
+                    centerTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(centerTrigger.GetTrigger());
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
-
-                auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (locationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", centerView->GetLocationName()));
-                }
-
-                auto address = nextAddress++;
-                current.Action_JumpTo(address);
-                m_Triggers.push_back(current.GetTrigger());
-
-                auto centerViewTrigger = TriggerBuilder(address, instruction.get(), playerMask + 1);
-
-                centerViewTrigger.Action_CenterView(locationId + 1);
-
-                auto retAddress = nextAddress++;
-                centerViewTrigger.Action_JumpTo(retAddress);
-                m_Triggers.push_back(centerViewTrigger.GetTrigger());
-
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
             }
             else if (instruction->GetType() == IRInstructionType::Ping)
             {
                 auto ping = (IRPingInstruction*)instruction.get();
                 auto playerMask = ping->GetPlayerId();
 
-                auto locName = ping->GetLocationName();
-                if (locName.length() == 0)
-                {
-                    throw CompilerException(SafePrintf("Empty location \"%\" in ping instruction!", ping->GetLocationName()));
-                }
-
-                auto locationStringId = m_StringsChunk->FindString(ping->GetLocationName());
-                if (locationStringId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", ping->GetLocationName()));
-                }
-
-                auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
-                if (locationId == -1)
-                {
-                    throw CompilerException(SafePrintf("Location \"%\" not found!", ping->GetLocationName()));
-                }
+                auto locationId = GetLocationIdByName(ping->GetLocationName());
 
                 auto address = nextAddress++;
                 current.Action_JumpTo(address);
@@ -1554,7 +1381,7 @@ namespace Langums
                     m_Triggers.push_back(current.GetTrigger());
 
                     auto all = false;
-                    if (playerId == -1)
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner;
@@ -1765,6 +1592,28 @@ namespace Langums
         }
 
         return index;
+    }
+
+    unsigned int Compiler::GetLocationIdByName(const std::string& name)
+    {
+        if (name.length() == 0)
+        {
+            throw CompilerException("Invalid empty location name");
+        }
+
+        auto locationStringId = m_StringsChunk->FindString(name);
+        if (locationStringId == -1)
+        {
+            throw CompilerException(SafePrintf("Location \"%\" not found", name));
+        }
+
+        auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
+        if (locationId == -1)
+        {
+            throw CompilerException(SafePrintf("Location \"%\" not found", name));
+        }
+
+        return locationId;
     }
 
 }

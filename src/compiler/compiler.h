@@ -51,6 +51,8 @@ namespace Langums
         void Action_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
         void Action_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
 
+        unsigned int GetLocationIdByName(const std::string& name);
+
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
         uint32_t m_CopyBatchSize = 65536u;
         uint32_t m_HyperTriggerCount = 5;

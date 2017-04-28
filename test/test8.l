@@ -15,7 +15,7 @@ opponents(Player1, AtLeast, 1) => {
 }
 
 fn spawn_units<T>(T, qty) {
-  talking_portrait(T, 5);
+  talking_portrait(Player1, T, 5);
   spawn(T, Player1, qty, "TestLocation");
   order(T, Player1, Move, "TestLocation", "TestLocation2");
 }

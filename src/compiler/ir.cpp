@@ -452,7 +452,7 @@ namespace Langums
 
             if (fnCall->GetChildCount() != 3)
             {
-                throw IRCompilerException("talking_portrait() takes exactly two arguments");
+                throw IRCompilerException("talking_portrait() takes exactly three arguments");
             }
 
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
