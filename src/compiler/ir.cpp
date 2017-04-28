@@ -73,182 +73,44 @@ namespace Langums
 
                     if (name == "bring")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as first argument to bring(), expected player name");
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
+                        auto unitId = ParseUnitTypeArgument(condition->GetArgument(3), name, 3);
+                        auto locationName = ParseLocationArgument(condition->GetArgument(4), name, 4);
 
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as second argument to bring(), expected comparison type");
-                        }
-
-                        auto comparisonType = (ASTIdentifier*)arg1.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg2 = condition->GetArgument(2);
-                        if (arg2->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException("Something other than a number literal passed as third argument to bring(), expected quantity");
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg2.get();
-
-                        auto arg3 = condition->GetArgument(3);
-                        if (arg3->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as fourth argument to bring(), expected unit type");
-                        }
-
-                        auto unitName = (ASTIdentifier*)arg3.get();
-                        auto unitId = UnitNameToId(unitName->GetName());
-                        if (unitId == -1)
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to bring()", unitName->GetName()));
-                        }
-
-                        auto arg4 = condition->GetArgument(4);
-                        if (arg4->GetType() != ASTNodeType::StringLiteral)
-                        {
-                            throw IRCompilerException("Something other than a string literal passed as fifth argument to bring(), expected location name");
-                        }
-
-                        auto location = (ASTStringLiteral*)arg4.get();
-                        auto& locationName = location->GetValue();
-
-                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity->GetValue()), m_Instructions);
+                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity), m_Instructions);
                     }
                     else if (name == "commands" || name == "killed" || name == "deaths")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
-                        }
-
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected comparison type", name));
-                        }
-
-                        auto comparisonType = (ASTIdentifier*)arg1.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg2 = condition->GetArgument(2);
-                        if (arg2->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than a number literal passed as third argument to %(), expected quantity", name));
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg2.get();
-
-                        auto arg3 = condition->GetArgument(3);
-                        if (arg3->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as fourth argument to %(), expected unit type", name));
-                        }
-
-                        auto unitName = (ASTIdentifier*)arg3.get();
-                        auto unitId = UnitNameToId(unitName->GetName());
-                        if (unitId == -1)
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
+                        auto unitId = ParseUnitTypeArgument(condition->GetArgument(3), name, 3);
 
                         if (name == "commands")
                         {
-                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity), m_Instructions);
                         }
                         else if (name == "killed")
                         {
-                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity), m_Instructions);
                         }
                         else if (name == "deaths")
                         {
-                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity->GetValue()), m_Instructions);
+                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity), m_Instructions);
                         }
                     }
                     else if (name == "commands_least" || name == "commands_most")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
-                        }
-
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit type", name));
-                        }
-
-                        auto unitName = (ASTIdentifier*)arg1.get();
-                        auto unitId = UnitNameToId(unitName->GetName());
-                        if (unitId == -1)
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto unitId = ParseUnitTypeArgument(condition->GetArgument(1), name, 1);
 
                         std::string locationName;
 
                         if (condition->GetChildCount() > 2)
                         {
-                            auto arg2 = condition->GetArgument(2);
-                            if (arg2->GetType() != ASTNodeType::StringLiteral)
-                            {
-                                throw IRCompilerException(SafePrintf("Something other than a string literal passed as third argument to %(), expected location name", name));
-                            }
-
-                            auto location = (ASTStringLiteral*)arg2.get();
-                            locationName = location->GetValue();
+                            locationName = ParseLocationArgument(condition->GetArgument(2), name, 2);
                         }
 
                         if (name == "commands_least")
@@ -262,27 +124,8 @@ namespace Langums
                     }
                     else if (name == "killed_least" || name == "killed_most")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
-                        }
-
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit type", name));
-                        }
-
-                        auto unitName = (ASTIdentifier*)arg1.get();
-                        auto unitId = UnitNameToId(unitName->GetName());
-                        if (unitId == -1)
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto unitId = ParseUnitTypeArgument(condition->GetArgument(1), name, 1);
 
                         if (name == "killed_least")
                         {
@@ -295,106 +138,17 @@ namespace Langums
                     }
                     else if (name == "accumulate")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as first argument to accumulate(), expected player name");
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
+                        auto resType = ParseResourceTypeArgument(condition->GetArgument(3), name, 3);
 
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as second argument to accumulate(), expected comparison type");
-                        }
-
-                        auto comparisonType = (ASTIdentifier*)arg1.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg2 = condition->GetArgument(2);
-                        if (arg2->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException("Something other than a number literal passed as third argument to accumulate(), expected quantity");
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg2.get();
-
-                        auto arg3 = condition->GetArgument(3);
-                        if (arg3->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as fourth argument to accumulate(), expected resource type");
-                        }
-
-                        auto resourceType = ((ASTIdentifier*)arg3.get())->GetName();
-
-                        CHK::ResourceType resType;
-                        if (resourceType == "Minerals")
-                        {
-                            resType = CHK::ResourceType::Ore;
-                        }
-                        else if (resourceType == "Gas")
-                        {
-                            resType = CHK::ResourceType::Gas;
-                        }
-                        else
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to accumulate(), expected Minerals or Gas", resourceType));
-                        }
-
-                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity->GetValue()), m_Instructions);
+                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity), m_Instructions);
                     }
                     else if (name == "least_resources" || name == "most_resources")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
-                        }
-
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected resource type", name));
-                        }
-
-                        auto resourceType = ((ASTIdentifier*)arg1.get())->GetName();
-
-                        CHK::ResourceType resType;
-                        if (resourceType == "Minerals")
-                        {
-                            resType = CHK::ResourceType::Ore;
-                        }
-                        else if (resourceType == "Gas")
-                        {
-                            resType = CHK::ResourceType::Gas;
-                        }
-                        else
-                        {
-                            throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Minerals or Gas", resourceType, name));
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto resType = ParseResourceTypeArgument(condition->GetArgument(1), name, 1);
 
                         if (name == "least_resources")
                         {
@@ -407,129 +161,25 @@ namespace Langums
                     }
                     else if (name == "elapsed_time")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as first argument to elapsed_time(), expected comparison type");
-                        }
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        auto comparisonType = (ASTIdentifier*)arg0.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException("Something other than a number literal passed as second argument to accumulate(), expected elapsed time quantity");
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg1.get();
-
-                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity->GetValue()), m_Instructions);
+                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity), m_Instructions);
                     }
                     else if (name == "countdown")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as first argument to countdown(), expected comparison type");
-                        }
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        auto comparisonType = (ASTIdentifier*)arg0.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException("Something other than a number literal passed as second argument to countdown(), expected time quantity");
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg1.get();
-
-                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity->GetValue()), m_Instructions);
+                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity), m_Instructions);
                     }
                     else if (name == "opponents")
                     {
-                        auto arg0 = condition->GetArgument(0);
-                        if (arg0->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
-                        }
+                        auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
 
-                        auto playerName = (ASTIdentifier*)arg0.get();
-                        auto playerId = PlayerNameToId(playerName->GetName());
-
-                        auto arg1 = condition->GetArgument(1);
-                        if (arg1->GetType() != ASTNodeType::Identifier)
-                        {
-                            throw IRCompilerException("Something other than an identifier passed as second argument to opponents(), expected comparison type");
-                        }
-
-                        auto comparisonType = (ASTIdentifier*)arg1.get();
-                        auto comparisonName = comparisonType->GetName();
-
-                        ConditionComparison comparison;
-                        if (comparisonName == "AtLeast")
-                        {
-                            comparison = ConditionComparison::AtLeast;
-                        }
-                        else if (comparisonName == "AtMost")
-                        {
-                            comparison = ConditionComparison::AtMost;
-                        }
-                        else if (comparisonName == "Exactly")
-                        {
-                            comparison = ConditionComparison::Exactly;
-                        }
-                        else
-                        {
-                            throw IRCompilerException("Invalid comparison type, expected one of AtLeast, AtMost or Exactly");
-                        }
-
-                        auto arg2 = condition->GetArgument(2);
-                        if (arg2->GetType() != ASTNodeType::NumberLiteral)
-                        {
-                            throw IRCompilerException("Something other than a number literal passed as second argument to opponents(), expected quantity");
-                        }
-
-                        auto quantity = (ASTNumberLiteral*)arg2.get();
-
-                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity->GetValue()), m_Instructions);
+                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity), m_Instructions);
                     }
                     else
                     {
@@ -651,45 +301,10 @@ namespace Langums
                 throw IRCompilerException("end() takes exactly two arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto endCondition = ParseEndGameCondition(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected Victory, Defeat or Draw", fnName));
-            }
-
-            auto& endCondition = ((ASTIdentifier*)arg1.get())->GetName();
-            EndGameType type = EndGameType::Victory;
-            if (endCondition == "Victory")
-            {
-                type = EndGameType::Victory;
-            }
-            else if (endCondition == "Defeat")
-            {
-                type = EndGameType::Defeat;
-            }
-            else if (endCondition == "Draw")
-            {
-                type = EndGameType::Draw;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Victory, Defeat or Draw", endCondition, fnName));
-            }
-
-            EmitInstruction(new IREndGameInstruction(playerId + 1, type), instructions);
+            EmitInstruction(new IREndGameInstruction(playerId + 1, endCondition), instructions);
         }
         else if (fnName == "set_resource")
         {
@@ -703,59 +318,13 @@ namespace Langums
                 throw IRCompilerException("set_resource() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto resType = ParseResourceTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected Minerals or Gas", fnName));
-            }
-
-            auto resource = (ASTIdentifier*)arg1.get();
-            auto resourceType = resource->GetName();
-
-            CHK::ResourceType resType;
-            if (resourceType == "Minerals")
-            {
-                resType = CHK::ResourceType::Ore;
-            }
-            else if (resourceType == "Gas")
-            {
-                resType = CHK::ResourceType::Gas;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Minerals or Gas", resourceType, fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRSetResourceInstruction(playerId, resType, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRSetResourceInstruction(playerId, resType, regId, isLiteral), instructions);
         }
         else if (fnName == "add_resource")
         {
@@ -769,59 +338,13 @@ namespace Langums
                 throw IRCompilerException("add_resource() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto resType = ParseResourceTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected Minerals or Gas", fnName));
-            }
-
-            auto resource = (ASTIdentifier*)arg1.get();
-            auto resourceType = resource->GetName();
-
-            CHK::ResourceType resType;
-            if (resourceType == "Minerals")
-            {
-                resType = CHK::ResourceType::Ore;
-            }
-            else if (resourceType == "Gas")
-            {
-                resType = CHK::ResourceType::Gas;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Minerals or Gas", resourceType, fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRIncResourceInstruction(playerId, resType, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRIncResourceInstruction(playerId, resType, regId, isLiteral), instructions);
         }
         else if (fnName == "take_resource")
         {
@@ -835,59 +358,13 @@ namespace Langums
                 throw IRCompilerException("take_resource() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto resType = ParseResourceTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected Minerals or Gas", fnName));
-            }
-
-            auto resource = (ASTIdentifier*)arg1.get();
-            auto resourceType = resource->GetName();
-
-            CHK::ResourceType resType;
-            if (resourceType == "Minerals")
-            {
-                resType = CHK::ResourceType::Ore;
-            }
-            else if (resourceType == "Gas")
-            {
-                resType = CHK::ResourceType::Gas;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid second argument \"%\" passed to %(), expected Minerals or Gas", resourceType, fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isLiteral), instructions);
         }
         else if (fnName == "set_countdown")
         {
@@ -901,23 +378,10 @@ namespace Langums
                 throw IRCompilerException("set_countdown() takes exactly one argument");
             }
 
-            auto regId = 0;
-            bool isValueLiteral = false;
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg0.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg0.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRSetCountdownInstruction(regId, isValueLiteral), instructions);
+            EmitInstruction(new IRSetCountdownInstruction(regId, isLiteral), instructions);
         }
         else if (fnName == "set_deaths")
         {
@@ -931,49 +395,13 @@ namespace Langums
                 throw IRCompilerException("set_deaths() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
-            }
-
-            auto unitName = (ASTIdentifier*)arg1.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRSetDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRSetDeathsInstruction(playerId, unitId, regId, isLiteral), instructions);
         }
         else if (fnName == "add_deaths")
         {
@@ -987,49 +415,13 @@ namespace Langums
                 throw IRCompilerException("inc_deaths() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
-            }
-
-            auto unitName = (ASTIdentifier*)arg1.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRIncDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRIncDeathsInstruction(playerId, unitId, regId, isLiteral), instructions);
         }
         else if (fnName == "remove_deaths")
         {
@@ -1043,49 +435,13 @@ namespace Langums
                 throw IRCompilerException("remove_deaths() takes exactly three arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit name", fnName));
-            }
-
-            auto unitName = (ASTIdentifier*)arg1.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto regId = 0;
-            bool isValueLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto number = (ASTNumberLiteral*)arg2.get();
-                regId = number->GetValue();
-                isValueLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                regId = Reg_StackTop;
-            }
-
-            EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isValueLiteral), instructions);
+            EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isLiteral), instructions);
         }
         else if (fnName == "talking_portrait")
         {
@@ -1099,27 +455,9 @@ namespace Langums
                 throw IRCompilerException("talking_portrait() takes exactly two arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
-
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::NumberLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a number literal passed as second argument to %(), expected amount of time", fnName));
-            }
-
-            auto time = (ASTNumberLiteral*)arg1.get();
-            EmitInstruction(new IRTalkInstruction(unitId, time->GetValue() * 1000), instructions);
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto time = ParseQuantityArgument(fnCall->GetArgument(1), fnName, 1);
+            EmitInstruction(new IRTalkInstruction(unitId, time * 1000), instructions);
         }
         else if (fnName == "center_view")
         {
@@ -1133,27 +471,8 @@ namespace Langums
                 throw IRCompilerException("center_view() takes exactly two arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-            }
-
-            auto locationName = (ASTStringLiteral*)arg1.get();
-            auto locName = locationName->GetValue();
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto locName = ParseLocationArgument(fnCall->GetArgument(1), fnName, 1);
 
             EmitInstruction(new IRCenterViewInstruction(playerId, locName), instructions);
         }
@@ -1169,27 +488,8 @@ namespace Langums
                 throw IRCompilerException("ping() takes exactly two arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg0.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-            }
-
-            auto locationName = (ASTStringLiteral*)arg1.get();
-            auto locName = locationName->GetValue();
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto locName = ParseLocationArgument(fnCall->GetArgument(1), fnName, 1);
 
             EmitInstruction(new IRPingInstruction(playerId, locName), instructions);
         }
@@ -1211,18 +511,7 @@ namespace Langums
 
             if (fnCall->GetChildCount() >= 2)
             {
-                auto arg1 = fnCall->GetArgument(1);
-                if (arg1->GetType() != ASTNodeType::Identifier)
-                {
-                    throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-                }
-
-                auto playerName = (ASTIdentifier*)arg1.get();
-                playerId = PlayerNameToId(playerName->GetName()) + 1;
-                if (playerId == -1)
-                {
-                    throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-                }
+                playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
             }
 
             EmitInstruction(new IRDisplayMsgInstruction(msg->GetValue(), playerId), instructions);
@@ -1234,14 +523,8 @@ namespace Langums
                 throw IRCompilerException("sleep() called without arguments");
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::NumberLiteral)
-            {
-                throw IRCompilerException("Something other than a number literal passed to sleep()");
-            }
-
-            auto milliseconds = (ASTNumberLiteral*)arg0.get();
-            EmitInstruction(new IRWaitInstruction(milliseconds->GetValue()), instructions);
+            auto quantity = ParseQuantityArgument(fnCall->GetArgument(0), fnName, 0);
+            EmitInstruction(new IRWaitInstruction(quantity), instructions);
         }
         else if (fnName == "spawn" || fnName == "kill" || fnName == "remove")
         {
@@ -1263,67 +546,16 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes 3 or 4 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg1.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto regId = 0;
             bool isLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto unitQuantity = (ASTNumberLiteral*)arg2.get();
-                regId = unitQuantity->GetValue();
-
-                if (regId <= 0)
-                {
-                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
-                }
-
-                isLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                isLiteral = false;
-                regId = Reg_StackTop;
-            }
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
             
             std::string locName;
-
             if (fnCall->GetChildCount() == 4)
             {
-                auto arg3 = fnCall->GetArgument(3);
-                if (arg3->GetType() != ASTNodeType::StringLiteral)
-                {
-                    throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-                }
-
-                auto locationName = (ASTStringLiteral*)arg3.get();
-                locName = locationName->GetValue();
+                locName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
             }
 
             if (fnName == "spawn")
@@ -1351,72 +583,14 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg1.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto regId = 0;
             bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto unitQuantity = (ASTNumberLiteral*)arg2.get();
-                regId = unitQuantity->GetValue();
-
-                if (regId <= 0)
-                {
-                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
-                }
-
-                isLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                isLiteral = false;
-                regId = Reg_StackTop;
-            }
-
-            auto arg3 = fnCall->GetArgument(3);
-            if (arg3->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-            }
-
-            auto srcLocationName = (ASTStringLiteral*)arg3.get();
-            auto srcLocName = srcLocationName->GetValue();
-
-            auto arg4 = fnCall->GetArgument(4);
-            if (arg4->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
-            }
-
-            auto dstLocationName = (ASTStringLiteral*)arg4.get();
-            auto dstLocName = dstLocationName->GetValue();
+            auto srcLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
+            auto dstLocName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
             EmitInstruction(new IRMoveInstruction(playerId, unitId, regId, isLiteral, srcLocName, dstLocName), instructions);
         }
@@ -1432,77 +606,13 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            auto order = ParseOrderType(fnCall->GetArgument(2), fnName, 2);
+            auto srcLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
+            auto dstLocName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg1.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as third argument to %(), expected order type", fnName));
-            }
-
-            auto order = (ASTIdentifier*)arg2.get();
-            auto orderType = order->GetName();
-            CHK::TriggerActionState orderValue;
-            if (orderType == "Move")
-            {
-                orderValue = CHK::TriggerActionState::Move;
-            }
-            else if (orderType == "Attack")
-            {
-                orderValue = CHK::TriggerActionState::Attack;
-            }
-            else if (orderType == "Patrol")
-            {
-                orderValue = CHK::TriggerActionState::Patrol;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid order passed as third argument to %(), expected Move, Attack or Patrol", fnName));
-            }
-
-            auto arg3 = fnCall->GetArgument(3);
-            if (arg3->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-            }
-
-            auto srcLocationName = (ASTStringLiteral*)arg3.get();
-            auto srcLocName = srcLocationName->GetValue();
-
-            auto arg4 = fnCall->GetArgument(4);
-            if (arg4->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
-            }
-
-            auto dstLocationName = (ASTStringLiteral*)arg4.get();
-            auto dstLocName = dstLocationName->GetValue();
-
-            EmitInstruction(new IROrderInstruction(playerId, unitId, orderValue, srcLocName, dstLocName), instructions);
+            EmitInstruction(new IROrderInstruction(playerId, unitId, order, srcLocName, dstLocName), instructions);
         }
         else if (fnName == "modify")
         {
@@ -1516,54 +626,11 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 6 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
 
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg1.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto regId = 0;
             bool isLiteral = false;
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto unitQuantity = (ASTNumberLiteral*)arg2.get();
-                regId = unitQuantity->GetValue();
-
-                if (regId <= 0)
-                {
-                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
-                }
-
-                isLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg2.get(), instructions, aliases);
-                isLiteral = false;
-                regId = Reg_StackTop;
-            }
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
             auto arg3 = fnCall->GetArgument(3);
             if (arg3->GetType() != ASTNodeType::Identifier)
@@ -1571,48 +638,11 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("Something other than a string literal as third argument to %(), expected Health, Energy, Shields or Hangar", fnName));
             }
 
-            auto modify = (ASTIdentifier*)arg3.get();
-            auto modifyValue = modify->GetName();
-            ModifyType modifyType;
-            if (modifyValue == "Health")
-            {
-                modifyType = ModifyType::HitPoints;
-            }
-            else if (modifyValue == "Energy")
-            {
-                modifyType = ModifyType::Energy;
-            }
-            else if (modifyValue == "Shields")
-            {
-                modifyType = ModifyType::ShieldPoints;
-            }
-            else if (modifyValue == "Hangar")
-            {
-                modifyType = ModifyType::HangarCount;
-            }
-            else
-            {
-                throw IRCompilerException(SafePrintf("Invalid fourth argument to %(), expected Health, Energy, Shields or Hangar", fnName));
-            }
+            auto modifyType = ParseModifyType(fnCall->GetArgument(3), fnName, 3);
+            auto amount = ParseQuantityArgument(fnCall->GetArgument(4), fnName, 4);
+            auto locName = ParseLocationArgument(fnCall->GetArgument(5), fnName, 5);
 
-            auto arg4 = fnCall->GetArgument(4);
-            if (arg4->GetType() != ASTNodeType::NumberLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a number literal as fourth argument to %(), expected amount", fnName));
-            }
-
-            auto amount = (ASTNumberLiteral*)arg4.get();
-
-            auto arg5 = fnCall->GetArgument(5);
-            if (arg5->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
-            }
-
-            auto locationName = (ASTStringLiteral*)arg5.get();
-            auto locName = locationName->GetValue();
-
-            EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount->GetValue(), modifyType, locName), instructions);
+            EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount, modifyType, locName), instructions);
         }
         else if (fnName == "give")
         {
@@ -1626,76 +656,14 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 5 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto srcPlayerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            auto dstPlayerId = ParsePlayerIdArgument(fnCall->GetArgument(2), fnName, 2);
 
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto srcPlayerName = (ASTIdentifier*)arg1.get();
-            auto srcPlayerId = PlayerNameToId(srcPlayerName->GetName());
-            if (srcPlayerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid source player name \"%\" passed to %()", srcPlayerName->GetName(), fnName));
-            }
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as third argument to %(), expected player name", fnName));
-            }
-
-            auto dstPlayerName = (ASTIdentifier*)arg2.get();
-            auto dstPlayerId = PlayerNameToId(dstPlayerName->GetName());
-            if (dstPlayerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid destination player name \"%\" passed to %()", dstPlayerName->GetName(), fnName));
-            }
-
-            auto regId = 0;
             bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(3), fnName, 3, instructions, aliases, isLiteral);
 
-            auto arg3 = fnCall->GetArgument(3);
-            if (arg3->GetType() == ASTNodeType::NumberLiteral)
-            {
-                auto unitQuantity = (ASTNumberLiteral*)arg3.get();
-                regId = unitQuantity->GetValue();
-
-                if (regId <= 0)
-                {
-                    throw IRCompilerException(SafePrintf("Trying to %() zero or less units", fnName));
-                }
-
-                isLiteral = true;
-            }
-            else
-            {
-                EmitExpression(arg3.get(), instructions, aliases);
-                isLiteral = false;
-                regId = Reg_StackTop;
-            }
-
-            auto arg4 = fnCall->GetArgument(4);
-            if (arg4->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fifth argument to %(), expected location name", fnName));
-            }
-
-            auto locationName = (ASTStringLiteral*)arg4.get();
-            auto locName = locationName->GetValue();
+            auto locName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
             EmitInstruction(new IRGiveInstruction(srcPlayerId, dstPlayerId, unitId, regId, isLiteral, locName), instructions);
         }
@@ -1711,49 +679,10 @@ namespace Langums
                 throw IRCompilerException(SafePrintf("%() takes exactly 4 arguments", fnName));
             }
 
-            auto arg0 = fnCall->GetArgument(0);
-            if (arg0->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected unit name", fnName));
-            }
-
-            auto unitName = (ASTIdentifier*)arg0.get();
-            auto unitId = UnitNameToId(unitName->GetName());
-            if (unitId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), fnName));
-            }
-
-            auto arg1 = fnCall->GetArgument(1);
-            if (arg1->GetType() != ASTNodeType::Identifier)
-            {
-                throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected player name", fnName));
-            }
-
-            auto playerName = (ASTIdentifier*)arg1.get();
-            auto playerId = PlayerNameToId(playerName->GetName());
-            if (playerId == -1)
-            {
-                throw IRCompilerException(SafePrintf("Invalid player name \"%\" passed to %()", playerName->GetName(), fnName));
-            }
-
-            auto arg2 = fnCall->GetArgument(2);
-            if (arg2->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as third argument to %(), expected location name", fnName));
-            }
-
-            auto srcLocationName = (ASTStringLiteral*)arg2.get();
-            auto srcLocName = srcLocationName->GetValue();
-
-            auto arg3 = fnCall->GetArgument(3);
-            if (arg3->GetType() != ASTNodeType::StringLiteral)
-            {
-                throw IRCompilerException(SafePrintf("Something other than a string literal as fourth argument to %(), expected location name", fnName));
-            }
-
-            auto dstLocationName = (ASTStringLiteral*)arg3.get();
-            auto dstLocName = dstLocationName->GetValue();
+            auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(0), fnName, 0);
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            auto srcLocName = ParseLocationArgument(fnCall->GetArgument(2), fnName, 2);
+            auto dstLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
 
             EmitInstruction(new IRMoveLocInstruction(playerId, unitId, srcLocName, dstLocName), instructions);
         }
@@ -2521,6 +1450,289 @@ namespace Langums
         }
 
         return -1;
+    }
+
+    uint8_t IRCompiler::ParsePlayerIdArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in \"%\", expected player name", argIndex, fnName));
+        }
+
+        auto identifier = (ASTIdentifier*)node.get();
+        auto& name = identifier->GetName();
+        auto playerId = PlayerNameToId(name);
+        if (playerId == -1)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid player name \"%\" given as argument % in \"%\"", name, argIndex, fnName));
+        }
+
+        return playerId;
+    }
+
+    ConditionComparison IRCompiler::ParseComparisonArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
+        }
+
+        auto identifier = (ASTIdentifier*)node.get();
+        auto& name = identifier->GetName();
+
+        ConditionComparison comparison;
+        if (name == "AtLeast" || name == "GreaterOrEquals")
+        {
+            comparison = ConditionComparison::AtLeast;
+        }
+        else if (name == "AtMost" || name == "LessOrEquals")
+        {
+            comparison = ConditionComparison::AtMost;
+        }
+        else if (name == "Exactly" || name == "Equals")
+        {
+            comparison = ConditionComparison::Exactly;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected comparison type (AtLeast, Exactly, AtMost)", argIndex, fnName));
+        }
+
+        return comparison;
+    }
+
+    int IRCompiler::ParseQuantityArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::NumberLiteral)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected quantity", argIndex, fnName));
+        }
+
+        auto numberLiteral = (ASTNumberLiteral*)node.get();
+        return numberLiteral->GetValue();
+    }
+
+    uint8_t IRCompiler::ParseUnitTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected unit type", argIndex, fnName));
+        }
+
+        auto identifier = (ASTIdentifier*)node.get();
+        auto& name = identifier->GetName();
+        auto unitId = UnitNameToId(name);
+
+        if (unitId == -1)
+        {
+            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed for argument % in call to \"%\"", name, argIndex, fnName));
+        }
+
+        return (uint8_t)unitId;
+    }
+
+    std::string IRCompiler::ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+        }
+
+        std::string locationName;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            return stringLiteral->GetValue();
+        }
+        else if(node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            return identifier->GetName();
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+        }
+    }
+
+    CHK::ResourceType IRCompiler::ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        CHK::ResourceType type;
+        if (name == "Minerals" || name == "Ore")
+        {
+            return CHK::ResourceType::Ore;
+        }
+        else if (name == "Gas" || name == "Vespene")
+        {
+            return CHK::ResourceType::Gas;
+        }
+        else if (name == "OreAndGas" || name == "Both" || name == "All")
+        {
+            return CHK::ResourceType::OreAndGas;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Minerals or Gas", argIndex, fnName));
+        }
+
+        return type;
+    }
+
+    EndGameType IRCompiler::ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Victory")
+        {
+            return EndGameType::Victory;
+        }
+        else if (name == "Defeat")
+        {
+            return EndGameType::Defeat;
+        }
+        else if (name == "Draw")
+        {
+            return EndGameType::Draw;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Victory, Defeat or Draw", argIndex, fnName));
+        }
+    }
+
+    CHK::TriggerActionState IRCompiler::ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Move")
+        {
+            return CHK::TriggerActionState::Move;
+        }
+        else if (name == "Attack")
+        {
+            return CHK::TriggerActionState::Attack;
+        }
+        else if (name == "Patrol")
+        {
+            return CHK::TriggerActionState::Patrol;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+        }
+    }
+
+    ModifyType IRCompiler::ParseModifyType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
+    {
+        if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Move, Attack or Patrol", argIndex, fnName));
+        }
+
+        std::string name;
+
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto stringLiteral = (ASTStringLiteral*)node.get();
+            name = stringLiteral->GetValue();
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            name = identifier->GetName();
+        }
+
+        if (name == "Health")
+        {
+            return ModifyType::HitPoints;
+        }
+        else if (name == "Energy")
+        {
+            return ModifyType::Energy;
+        }
+        else if (name == "Shields")
+        {
+            return ModifyType::ShieldPoints;
+        }
+        else if (name == "Hangar")
+        {
+            return ModifyType::HangarCount;
+        }
+        else
+        {
+            throw new IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected Health, Energy, Shields or Hangar", argIndex, fnName));
+        }
+    }
+
+    int IRCompiler::ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,
+        std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral)
+    {
+        auto regId = 0;
+        if (node->GetType() == ASTNodeType::NumberLiteral)
+        {
+            auto unitQuantity = (ASTNumberLiteral*)node.get();
+            regId = unitQuantity->GetValue();
+            isLiteral = true;
+        }
+        else
+        {
+            EmitExpression(node.get(), instructions, aliases);
+            isLiteral = false;
+            regId = Reg_StackTop;
+        }
+
+        return regId;
     }
 
 }
