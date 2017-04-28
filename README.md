@@ -234,10 +234,10 @@ Notes:
 | Function prototype                                                                          | Description                                                                                              |
 |---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | poll_events()                                                                               | Runs any associated event handlers.                                                                      |
-| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all [Player](#player)s.                                                    |
+| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all players.                                                               |
 | random()                                                                                    | Returns a random value between 0 and 255 (inclusive).                                                    |
-| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for [Player](#player) with [EndCondition](#endcondition).                                  |
-| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two [Player](#player)s.                                                 |
+| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition).                                             |
+| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                                                            |
 | set_mission_objectives(Text)                                                                | Sets the mission objectives.                                                                             |
 | show_leaderboard(Text, [LeaderboardType](#leaderboardtype), ...)                            | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in)             |
 | show_leaderboard_goal(Text, [LeaderboardType](#leaderboardtype), Quantity, ...)             | Shows the leaderboard with a goal. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
@@ -248,51 +248,51 @@ Notes:
 
 ### Unit functions
 
-| Function prototype                                                                               | Description                                                   |
-|--------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| spawn([Unit](#unit), [Player](#player), Expression, Location, optional: Props)                   | Spawns [Unit](#unit)s at a location with optional properties. |
-| kill([Unit](#unit), [Player](#player), Expression, optional: Location)                           | Kills [Unit](#unit)s at an optional location.                 |
-| remove([Unit](#unit), [Player](#player), Expression, optional: Location)                         | Removes [Unit](#unit)s at an optional location.               |
-| move([Unit](#unit), [Player](#player), Expression, SrcLocation, DstLocation)                     | Moves [Unit](#unit)s from one location to another.            |
-| order([Unit](#unit), [Player](#player), [Order](#order), SrcLocation, DstLocation)               | Orders a [Unit](#unit) to move, attack or patrol.             |
-| modify([Unit](#unit), [Player](#player), Expression, [UnitMod](#unitmod), ModQuantity, Location) | Modifies a [Unit](#unit)'s HP, SP, energy or hangar count.    |
-| give([Unit](#unit), [SrcPlayer](#player), [DstPlayer](#player), Expression, Location)            | Gives [Unit](#unit)s to another [Player](#player).            |
-| set_doodad([Player](#player), [Unit](#unit), [State](#state), Location)                          | Sets/ toggles doodad [State](#state).                         |
-| set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Sets/ toggles invincibility for [Unit](#unit)s at location.   |
-| run_ai_script([Player](#player), [AIScript](#aiscript), optional: Location)                      | Runs an AI script.                                            |
+| Function prototype                                                                               | Description                                          |
+|--------------------------------------------------------------------------------------------------|------------------------------------------------------|
+| spawn([Unit](#unit), [Player](#player), Expression, Location, optional: Props)                   | Spawns units at a location with optional properties. |
+| kill([Unit](#unit), [Player](#player), Expression, optional: Location)                           | Kills units at an optional location.                 |
+| remove([Unit](#unit), [Player](#player), Expression, optional: Location)                         | Removes units at an optional location.               |
+| move([Unit](#unit), [Player](#player), Expression, SrcLocation, DstLocation)                     | Moves units from one location to another.            |
+| order([Unit](#unit), [Player](#player), [Order](#order), SrcLocation, DstLocation)               | Orders a units to move, attack or patrol.            |
+| modify([Unit](#unit), [Player](#player), Expression, [UnitMod](#unitmod), ModQuantity, Location) | Modifies a unit's HP, SP, energy or hangar count.    |
+| give([Unit](#unit), [SrcPlayer](#player), [DstPlayer](#player), Expression, Location)            | Gives units to another player.                       |
+| set_doodad([Player](#player), [Unit](#unit), [State](#state), Location)                          | Sets/ toggles doodad [State](#state).                |
+| set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Sets/ toggles invincibility for units at location.   |
+| run_ai_script([Player](#player), [AIScript](#aiscript), optional: Location)                      | Runs an AI script.                                   |
 
 ### Resource functions
 
-| Function prototype                                                          | Description                                    |
-|-----------------------------------------------------------------------------|------------------------------------------------|
-| set_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Sets the resource count for [Player](#player). |
-| add_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Gives resources to a [Player](#player).        |
-| take_resource([Player](#player), [ResourceType](#resourcetype), Expression) | Takes resources from a [Player](#player).      |
+| Function prototype                                                          | Description                           |
+|-----------------------------------------------------------------------------|---------------------------------------|
+| set_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Sets the resource count for a player. |
+| add_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Gives resources to a player.          |
+| take_resource([Player](#player), [ResourceType](#resourcetype), Expression) | Takes resources from a player.        |
 
 ### Score functions
 
-| Function prototype                                                        | Description                                                    |
-|---------------------------------------------------------------------------|----------------------------------------------------------------|
-| set_score([Player](#player), [ScoreType](#scoretype), Expression)         | Sets the score of a [Player](#player).                         |
-| add_score([Player](#player), [ScoreType](#scoretype), Expression)         | Add to the score of a [Player](#player).                       |
-| subtract_score([Player](#player), [ScoreType](#scoretype), Expression)    | Subtracts from the score of a [Player](#player).               |
-| set_deaths([Player](#player), [Unit](#unit), Expression)                  | Sets the death count for a [Unit](#unit). (Caution!)           |
-| add_deaths([Player](#player), [Unit](#unit), Expression)                  | Adds to the death count for a [Unit](#unit). (Caution!)        |
-| remove_deaths([Player](#player), [Unit](#unit), Expression)               | Subtracts from the death count for a [Unit](#unit). (Caution!) |
+| Function prototype                                                        | Description                                           |
+|---------------------------------------------------------------------------|-------------------------------------------------------|
+| set_score([Player](#player), [ScoreType](#scoretype), Expression)         | Sets the score of a player.                           |
+| add_score([Player](#player), [ScoreType](#scoretype), Expression)         | Add to the score of a player.                         |
+| subtract_score([Player](#player), [ScoreType](#scoretype), Expression)    | Subtracts from the score of a player.                 |
+| set_deaths([Player](#player), [Unit](#unit), Expression)                  | Sets the death count for a unit. (Caution!)           |
+| add_deaths([Player](#player), [Unit](#unit), Expression)                  | Adds to the death count for a unit. (Caution!)        |
+| remove_deaths([Player](#player), [Unit](#unit), Expression)               | Subtracts from the death count for a unit. (Caution!) |
 
 ### UI functions
 
-| Function prototype                                                     | Description                                                        |
-|------------------------------------------------------------------------|--------------------------------------------------------------------|
-| center_view([Player](#player), Location)                               | Centers the view on a location for a [Player](#player).            |
-| ping([Player](#player), Location)                                      | Triggers a minimap ping on a location for a [Player](#player).     |
-| talking_portrait([Player](#player), [Unit](#unit), Quantity)           | Shows the [Unit](#unit) talking portrait for an amount of seconds. |
+| Function prototype                                                     | Description                                               |
+|------------------------------------------------------------------------|-----------------------------------------------------------|
+| center_view([Player](#player), Location)                               | Centers the view on a location for a player.              |
+| ping([Player](#player), Location)                                      | Triggers a minimap ping on a location for a player.       |
+| talking_portrait([Player](#player), [Unit](#unit), Quantity)           | Shows the unit talking portrait for an amount of seconds. |
 
 ### Location functions
 
-| Function prototype                                                     | Description                                            |
-|------------------------------------------------------------------------|--------------------------------------------------------|
-| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)   | Centers DstLocation on a [Unit](#unit) at SrcLocation. |
+| Function prototype                                                     | Description                                   |
+|------------------------------------------------------------------------|-----------------------------------------------|
+| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)   | Centers DstLocation on a unit at SrcLocation. |
 
 ### Game functions
 
@@ -308,40 +308,40 @@ Notes:
 
 ### Unit conditions
 
-| Event prototype                                                                        | Description                                                                                   |
-|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| bring([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit), Location) | When a [Player](#player) owns a quantity of [Unit](#unit)s at location.                       |
-| commands([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))        | When a [Player](#player) commands a number of [Unit](#unit)s.                                 |
-| commands_least([Player](#player), [Unit](#unit), optional: Location)                   | When a [Player](#player) commands the least number of [Unit](#unit)s at an optional location. |
-| commands_most([Player](#player), [Unit](#unit), optional: Location)                    | When a [Player](#player) commands the most number of [Unit](#unit)s at an optional location.  |
-| killed([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a [Player](#player) has killed a number of [Unit](#unit)s.                               |
-| killed_least([Player](#player), [Unit](#unit))                                         | When a [Player](#player) has killed the lowest quantity of a given [Unit](#unit).             |
-| killed_most([Player](#player), [Unit](#unit))                                          | When a [Player](#player) has killed the highest quantity of a given [Unit](#unit).            |
-| deaths([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a [Player](#player) has lost a number of [Unit](#unit)s.                                 |
+| Event prototype                                                                        | Description                                                               |
+|----------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| bring([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit), Location) | When a player owns a quantity of units at location.                       |
+| commands([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))        | When a player commands a number of units.                                 |
+| commands_least([Player](#player), [Unit](#unit), optional: Location)                   | When a player commands the least number of units at an optional location. |
+| commands_most([Player](#player), [Unit](#unit), optional: Location)                    | When a player commands the most number of units at an optional location.  |
+| killed([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a player has killed a number of units.                               |
+| killed_least([Player](#player), [Unit](#unit))                                         | When a player has killed the lowest quantity of a given unit.             |
+| killed_most([Player](#player), [Unit](#unit))                                          | When a player has killed the highest quantity of a given unit.            |
+| deaths([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))          | When a player has lost a number of units.                                 |
 
 ### Resource conditions
 
-| Event prototype                                                                                   | Description                                                  |
-|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| accumulate([Player](#player), [Comparison](#comparison), Quantity, [ResourceType](#resourcetype)) | When a [Player](#player) owns a quantity of resources.       |
-| most_resources([Player](#player), [ResourceType](#resourcetype))                                  | When a [Player](#player) owns the most of a given resource.  |
-| least_resources([Player](#player), [ResourceType](#resourcetype))                                 | When a [Player](#player) owns the least of a given resource. |
+| Event prototype                                                                                   | Description                                       |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| accumulate([Player](#player), [Comparison](#comparison), Quantity, [ResourceType](#resourcetype)) | When a player owns a quantity of resources.       |
+| most_resources([Player](#player), [ResourceType](#resourcetype))                                  | When a player owns the most of a given resource.  |
+| least_resources([Player](#player), [ResourceType](#resourcetype))                                 | When a player owns the least of a given resource. |
 
 ### Game conditions
 
-| Event prototype                                                   | Description                                                               |
-|-------------------------------------------------------------------|---------------------------------------------------------------------------|
-| elapsed_time([Comparison](#comparison), Quantity)                 | When a certain amount of time has elapsed.                                |
-| countdown([Comparison](#comparison), Quantity)                    | When the countdown timer reaches a amount of seconds.                     |
-| opponents([Player](#player), [Comparison](#comparison), Quantity) | When a [Player](#player) has a number of opponents remaining in the game. |
+| Event prototype                                                   | Description                                                    |
+|-------------------------------------------------------------------|----------------------------------------------------------------|
+| elapsed_time([Comparison](#comparison), Quantity)                 | When a certain amount of time has elapsed.                     |
+| countdown([Comparison](#comparison), Quantity)                    | When the countdown timer reaches a amount of seconds.          |
+| opponents([Player](#player), [Comparison](#comparison), Quantity) | When a player has a number of opponents remaining in the game. |
 
 ### Score conditions
 
-| Event prototype                                                                        | Description                                                |
-|----------------------------------------------------------------------------------------|------------------------------------------------------------|
-| score([Player](#player), [ScoreType](#scoretype), [Comparison](#comparison), Quantity) | When a [Player](#player)'s score reaches a given quantity. |
-| lowest_score([Player](#player), [ScoreType](#scoretype))                               | When a [Player](#player) has the lowest score.             |
-| highest_score([Player](#player), [ScoreType](#scoretype))                              | When a [Player](#player) has the highest score.            |
+| Event prototype                                                                        | Description                                     |
+|----------------------------------------------------------------------------------------|-------------------------------------------------|
+| score([Player](#player), [ScoreType](#scoretype), [Comparison](#comparison), Quantity) | When a player's score reaches a given quantity. |
+| lowest_score([Player](#player), [ScoreType](#scoretype))                               | When a player has the lowest score.             |
+| highest_score([Player](#player), [ScoreType](#scoretype))                              | When a player has the highest score.            |
 
 ## Spawning units with properties
 
