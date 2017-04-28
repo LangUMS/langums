@@ -2061,8 +2061,8 @@ namespace Langums
     class IRLeaderboardInstruction : public IIRInstruction
     {
         public:
-        IRLeaderboardInstruction(const std::string& text, LeaderboardType type) :
-            m_Text(text), m_LeaderboardType(type), IIRInstruction(IRInstructionType::Leaderboard) {}
+        IRLeaderboardInstruction(const std::string& text, LeaderboardType type, int goalQuantity) :
+            m_Text(text), m_LeaderboardType(type), m_GoalQuantity(goalQuantity), IIRInstruction(IRInstructionType::Leaderboard) {}
 
         std::string DebugDump() const
         {
@@ -2090,7 +2090,14 @@ namespace Langums
                 break;
             }
 
-            return SafePrintf("LDRBOARD % %", m_Text, type);
+            if (m_GoalQuantity == -1)
+            {
+                return SafePrintf("LDRBOARD % %", m_Text, type);
+            }
+            else
+            {
+                return SafePrintf("LDRBOARD % % [GOAL %]", m_Text, type, m_GoalQuantity);
+            }
         }
 
         void SetUnitId(uint8_t unitId)
@@ -2143,6 +2150,11 @@ namespace Langums
             return m_LeaderboardType;
         }
 
+        int GetGoalQuantity() const
+        {
+            return m_GoalQuantity;
+        }
+
         private:
         LeaderboardType m_LeaderboardType;
         ScoreType m_ScoreType;
@@ -2150,6 +2162,7 @@ namespace Langums
         uint8_t m_UnitId;
         std::string m_Text;
         std::string m_LocationName;
+        int m_GoalQuantity;
     };
 
     class IREventInstruction : public IIRInstruction
