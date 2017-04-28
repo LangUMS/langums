@@ -278,6 +278,8 @@ Note: Arguments named `QuantityExpression` can be either numeric constants e.g. 
 | `commands_least(Player, Unit, optional: Location)`              | When a player commands the least number of units at an optional location.     |
 | `commands_most(Player, Unit, optional: Location)`               | When a player commands the most number of units at an optional location.      |
 | `killed(Player, Comparison, Quantity, Unit)`                    | When a player has killed a number of units.                                   |
+| `killed_least(Player, Unit)`                                    | When a player has killed the lowest quantity of a given unit.                 |
+| `killed_most(Player, Unit)`                                     | When a player has killed the highest quantity of a given unit.                |
 | `deaths(Player, Comparison, Quantity, Unit)`                    | When a player has lost a number of units.                                     |
 | `countdown(Comparison, Time)`                                   | When the countdown timer reaches a specific time.                             |
 | More to be added ...                                            |                                                                               |

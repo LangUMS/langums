@@ -260,6 +260,39 @@ namespace Langums
                             EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions);
                         }
                     }
+                    else if (name == "killed_least" || name == "killed_most")
+                    {
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as first argument to %(), expected player name", name));
+                        }
+
+                        auto playerName = (ASTIdentifier*)arg0.get();
+                        auto playerId = PlayerNameToId(playerName->GetName());
+
+                        auto arg1 = condition->GetArgument(1);
+                        if (arg1->GetType() != ASTNodeType::Identifier)
+                        {
+                            throw IRCompilerException(SafePrintf("Something other than an identifier passed as second argument to %(), expected unit type", name));
+                        }
+
+                        auto unitName = (ASTIdentifier*)arg1.get();
+                        auto unitId = UnitNameToId(unitName->GetName());
+                        if (unitId == -1)
+                        {
+                            throw IRCompilerException(SafePrintf("Invalid unit name \"%\" passed to %()", unitName->GetName(), name));
+                        }
+
+                        if (name == "killed_least")
+                        {
+                            EmitInstruction(new IRKillLeastCondInstruction(playerId, unitId), m_Instructions);
+                        }
+                        else if (name == "killed_most")
+                        {
+                            EmitInstruction(new IRKillMostCondInstruction(playerId, unitId), m_Instructions);
+                        }
+                    }
                     else if (name == "accumulate")
                     {
                         auto arg0 = condition->GetArgument(0);

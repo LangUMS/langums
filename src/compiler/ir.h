@@ -94,6 +94,8 @@ namespace Langums
         CmdLeastCond,   // Player commands the least quantity of units condition
         CmdMostCond,    // Player commands the most quantity of units condition
         KillCond,       // Player has killed a quantity of units condition
+        KillLeastCond,  // Player has the least units killed
+        KillMostCond,   // Player hast the most units killed
         DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
     };
@@ -1846,6 +1848,58 @@ namespace Langums
         uint8_t m_UnitId;
         ConditionComparison m_Comparison;
         uint32_t m_Quantity;
+    };
+
+    class IRKillLeastCondInstruction : public IIRInstruction
+    {
+        public:
+        IRKillLeastCondInstruction(uint8_t playerId, uint8_t unitId) :
+            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::KillLeastCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("LEASTKILLS % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId]);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+    };
+
+    class IRKillMostCondInstruction : public IIRInstruction
+    {
+        public:
+        IRKillMostCondInstruction(uint8_t playerId, uint8_t unitId) :
+            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::KillMostCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("MOSTKILLS % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId]);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
     };
 
     class IRDeathCondInstruction : public IIRInstruction

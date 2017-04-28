@@ -181,6 +181,18 @@ namespace Langums
                         auto kill = (IRKillCondInstruction*)condition.get();
                         eventTrigger.Cond_Kills(kill->GetPlayerId(), (TriggerComparisonType)kill->GetComparison(), kill->GetUnitId(), kill->GetQuantity());
                     }
+                    else if (condition->GetType() == IRInstructionType::KillLeastCond)
+                    {
+                        auto killLeast = (IRKillLeastCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(killLeast->GetPlayerId() + 1);
+                        eventTrigger.Cond_KillsLeast(killLeast->GetPlayerId(), killLeast->GetUnitId());
+                    }
+                    else if (condition->GetType() == IRInstructionType::KillMostCond)
+                    {
+                        auto killMost = (IRKillMostCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(killMost->GetPlayerId() + 1);
+                        eventTrigger.Cond_KillsMost(killMost->GetPlayerId(), killMost->GetUnitId());
+                    }
                     else if (condition->GetType() == IRInstructionType::DeathCond)
                     {
                         auto death = (IRDeathCondInstruction*)condition.get();
@@ -1509,6 +1521,8 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::AccumCond ||
                 instruction->GetType() == IRInstructionType::TimeCond ||
                 instruction->GetType() == IRInstructionType::KillCond ||
+                instruction->GetType() == IRInstructionType::KillMostCond ||
+                instruction->GetType() == IRInstructionType::KillLeastCond ||
                 instruction->GetType() == IRInstructionType::DeathCond ||
                 instruction->GetType() == IRInstructionType::CmdCond ||
                 instruction->GetType() == IRInstructionType::CmdLeastCond ||
