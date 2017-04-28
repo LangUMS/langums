@@ -17,16 +17,16 @@ namespace Langums
 
         if (address >= 0)
         {
-            CodeGen_TestReg(Reg_InstructionCounter, address, TriggerComparisonType::Exactly);
+            Cond_TestReg(Reg_InstructionCounter, address, TriggerComparisonType::Exactly);
         }
 
         // actions
 
-        CodeGen_PreserveTrigger();
+        Action_PreserveTrigger();
         m_HasChanges = false;
     }
 
-    void TriggerBuilder::CodeGen_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison)
+    void TriggerBuilder::Cond_TestReg(unsigned int regId, int value, CHK::TriggerComparisonType comparison)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -47,7 +47,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_TestSwitch(unsigned int switchId, bool expectedState)
+    void TriggerBuilder::Cond_TestSwitch(unsigned int switchId, bool expectedState)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -60,7 +60,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Always()
+    void TriggerBuilder::Cond_Always()
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -69,7 +69,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Bring(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int locationId, unsigned int quantity)
+    void TriggerBuilder::Cond_Bring(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int locationId, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -83,7 +83,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Accumulate(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ResourceType resourceType, unsigned int quantity)
+    void TriggerBuilder::Cond_Accumulate(unsigned int playerId, CHK::TriggerComparisonType comparison, CHK::ResourceType resourceType, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -96,7 +96,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity)
+    void TriggerBuilder::Cond_ElapsedTime(CHK::TriggerComparisonType comparison, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -107,7 +107,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Commands(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
+    void TriggerBuilder::Cond_Commands(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -120,7 +120,17 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Kills(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
+    void TriggerBuilder::Cond_CommandsLeast(unsigned int playerId, unsigned int unitId, int locationId)
+    {
+
+    }
+
+    void TriggerBuilder::Cond_CommandsMost(unsigned int playerId, unsigned int unitId, int locationId)
+    {
+
+    }
+
+    void TriggerBuilder::Cond_Kills(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -133,7 +143,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Deaths(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
+    void TriggerBuilder::Cond_Deaths(unsigned int playerId, CHK::TriggerComparisonType comparison, unsigned int unitId, unsigned int quantity)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -146,7 +156,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Countdown(CHK::TriggerComparisonType comparison, unsigned int time)
+    void TriggerBuilder::Cond_Countdown(CHK::TriggerComparisonType comparison, unsigned int time)
     {
         using namespace CHK;
         auto& condition = m_Trigger.m_Conditions[m_NextCondition++];
@@ -157,7 +167,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_SetReg(unsigned int regId, int value)
+    void TriggerBuilder::Action_SetReg(unsigned int regId, int value)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -178,7 +188,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_IncReg(unsigned int regId, int amount)
+    void TriggerBuilder::Action_IncReg(unsigned int regId, int amount)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -199,7 +209,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_DecReg(unsigned int regId, int amount)
+    void TriggerBuilder::Action_DecReg(unsigned int regId, int amount)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -220,7 +230,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_DisplayMsg(unsigned int stringId)
+    void TriggerBuilder::Action_DisplayMsg(unsigned int stringId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -231,12 +241,12 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_JumpTo(unsigned int address)
+    void TriggerBuilder::Action_JumpTo(unsigned int address)
     {
-        CodeGen_SetReg(Reg_InstructionCounter, address);
+        Action_SetReg(Reg_InstructionCounter, address);
     }
 
-    void TriggerBuilder::CodeGen_PreserveTrigger()
+    void TriggerBuilder::Action_PreserveTrigger()
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -245,7 +255,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Wait(unsigned int milliseconds)
+    void TriggerBuilder::Action_Wait(unsigned int milliseconds)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -255,7 +265,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Comment(unsigned int stringId)
+    void TriggerBuilder::Action_Comment(unsigned int stringId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -266,7 +276,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_SetSwitch(unsigned int switchId, CHK::TriggerActionState state)
+    void TriggerBuilder::Action_SetSwitch(unsigned int switchId, CHK::TriggerActionState state)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -278,7 +288,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
+    void TriggerBuilder::Action_CreateUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -293,7 +303,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_KillUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId)
+    void TriggerBuilder::Action_KillUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -315,7 +325,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_RemoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId)
+    void TriggerBuilder::Action_RemoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -338,7 +348,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_MoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int srcLocationId, unsigned int dstLocationId)
+    void TriggerBuilder::Action_MoveUnit(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -355,7 +365,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_OrderUnit(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState order, unsigned int srcLocationId, unsigned int dstLocationId)
+    void TriggerBuilder::Action_OrderUnit(unsigned int playerId, unsigned int unitId, CHK::TriggerActionState order, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -372,7 +382,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_ModifyUnitHitPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    void TriggerBuilder::Action_ModifyUnitHP(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -389,7 +399,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_ModifyUnitEnergy(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    void TriggerBuilder::Action_ModifyUnitEnergy(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -406,7 +416,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_ModifyUnitShieldPoints(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    void TriggerBuilder::Action_ModifyUnitSP(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -423,7 +433,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_ModifyUnitHangarCount(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
+    void TriggerBuilder::Action_ModifyUnitHangar(unsigned int playerId, unsigned int unitId, unsigned int quantity, unsigned int amount, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -440,7 +450,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_GiveUnits(unsigned int srcPlayerId, unsigned int dstPlayerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
+    void TriggerBuilder::Action_GiveUnits(unsigned int srcPlayerId, unsigned int dstPlayerId, unsigned int unitId, unsigned int quantity, unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -456,7 +466,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId)
+    void TriggerBuilder::Action_MoveLocation(unsigned int playerId, unsigned int unitId, unsigned int srcLocationId, unsigned int dstLocationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -472,7 +482,7 @@ namespace Langums
         m_HasChanges = true;
     }
     
-    void TriggerBuilder::CodeGen_Victory()
+    void TriggerBuilder::Action_Victory()
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -481,7 +491,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Defeat()
+    void TriggerBuilder::Action_Defeat()
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -490,7 +500,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Draw()
+    void TriggerBuilder::Action_Draw()
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -499,7 +509,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_CenterView(unsigned int locationId)
+    void TriggerBuilder::Action_CenterView(unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -509,7 +519,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_Ping(unsigned int locationId)
+    void TriggerBuilder::Action_Ping(unsigned int locationId)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -519,7 +529,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState actionType, CHK::ResourceType resourceType)
+    void TriggerBuilder::Action_SetResources(unsigned int playerId, unsigned int quantity, CHK::TriggerActionState actionType, CHK::ResourceType resourceType)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -531,7 +541,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState actionType)
+    void TriggerBuilder::Action_SetDeaths(unsigned int playerId, unsigned int unitId, unsigned int quantity, CHK::TriggerActionState actionType)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -543,7 +553,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_SetCountdown(unsigned int time, CHK::TriggerActionState actionType)
+    void TriggerBuilder::Action_SetCountdown(unsigned int time, CHK::TriggerActionState actionType)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];
@@ -553,7 +563,7 @@ namespace Langums
         m_HasChanges = true;
     }
 
-    void TriggerBuilder::CodeGen_TalkingPortrait(unsigned int unitId, unsigned int time)
+    void TriggerBuilder::Action_TalkingPortrait(unsigned int unitId, unsigned int time)
     {
         using namespace CHK;
         auto& action = m_Trigger.m_Actions[m_NextAction++];

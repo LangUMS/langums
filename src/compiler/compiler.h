@@ -44,12 +44,12 @@ namespace Langums
         bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
 
         private:
-        void CodeGen_Always(CHK::TriggerCondition& retCondition);
+        void Cond_Always(CHK::TriggerCondition& retCondition);
 
         unsigned int CodeGen_CopyReg(unsigned int dstRegId, unsigned int srcRegId, unsigned int& nextAddress, unsigned int retAddress);
-        void CodeGen_PreserveTrigger(CHK::TriggerAction& retAction);
-        void CodeGen_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
-        void CodeGen_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
+        void Action_PreserveTrigger(CHK::TriggerAction& retAction);
+        void Action_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
+        void Action_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
 
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
         uint32_t m_CopyBatchSize = 65536u;

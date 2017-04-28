@@ -91,6 +91,8 @@ namespace Langums
         AccumCond,      // Accumulate trigger condition
         TimeCond,       // Elapsed time trigger condition
         CmdCond,        // Player commands a quantity of units condition
+        CmdLeastCond,   // Player commands the least quantity of units condition
+        CmdMostCond,    // Player commands the most quantity of units condition
         KillCond,       // Player has killed a quantity of units condition
         DeathCond,      // Player has lost a quantity of units condition
         CountdownCond,  // Countdown timer condition
@@ -1742,6 +1744,70 @@ namespace Langums
         uint8_t m_UnitId;
         ConditionComparison m_Comparison;
         uint32_t m_Quantity;
+    };
+
+    class IRCmdLeastCondInstruction : public IIRInstruction
+    {
+        public:
+        IRCmdLeastCondInstruction(uint8_t playerId, uint8_t unitId, const std::string& locationName) :
+            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::CmdLeastCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("CMDLEAST % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_LocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        std::string m_LocationName; // location name can be empty which means "no location"
+    };
+
+    class IRCmdMostCondInstruction : public IIRInstruction
+    {
+        public:
+        IRCmdMostCondInstruction(uint8_t playerId, uint8_t unitId, const std::string& locationName) :
+            m_PlayerId(playerId), m_UnitId(unitId), IIRInstruction(IRInstructionType::CmdMostCond) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("CMDMOST % % %", PlayersByName[m_PlayerId], UnitsByName[m_UnitId], m_LocationName);
+        }
+
+        uint8_t GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        private:
+        uint8_t m_PlayerId;
+        uint8_t m_UnitId;
+        std::string m_LocationName; // location name can be empty which means "no location"
     };
 
     class IRKillCondInstruction : public IIRInstruction
