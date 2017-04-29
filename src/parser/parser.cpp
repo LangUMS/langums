@@ -502,10 +502,15 @@ namespace Langums
         auto variableDeclaration = new ASTVariableDeclaration(Identifier());
 
         Whitespace();
-        Symbol('=');
-        Whitespace();
 
-        variableDeclaration->AddChild(Expression());
+        if (Peek() == '=')
+        {
+            Symbol('=');
+            Whitespace();
+
+            variableDeclaration->AddChild(Expression());
+        }
+
         return std::unique_ptr<IASTNode>(variableDeclaration);
     }
 

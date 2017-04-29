@@ -1416,6 +1416,10 @@ namespace Langums
             {
                 auto variableDeclaration = (ASTVariableDeclaration*)statement.get();
                 auto& expression = variableDeclaration->GetExpression();
+                if (expression == nullptr)
+                {
+                    continue;
+                }
 
                 auto regId = RegisterNameToIndex(variableDeclaration->GetName(), aliases);
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
