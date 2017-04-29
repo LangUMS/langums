@@ -245,21 +245,32 @@ namespace Langums
                 auto variable = (ASTVariableDeclaration*)node.get();
                 auto& name = variable->GetName();
 
-                if (m_GlobalAliases.GetAlias(name) != -1)
+                if (m_GlobalAliases.HasAlias(name, 0))
                 {
                     throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name));
                 }
 
-                auto regId = m_GlobalAliases.Allocate(name);
+                auto arraySize = variable->GetArraySize();
+                m_GlobalAliases.Allocate(name, arraySize);
 
                 auto& expression = variable->GetExpression();
-                if (expression->GetType() != ASTNodeType::NumberLiteral)
+                
+                if (expression != nullptr)
                 {
-                    throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name));
-                }
+                    if (expression->GetType() != ASTNodeType::NumberLiteral)
+                    {
+                        throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name));
+                    }
 
-                auto number = (ASTNumberLiteral*)expression.get();
-                EmitInstruction(new IRSetRegInstruction(regId, number->GetValue()), m_Instructions);
+                    auto number = (ASTNumberLiteral*)expression.get();
+                    auto value = number->GetValue();
+
+                    for (auto i = 0u; i < arraySize; i++)
+                    {
+                        auto regId = m_GlobalAliases.GetAlias(name, i);
+                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions);
+                    }
+                }
             }
         }
 
@@ -1318,37 +1329,65 @@ namespace Langums
         }
         else if (op == OperatorType::PostfixIncrement)
         {
-            if (lhs->GetType() != ASTNodeType::Identifier)
+            if (lhs->GetType() == ASTNodeType::Identifier)
             {
-                throw IRCompilerException("Postfix operator used on something other than an identifier");
-            }
+                auto identifier = (ASTIdentifier*)lhs.get();
+                auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
+                if (regId == -1)
+                {
+                    throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()));
+                }
 
-            auto identifier = (ASTIdentifier*)lhs.get();
-            auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
-            if (regId == -1)
+                EmitInstruction(new IRPushInstruction(regId), instructions);
+                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions);
+            }
+            else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
-                throw IRCompilerException(SafePrintf("Unknown name \"%\"", identifier->GetName()));
-            }
+                auto arrayExpression = (ASTArrayExpression*)lhs.get();
+                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                if (regId == -1)
+                {
+                    throw IRCompilerException(SafePrintf("Invalid name \"%[%]\"", arrayExpression->GetIdentifier(), arrayExpression->GetIndex()));
+                }
 
-            EmitInstruction(new IRPushInstruction(regId), instructions);
-            EmitInstruction(new IRIncRegInstruction(regId, 1), instructions);
+                EmitInstruction(new IRPushInstruction(regId), instructions);
+                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions);
+            }
+            else
+            {
+                throw IRCompilerException("Invalid postfix increment operator usage");
+            }
         }
         else if (op == OperatorType::PostfixDecrement)
         {
-            if (lhs->GetType() != ASTNodeType::Identifier)
+            if (lhs->GetType() == ASTNodeType::Identifier)
             {
-                throw IRCompilerException("Postfix operator used on something other than an identifier");
-            }
+                auto identifier = (ASTIdentifier*)lhs.get();
+                auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
+                if (regId == -1)
+                {
+                    throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()));
+                }
 
-            auto identifier = (ASTIdentifier*)lhs.get();
-            auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
-            if (regId == -1)
+                EmitInstruction(new IRPushInstruction(regId), instructions);
+                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions);
+            }
+            else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
-                throw IRCompilerException(SafePrintf("Unknown name \"%\"", identifier->GetName()));
-            }
+                auto arrayExpression = (ASTArrayExpression*)lhs.get();
+                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                if (regId == -1)
+                {
+                    throw IRCompilerException(SafePrintf("Invalid name \"%[%]\"", arrayExpression->GetIdentifier(), arrayExpression->GetIndex()));
+                }
 
-            EmitInstruction(new IRPushInstruction(regId), instructions);
-            EmitInstruction(new IRDecRegInstruction(regId, 1), instructions);
+                EmitInstruction(new IRPushInstruction(regId), instructions);
+                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions);
+            }
+            else
+            {
+                throw IRCompilerException("Invalid postfix decrement operator usage");
+            }
         }
         else
         {
@@ -1366,7 +1405,7 @@ namespace Langums
         else if (expression->GetType() == ASTNodeType::Identifier)
         {
             auto identifier = (ASTIdentifier*)expression;
-            auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
+            auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
             EmitInstruction(new IRPushInstruction(regId), instructions);
         }
         else if (expression->GetType() == ASTNodeType::BinaryExpression)
@@ -1376,6 +1415,12 @@ namespace Langums
         else if (expression->GetType() == ASTNodeType::UnaryExpression)
         {
             EmitUnaryExpression((ASTUnaryExpression*)expression, instructions, aliases);
+        }
+        else if (expression->GetType() == ASTNodeType::ArrayExpression)
+        {
+            auto arrayExpression = (ASTArrayExpression*)expression;
+            auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+            EmitInstruction(new IRPushInstruction(regId), instructions);
         }
         else if (expression->GetType() == ASTNodeType::FunctionCall)
         {
@@ -1404,7 +1449,7 @@ namespace Langums
                 auto variableDeclaration = (ASTVariableDeclaration*)statement.get();
 
                 auto& name = variableDeclaration->GetName();
-                aliases.Allocate(name);
+                aliases.Allocate(name, variableDeclaration->GetArraySize());
                 localVariables.push_back(name);
             }
         }
@@ -1421,7 +1466,12 @@ namespace Langums
                     continue;
                 }
 
-                auto regId = RegisterNameToIndex(variableDeclaration->GetName(), aliases);
+                if (variableDeclaration->GetArraySize() > 1)
+                {
+                    throw IRCompilerException(SafePrintf("Array declarations cannot have initializers, see declaration of \"%\"", variableDeclaration->GetName()));
+                }
+
+                auto regId = RegisterNameToIndex(variableDeclaration->GetName(), 0, aliases);
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
                 {
                     auto number = (ASTNumberLiteral*)expression.get();
@@ -1437,13 +1487,42 @@ namespace Langums
             {
                 auto expression = (ASTAssignmentExpression*)statement.get();
 
-                auto& lhs = expression->GetLHSValue();
-                if (!IsRegisterName(lhs.GetName(), aliases))
-                {
-                    throw IRCompilerException("Assignment expression contains non-register on the left side");
-                }
+                auto lhsRegIndex = -1;
 
-                auto lhsRegIndex = RegisterNameToIndex(lhs.GetName(), aliases);
+                auto& lhs = expression->GetLHSValue();
+                if (lhs->GetType() == ASTNodeType::Identifier)
+                {
+                    auto identifier = (ASTIdentifier*)lhs.get();
+
+                    if (!IsRegisterName(identifier->GetName(), aliases))
+                    {
+                        throw IRCompilerException("Assignment expression has invalid register on the left side");
+                    }
+
+                    lhsRegIndex = RegisterNameToIndex(identifier->GetName(), 0, aliases);
+                }
+                else if (lhs->GetType() == ASTNodeType::ArrayExpression)
+                {
+                    auto arrayExpression = (ASTArrayExpression*)lhs.get();
+
+                    auto& name = arrayExpression->GetIdentifier();
+
+                    if (!IsRegisterName(name, aliases))
+                    {
+                        throw IRCompilerException("Assignment expression has invalid register on the left side");
+                    }
+
+                    lhsRegIndex = RegisterNameToIndex(name, arrayExpression->GetIndex(), aliases);
+                }
+                else
+                {
+                    throw IRCompilerException("Invalid type on left side of assignment expression, expected identifier or array expression");
+                }
+                
+                if (lhsRegIndex == -1)
+                {
+                    throw IRCompilerException("Invalid type on left side of assignment expression, expected identifier or array expression");
+                }
 
                 auto& rhs = expression->GetRHSValue();
 
@@ -1455,7 +1534,24 @@ namespace Langums
                 else if (rhs->GetType() == ASTNodeType::Identifier)
                 {
                     auto rhsRegister = (ASTIdentifier*)rhs.get();
-                    auto rhsRegIndex = RegisterNameToIndex(rhsRegister->GetName(), aliases);
+                    auto rhsRegIndex = RegisterNameToIndex(rhsRegister->GetName(), 0, aliases);
+
+                    if (rhsRegIndex == -1)
+                    {
+                        throw IRCompilerException("Invalid value on right side of assignment expression");
+                    }
+
+                    EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions);
+                }
+                else if (rhs->GetType() == ASTNodeType::ArrayExpression)
+                {
+                    auto arrayExpression = (ASTArrayExpression*)rhs.get();
+                    auto rhsRegIndex = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    if (rhsRegIndex == -1)
+                    {
+                        throw IRCompilerException("Invalid value on right side of assignment expression");
+                    }
+
                     EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions);
                 }
                 else
@@ -1466,29 +1562,7 @@ namespace Langums
             }
             else if (statement->GetType() == ASTNodeType::UnaryExpression)
             {
-                auto expression = (ASTUnaryExpression*)statement.get();
-
-                auto op = expression->GetOperator();
-                if (op != OperatorType::PostfixDecrement && op != OperatorType::PostfixIncrement)
-                {
-                    throw IRCompilerException("Only postfix increment & decrement operators are allowed in an expression statement");
-                }
-
-                auto identifier = (ASTIdentifier*)expression->GetChild(0).get();
-                auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
-                if (regId == -1)
-                {
-                    throw IRCompilerException(SafePrintf("Unknown name \"%\"", regId));
-                }
-
-                if (op == OperatorType::PostfixIncrement)
-                {
-                    EmitInstruction(new IRIncRegInstruction(regId, 1), instructions);
-                }
-                else if (op == OperatorType::PostfixDecrement)
-                {
-                    EmitInstruction(new IRDecRegInstruction(regId, 1), instructions);
-                }
+                EmitUnaryExpression((ASTUnaryExpression*)statement.get(), instructions, aliases);
             }
             else if (statement->GetType() == ASTNodeType::FunctionCall)
             {
@@ -1557,7 +1631,7 @@ namespace Langums
                         throw IRCompilerException("Disallowed if statement with empty body");
                     }
 
-                    auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
+                    auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
                     auto offset = 1;
                     if (elseBodyInstructions.size() > 0)
                     {
@@ -1703,7 +1777,7 @@ namespace Langums
                     }
 
                     auto loopStart = instructions.size();
-                    auto regId = RegisterNameToIndex(identifier->GetName(), aliases);
+                    auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
                     EmitInstruction(new IRJmpIfEqZeroInstruction(regId, bodyInstructions.size() + 2), instructions);
 
                     auto instructionCount = instructions.size();
@@ -1817,7 +1891,8 @@ namespace Langums
         for (auto i = 0u; i < argsCount; i++)
         {
             auto& argName = args[i];
-            auto regId = aliases.Allocate(argName);
+            aliases.Allocate(argName, 1);
+            auto regId = aliases.GetAlias(argName, 0);
             EmitInstruction(new IRPopInstruction(regId), instructions);
         }
 
@@ -1862,7 +1937,7 @@ namespace Langums
 
     bool IRCompiler::IsRegisterName(const std::string& name, RegisterAliases& aliases) const
     {
-        auto regId = aliases.GetAlias(name);
+        auto regId = aliases.GetAlias(name, 0);
         if (regId == -1)
         {
             if (name.length() < 2 || name.length() > 4 || name[0] != 'r')
@@ -1884,9 +1959,9 @@ namespace Langums
         return true;
     }
 
-    int IRCompiler::RegisterNameToIndex(const std::string& name, RegisterAliases& aliases) const
+    int IRCompiler::RegisterNameToIndex(const std::string& name, unsigned int arrayIndex, RegisterAliases& aliases) const
     {
-        auto regId = aliases.GetAlias(name);
+        auto regId = aliases.GetAlias(name, arrayIndex);
         if (regId == -1)
         {
             std::string reg(name.c_str() + 1, name.length() - 1);

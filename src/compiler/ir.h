@@ -33,52 +33,98 @@ namespace Langums
         public:
         RegisterAliases() {}
 
-        int GetAlias(const std::string& name) const
+        bool HasAlias(const std::string& name, unsigned int index) const
         {
-            auto it = m_Overrides.find(name);
-            if (it != m_Overrides.end())
+            auto it = m_Aliases.find(name);
+            if (it == m_Aliases.end())
             {
-                return (*it).second;
+                return false;
             }
 
-            for (auto i = 0u; i < m_Aliases.size(); i++)
+            auto& registers = (*it).second;
+            if (index >= registers.size())
             {
-                if (m_Aliases[i] == name)
+                if (registers.size() == 1)
                 {
-                    return (int)Reg_ReservedEnd + i;
+                    return false;
+                }
+                else
+                {
+                    return false;
                 }
             }
 
-            return -1;
+            return true;
         }
 
-        int Allocate(const std::string& name)
+        int GetAlias(const std::string& name, unsigned int index) const
         {
-            m_Aliases.push_back(name);
-            return GetAlias(name);
+            auto it = m_Aliases.find(name);
+            if (it == m_Aliases.end())
+            {
+                throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name));
+            }
+
+            auto& registers = (*it).second;
+            if (index >= registers.size())
+            {
+                if (registers.size() == 1)
+                {
+                    throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name));
+                }
+                else
+                {
+                    throw IRCompilerException(SafePrintf("Array access out of bounds for \"%[%]\"", name, index));
+                }
+            }
+
+            return Reg_ReservedEnd + registers[index];
+        }
+
+        void Allocate(const std::string& name, unsigned int count)
+        {
+            auto& registers = m_Aliases[name];
+
+            for (auto& id : registers)
+            {
+                m_FreeIds.push_back(id);
+            }
+
+            registers.clear();
+
+            for (auto i = 0u; i < count; i++)
+            {
+                registers.push_back(GetNextFreeId());
+            }
         }
 
         void Deallocate(const std::string& name)
         {
-            auto it = m_Overrides.find(name);
-            if (it != m_Overrides.end())
+            auto& registers = m_Aliases[name];
+            for (auto id : registers)
             {
-                m_Overrides.erase(it);
+                m_FreeIds.push_back(id);
             }
 
-            for (auto it = m_Aliases.begin(); it != m_Aliases.end(); ++it)
-            {
-                if (*it == name)
-                {
-                    m_Aliases.erase(it);
-                    break;
-                }
-            }
+            m_Aliases.erase(name);
         }
 
         private:
-        std::vector<std::string> m_Aliases;
-        std::unordered_map<std::string, unsigned int> m_Overrides;
+        unsigned int GetNextFreeId()
+        {
+            if (m_FreeIds.size() > 0)
+            {
+                auto next = m_FreeIds.back();
+                m_FreeIds.pop_back();
+                return next;
+            }
+
+            return m_NextFreeId++;
+        }
+
+        std::unordered_map<std::string, std::vector<unsigned int>> m_Aliases;
+        std::vector<unsigned int> m_FreeIds;
+        unsigned int m_NextFreeId = 0;
     };
 
     class IRCompiler
@@ -133,7 +179,7 @@ namespace Langums
         unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
 
         bool IsRegisterName(const std::string& name, RegisterAliases& aliases) const;
-        int RegisterNameToIndex(const std::string& name, RegisterAliases& aliases) const;
+        int RegisterNameToIndex(const std::string& name, unsigned int arrayIndex, RegisterAliases& aliases) const;
 
         int UnitNameToId(const std::string& name) const;
         int PlayerNameToId(const std::string& name) const;

@@ -75,7 +75,7 @@ namespace Langums
         LeastResCond,   // Player has the least quantity of a resource 
         MostResCond,    // Player has the most quantity of a resource
         ScoreCond,      // Score condition
-        HiScoreCond,    // Highest score conditiion
+        HiScoreCond,    // Highest score condition
         LowScoreCond,   // Lowest score condition
         TimeCond,       // Elapsed time trigger condition
         CmdCond,        // Player commands a quantity of units condition

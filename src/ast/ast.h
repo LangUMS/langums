@@ -40,6 +40,7 @@ namespace Langums
         IfStatement,
         WhileStatement,
         BinaryExpression,
+        ArrayExpression,
         UnaryExpression,
         ReturnStatement,
         VariableDeclaration,
@@ -161,9 +162,9 @@ namespace Langums
         public:
         ASTAssignmentExpression() : IASTNode(ASTNodeType::AssignmentExpression) {}
 
-        const ASTIdentifier& GetLHSValue() const
+        const std::shared_ptr<IASTNode>& GetLHSValue() const
         {
-            return *(ASTIdentifier*)GetChild(0).get();
+            return GetChild(0);
         }
 
         const std::shared_ptr<IASTNode>& GetRHSValue() const
@@ -195,6 +196,28 @@ namespace Langums
         
         private:
         OperatorType m_Operator = OperatorType::Add;
+    };
+
+    class ASTArrayExpression : public IASTNode
+    {
+        public:
+        ASTArrayExpression(const std::string& identifier, unsigned int index) :
+            m_Identifier(identifier), m_Index(index), IASTNode(ASTNodeType::ArrayExpression)
+        {}
+
+        const std::string& GetIdentifier() const
+        {
+            return m_Identifier;
+        }
+
+        unsigned int GetIndex() const
+        {
+            return m_Index;
+        }
+
+        private:
+        std::string m_Identifier;
+        unsigned int m_Index;
     };
 
     class ASTUnaryExpression : public IASTNode
@@ -362,8 +385,8 @@ namespace Langums
     class ASTVariableDeclaration : public IASTNode
     {
         public:
-        ASTVariableDeclaration(const std::string& name) :
-            m_Name(name), IASTNode(ASTNodeType::VariableDeclaration) {}
+        ASTVariableDeclaration(const std::string& name, unsigned int arraySize) :
+            m_Name(name), m_ArraySize(arraySize), IASTNode(ASTNodeType::VariableDeclaration) {}
 
         const std::string& GetName() const
         {
@@ -375,8 +398,14 @@ namespace Langums
             return GetChild(0);
         }
 
+        unsigned int GetArraySize() const
+        {
+            return m_ArraySize;
+        }
+
         private:
         std::string m_Name;
+        unsigned int m_ArraySize;
     };
 
     class ASTEventCondition : public IASTNode

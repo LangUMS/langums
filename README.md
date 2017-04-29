@@ -63,6 +63,7 @@ There is [a wonderful extension for VS Code](https://marketplace.visualstudio.co
 - C-like syntax
 - Single primitive type - unsigned 32-bit int
 - Local (block scoped) and global variables
+- Static arrays
 - Functions with arguments and a return value
 - Expressions e.g. `((foo + 42) - bar)`
 - Unsigned integer arithmetic with overflow detection
@@ -138,6 +139,25 @@ fn main() {
   var wave = 2;
   var count = get_unit_count(wave);
   spawn_units(count, wave);
+}
+```
+
+You can also have static arrays. At the moment arrays can only be indexed with constants.
+
+```c
+global my_array[8];
+
+fn main() {
+  my_array[0] = 42;
+  my_array[1] = 15;
+  
+  if (my_array[1] == 15) {
+    print("foo");
+  }
+  
+  var foo[4];
+  foo[0] = 10;
+  foo[1] = 13 * 2;
 }
 ```
 
@@ -544,7 +564,7 @@ No, but thanks for asking.
 
 ## Limitations
 
-- The player selected with `--triggers-owner` (player 1 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
+- The player selected with `--triggers-owner` (player 8 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
 - Multiplication only works with numbers up to the value set by `--copy-batch-size` (8192 by default).
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 8192 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 - Division is implemented suboptimally at the moment and can take many cycles to complete. This will change soon.
@@ -623,7 +643,6 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 
 - else-if statement
 - for loop
-- Arrays
 - Improved AST/ IR optimization
 - Multiple execution threads
 

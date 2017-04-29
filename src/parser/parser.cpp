@@ -36,6 +36,22 @@ namespace Langums
             return token;
         }
 
+        if (c == '[')
+        {
+            Next();
+            ExpressionToken token;
+            token.m_Type = TokenType::LeftSquareBracket;
+            return token;
+        }
+
+        if (c == ']')
+        {
+            Next();
+            ExpressionToken token;
+            token.m_Type = TokenType::RightSquareBracket;
+            return token;
+        }
+
         if (std::isdigit(c) || (c == '-' && std::isdigit(Peek(1))))
         {
             ExpressionToken token;
@@ -340,6 +356,40 @@ namespace Langums
 
                 stack.pop_back();
             }
+            else if (token.m_Type == TokenType::LeftSquareBracket)
+            {
+                if (output.size() == 0)
+                {
+                    throw ParserException(m_CurrentChar, "Syntax error. Unexpected \"[\"");
+                }
+
+                if (output.back().m_Type != TokenType::Identifier)
+                {
+                    throw ParserException(m_CurrentChar, "Syntax error. Unexpected \"[\"");
+                }
+
+                auto identifier = output.back();
+                output.pop_back();
+
+                auto arrayIndex = NumberLiteral();
+                if (arrayIndex < 0)
+                {
+                    throw ParserException(m_CurrentChar, SafePrintf("Invalid array index %", arrayIndex));
+                }
+
+                token.m_Value = identifier.m_Value;
+                token.m_NumberValue = arrayIndex;
+                token.m_Type = TokenType::ArrayOperator;
+                output.push_back(token);
+
+                Whitespace();
+                Symbol(']');
+                Whitespace();
+            }
+            else if (token.m_Type == TokenType::RightSquareBracket)
+            {
+                throw ParserException(m_CurrentChar, "Syntax error. Unexpected \"]\"");
+            }
         }
 
         while (stack.size() > 0)
@@ -408,8 +458,7 @@ namespace Langums
         }
         else if (token.m_Type == TokenType::Identifier)
         {
-            auto identifier = new ASTIdentifier(token.m_Value);
-            node = std::unique_ptr<IASTNode>(identifier);
+            node = std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value));
         }
         else if (token.m_Type == TokenType::FunctionName)
         {
@@ -428,18 +477,19 @@ namespace Langums
         }
         else if (token.m_Type == TokenType::BooleanLiteral)
         {
-            auto numberLiteral = new ASTNumberLiteral(token.m_Value == "true" ? 1 : 0);
-            node = std::unique_ptr<IASTNode>(numberLiteral);
+            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_Value == "true" ? 1 : 0));
         }
         else if (token.m_Type == TokenType::NumberLiteral)
         {
-            auto numberLiteral = new ASTNumberLiteral(token.m_NumberValue);
-            node = std::unique_ptr<IASTNode>(numberLiteral);
+            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue));
         }
         else if (token.m_Type == TokenType::StringLiteral)
         {
-            auto stringLiteral = new ASTStringLiteral(token.m_Value);
-            node = std::unique_ptr<IASTNode>(stringLiteral);
+            node = std::unique_ptr<IASTNode>(new ASTStringLiteral(token.m_Value));
+        }
+        else if (token.m_Type == TokenType::ArrayOperator)
+        {
+            node = std::unique_ptr<IASTNode>(new ASTArrayExpression(token.m_Value, token.m_NumberValue));
         }
         else
         {
@@ -455,6 +505,17 @@ namespace Langums
 
         auto identifier = Identifier();
         Whitespace();
+
+        auto arrayIndex = 0;
+        if (Peek() == '[')
+        {
+            Symbol('[');
+            Whitespace();
+            arrayIndex = NumberLiteral();
+            Whitespace();
+            Symbol(']');
+            Whitespace();
+        }
 
         OperatorType op;
 
@@ -476,7 +537,16 @@ namespace Langums
         Whitespace();
 
         auto unaryExpression = new ASTUnaryExpression(op);
-        unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier)));
+
+        if (arrayIndex == 0)
+        {
+            unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier)));
+        }
+        else
+        {
+            unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTArrayExpression(identifier, arrayIndex)));
+        }
+
         return std::unique_ptr<IASTNode>(unaryExpression);
     }
 
@@ -485,7 +555,30 @@ namespace Langums
         Whitespace();
 
         auto assignmentExpression = new ASTAssignmentExpression();
-        assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+
+        auto i = 0;
+        while (Peek(i) != '=' && Peek(i) != '[')
+        {
+            i++;
+        }
+
+        auto c = Peek(i);
+        if (c == '[')
+        {
+            auto identifier = Identifier();
+            Whitespace();
+            Symbol('[');
+            auto arrayIndex = NumberLiteral();
+            Whitespace();
+            Symbol(']');
+
+            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTArrayExpression(identifier, arrayIndex)));
+        }
+        else
+        {
+            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+        }
+
         Whitespace();
         Symbol('=');
         Whitespace();
@@ -499,16 +592,39 @@ namespace Langums
         Keyword("var");
         Whitespace();
 
-        auto variableDeclaration = new ASTVariableDeclaration(Identifier());
+        auto name = Identifier();
 
         Whitespace();
+
+        auto arraySize = 1;
+        std::unique_ptr<IASTNode> assignmentExpression;
 
         if (Peek() == '=')
         {
             Symbol('=');
             Whitespace();
+            assignmentExpression = Expression();
+        }
+        else if (Peek() == '[')
+        {
+            Symbol('[');
+            Whitespace();
 
-            variableDeclaration->AddChild(Expression());
+            arraySize = NumberLiteral();
+            if (arraySize <= 0)
+            {
+                throw ParserException(m_CurrentChar, SafePrintf("Invalid array size %", arraySize));
+            }
+
+            Whitespace();
+            Symbol(']');
+        }
+
+        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize);
+
+        if (assignmentExpression != nullptr)
+        {
+            variableDeclaration->AddChild(std::move(assignmentExpression));
         }
 
         return std::unique_ptr<IASTNode>(variableDeclaration);
@@ -777,16 +893,45 @@ namespace Langums
         Keyword("global");
         Whitespace();
 
-        auto variableDeclaration = new ASTVariableDeclaration(Identifier());
+        auto name = Identifier();
 
         Whitespace();
-        Symbol('=');
+
+        auto arraySize = 1;
+        std::unique_ptr<IASTNode> assignmentExpression;
+
+        if (Peek() == '=')
+        {
+            Symbol('=');
+            Whitespace();
+            assignmentExpression = Expression();
+        }
+        else if (Peek() == '[')
+        {
+            Symbol('[');
+            Whitespace();
+
+            arraySize = NumberLiteral();
+            if (arraySize <= 0)
+            {
+                throw ParserException(m_CurrentChar, SafePrintf("Invalid array size %", arraySize));
+            }
+
+            Whitespace();
+            Symbol(']');
+        }
+
+        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize);
+
+        if (assignmentExpression != nullptr)
+        {
+            variableDeclaration->AddChild(std::move(assignmentExpression));
+        }
+       
         Whitespace();
 
-        variableDeclaration->AddChild(Expression());
-
-        Whitespace();
         Symbol(';');
+
         return std::unique_ptr<IASTNode>(variableDeclaration);
     }
 

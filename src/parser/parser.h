@@ -20,8 +20,11 @@ namespace Langums
         StringLiteral,
         Identifier,
         Operator,
+        ArrayOperator,
         LeftParenthesis,
         RightParenthesis,
+        LeftSquareBracket,
+        RightSquareBracket,
         FunctionName,
         FunctionArgumentSeparator
     };

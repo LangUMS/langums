@@ -92,6 +92,12 @@ int main(int argc, char* argv[])
 
     auto dstPath = filesystem::path(opts["dst"].as<std::string>());
 
+    if (srcPath == dstPath)
+    {
+        LOG_EXITERR("\n(!) Fatal error, --src and --dst path are the same. Bailing out.");
+        return 1;
+    }
+
     if (filesystem::is_directory(dstPath))
     {
         dstPath += srcPath.filename();
@@ -326,7 +332,7 @@ int main(int argc, char* argv[])
     }
     catch (const IRCompilerException& ex)
     {
-        LOG_EXITERR("\n(!) IR Compiler Error: %", ex.what());
+        LOG_EXITERR("\n(!) IR compiler error: %", ex.what());
         return 1;
     }
 
@@ -339,7 +345,7 @@ int main(int argc, char* argv[])
     }
     catch (const IRCompilerException& ex)
     {
-        LOG_EXITERR("\n(!) IR Optimizer Error: %", ex.what());
+        LOG_EXITERR("\n(!) IR optimizer error: %", ex.what());
         return 1;
     }
 
