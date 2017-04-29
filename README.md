@@ -37,8 +37,6 @@ Table of Contents
     * [AIScript](#aiscript)
     * [LeaderboardType](#leaderboardtype)
 
-### LangUMS is early work-in-progress. Code contributions (and any other contributions) are welcome and will be credited.
-
 ### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
 ### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
 ### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
