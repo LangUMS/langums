@@ -1179,12 +1179,42 @@ namespace Langums
         }
         else if (op == OperatorType::Multiply)
         {
+            if (lhs->GetType() == ASTNodeType::NumberLiteral || rhs->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto number = (ASTNumberLiteral*)((lhs->GetType() == ASTNodeType::NumberLiteral) ? lhs.get() : rhs.get());
+                auto value = number->GetValue();
+
+                if (value == 0)
+                {
+                    EmitInstruction(new IRPushInstruction(0, true), instructions);
+                    return;
+                }
+
+                if (value == 1)
+                {
+                    EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
+                    return;
+                }
+
+                if (value == 2) // multiplication with 2 is converted to an addition
+                {
+                    EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions);
+                    EmitInstruction(new IRCopyRegInstruction(Reg_StackTop, Reg_StackTop + 1), instructions);
+                    EmitInstruction(new IRAddInstruction(), instructions);
+                    return;
+                }
+            }
+
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRMulInstruction(), instructions);
         }
         else if (op == OperatorType::Divide)
         {
+            // very suboptimal division
+            // TODO implement the Div instruction
+            
             EmitExpression(rhs.get(), instructions, aliases);
             EmitExpression(lhs.get(), instructions, aliases);
 
