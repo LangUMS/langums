@@ -1209,19 +1209,24 @@ namespace Langums
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 4), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
-            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 5), instructions);
+            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 4), instructions);
+            EmitInstruction(new IRPushInstruction(1, true), instructions);
+            EmitInstruction(new IRJmpInstruction(3), instructions);
+            EmitInstruction(new IRPopInstruction(), instructions);
+            EmitInstruction(new IRPushInstruction(0, true), instructions);
         }
         else if (op == OperatorType::NotEquals)
         {
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 3), instructions);
-            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_StackTop, 5), instructions);
+            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 4), instructions);
+            EmitInstruction(new IRPushInstruction(0, true), instructions);
+            EmitInstruction(new IRJmpInstruction(3), instructions);
+            EmitInstruction(new IRPopInstruction(), instructions);
+            EmitInstruction(new IRPushInstruction(1, true), instructions);
         }
         else if (op == OperatorType::LessThanOrEquals)
         {
@@ -1248,11 +1253,12 @@ namespace Langums
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
             EmitInstruction(new IRSubInstruction(), instructions);
-            EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 4), instructions);
-            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
-            EmitInstruction(new IRJmpInstruction(2), instructions);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+            EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, 5), instructions);
+            EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 4), instructions);
+            EmitInstruction(new IRPushInstruction(0, true), instructions);
+            EmitInstruction(new IRJmpInstruction(3), instructions);
+            EmitInstruction(new IRPopInstruction(), instructions);
+            EmitInstruction(new IRPushInstruction(1, true), instructions);
         }
         else if (op == OperatorType::GreaterThan)
         {
@@ -1547,7 +1553,6 @@ namespace Langums
                 {
                     auto binaryExpression = (ASTBinaryExpression*)expression.get();
                     EmitBinaryExpression(binaryExpression, instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
 
                     auto offset = 1;
                     if (elseBodyInstructions.size() > 0)
@@ -1555,7 +1560,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + offset), instructions);
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -1576,7 +1581,6 @@ namespace Langums
                 {
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
                     EmitUnaryExpression(unaryExpression, instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
 
                     auto offset = 1;
                     if (elseBodyInstructions.size() > 0)
@@ -1584,7 +1588,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + offset), instructions);
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -1611,8 +1615,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + offset), instructions);
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -1692,8 +1695,7 @@ namespace Langums
                     auto loopStart = instructions.size();
                     auto binaryExpression = (ASTBinaryExpression*)expression.get();
                     EmitBinaryExpression(binaryExpression, instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + 2), instructions);
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, bodyInstructions.size() + 2), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -1715,8 +1717,7 @@ namespace Langums
                     auto loopStart = instructions.size();
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
                     EmitUnaryExpression(unaryExpression, instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_Temp0, bodyInstructions.size() + 2), instructions);
+                    EmitInstruction(new IRJmpIfEqZeroInstruction(Reg_StackTop, bodyInstructions.size() + 2), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {

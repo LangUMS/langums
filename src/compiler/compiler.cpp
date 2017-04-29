@@ -637,9 +637,15 @@ namespace Langums
                 auto jmp = (IRJmpIfEqZeroInstruction*)instruction.get();
 
                 auto regId = jmp->GetRegisterId();
-                if (regId >= Reg_StackTop)
+
+                if (regId > Reg_StackTop)
                 {
-                    regId = m_StackPointer + (regId - Reg_StackTop) + 1;
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = ++m_StackPointer;
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
@@ -668,9 +674,14 @@ namespace Langums
                 auto jmp = (IRJmpIfNotEqZeroInstruction*)instruction.get();
 
                 auto regId = jmp->GetRegisterId();
-                if (regId >= Reg_StackTop)
+                if (regId > Reg_StackTop)
                 {
-                    regId = m_StackPointer + (regId - Reg_StackTop) + 1;
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = ++m_StackPointer;
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();

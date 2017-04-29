@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>--src test\test.scx --lang test\test13.l --dump-ir --dst C:\Users\alexa\Documents\Starcraft\maps\test\</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--src test\test.scx --lang test\test2.l --dump-ir --dst C:\Users\alexa\Documents\Starcraft\maps\test\</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>..</LocalDebuggerWorkingDirectory>
   </PropertyGroup>

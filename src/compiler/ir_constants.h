@@ -10,7 +10,6 @@ namespace Langums
         Reg_CopyStorage,
         Reg_Temp0,
         Reg_Temp1,
-        Reg_Temp2,
         Reg_ReservedEnd,
 
         Reg_StackTop = 0x574C

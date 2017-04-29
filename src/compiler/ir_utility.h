@@ -20,10 +20,6 @@ namespace Langums
         {
             return "[TEMP 1]";
         }
-        else if (regId == Reg_Temp2)
-        {
-            return "[TEMP 2]";
-        }
         else if (regId >= Reg_StackTop)
         {
             return SafePrintf("[STACK %]", regId - Reg_StackTop);
