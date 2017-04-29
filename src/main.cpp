@@ -17,6 +17,8 @@
 #undef min
 #undef max
 
+#define VERSION "v0.1.0"
+
 using namespace Langums;
 using namespace CHK;
 using namespace std::experimental;
@@ -25,7 +27,7 @@ using namespace std::experimental;
 
 int main(int argc, char* argv[])
 {
-    cxxopts::Options opts("LangUMS", "LangUMS compiler");
+    cxxopts::Options opts("LangUMS " VERSION, "LangUMS compiler");
 
     opts.add_options()
         ("h,help", "Prints this help message", cxxopts::value<bool>())
