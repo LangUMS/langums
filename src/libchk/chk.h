@@ -15,6 +15,7 @@
 #include "dimchunk.h"
 #include "cuwpchunk.h"
 #include "cuwpusedchunk.h"
+#include "wavchunk.h"
 
 namespace CHK
 {
@@ -62,6 +63,11 @@ namespace CHK
                     offset += bytes.size();
                 }
             }
+        }
+
+        void AddChunk(const std::string& type, std::unique_ptr<IChunk> chunk)
+        {
+            m_Chunks[type].push_back(std::move(chunk));
         }
 
         bool HasChunk(const std::string& type) const

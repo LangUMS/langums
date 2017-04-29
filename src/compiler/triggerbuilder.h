@@ -92,6 +92,9 @@ namespace Langums
         void Action_LeaderboardPoints(unsigned int stringId, CHK::ScoreType scoreType);
         void Action_LeaderboardGreed(unsigned int stringId);
         void Action_LeaderboardShowComputerPlayers(CHK::TriggerActionState state);
+        void Action_PlayWAV(unsigned int wavStringId, unsigned int wavTime);
+        void Action_Transmission(unsigned int stringId, unsigned int unitId, unsigned int locationId,
+            unsigned int time, CHK::TriggerActionState modifier, unsigned int wavStringId, unsigned int wavTime);
 
         const CHK::Trigger& GetTrigger()
         {

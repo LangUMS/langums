@@ -1854,6 +1854,25 @@ namespace Langums
                 auto leaderboardCpu = (IRLeaderboardCpuInstruction*)instruction.get();
                 current.Action_LeaderboardShowComputerPlayers(leaderboardCpu->GetState());
             }
+            else if (instruction->GetType() == IRInstructionType::PlayWAV)
+            {
+                auto playWav = (IRPlayWAVInstruction*)instruction.get();
+                auto name = SafePrintf("staredit\\wav\\%", playWav->GetWavName());
+                auto wavStringId = m_StringsChunk->InsertString(name);
+                current.Action_PlayWAV(wavStringId, playWav->GetWavTime());
+            }
+            else if (instruction->GetType() == IRInstructionType::Transmission)
+            {
+                auto transmission = (IRTransmissionInstructrion*)instruction.get();
+
+                auto stringId = m_StringsChunk->InsertString(transmission->GetLocationName());
+                auto name = SafePrintf("staredit\\wav\\%", transmission->GetWavName());
+                auto wavStringId = m_StringsChunk->InsertString(name);
+                auto locationId = GetLocationIdByName(transmission->GetLocationName());
+
+                auto time = transmission->GetTime();
+                current.Action_Transmission(stringId, transmission->GetUnitId(), locationId, time, CHK::TriggerActionState::SetTo, wavStringId, transmission->GetWavTime());
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

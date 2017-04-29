@@ -347,7 +347,7 @@ unit MyUnitProps {
 }
 ```
 
-You can mix and match any properties from the [UnitProperty](#unitproperty) constants. Here is a unit declaration that sets the unit's energy to 0% and makes it invincible.
+You can mix any properties from the [UnitProperty](#unitproperty) constants. Here is a unit declaration that sets the unit's energy to 0% and makes it invincible.
 
 ```c
 unit MyInvincibleUnit {
@@ -441,7 +441,7 @@ fn main() {
 }
 ```
 
-`fn spawn_units<T>(T, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
+`fn spawn_units<T, L>(T, L, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
 
 ```c
 fn spawn_units(qty) {

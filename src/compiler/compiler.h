@@ -40,7 +40,7 @@ namespace Langums
         {
             g_RegisterMap = defs;
         }
-        
+
         bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
 
         private:

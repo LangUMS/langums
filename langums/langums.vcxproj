@@ -176,6 +176,7 @@
     <ClCompile Include="..\src\scomp\zlib\trees.c" />
     <ClCompile Include="..\src\scomp\zlib\uncompr.c" />
     <ClCompile Include="..\src\scomp\zlib\zutil.c" />
+    <ClCompile Include="..\src\wavinfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ast\ast.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="..\src\libchk\stringschunk.h" />
     <ClInclude Include="..\src\libchk\triggerschunk.h" />
     <ClInclude Include="..\src\libchk\verchunk.h" />
+    <ClInclude Include="..\src\libchk\wavchunk.h" />
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h" />
     <ClInclude Include="..\src\libmpq\MpqCrypt.h" />
     <ClInclude Include="..\src\libmpq\MpqHashTable.h" />
@@ -234,6 +236,7 @@
     <ClInclude Include="..\src\serialization.h" />
     <ClInclude Include="..\src\stringhash.h" />
     <ClInclude Include="..\src\stringutil.h" />
+    <ClInclude Include="..\src\wavinfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

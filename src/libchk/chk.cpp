@@ -52,6 +52,10 @@ namespace CHK
             {
                 chunk = std::make_unique<CHKCuwpUsedChunk>(bytes, type);
             }
+            else if (type == "WAV ")
+            {
+                chunk = std::make_unique<CHKWavChunk>(bytes, type);
+            }
             else if
             ( // skip all non-required chunks to lower file-size
                 type == "TYPE" ||

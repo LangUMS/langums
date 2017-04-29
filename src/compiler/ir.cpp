@@ -14,6 +14,7 @@ namespace Langums
         m_Instructions.clear();
         m_FunctionDeclarations.clear();
         m_GlobalAliases = RegisterAliases();
+        m_WavFilenames.clear();
 
         if (ast->GetType() != ASTNodeType::Unit)
         {
@@ -1067,6 +1068,33 @@ namespace Langums
             auto dstLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
 
             EmitInstruction(new IRMoveLocInstruction(playerId, unitId, srcLocName, dstLocName), instructions);
+        }
+        else if (fnName == "play_wav")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
+            }
+
+            auto arg0 = fnCall->GetArgument(0);
+            if (arg0->GetType() != ASTNodeType::StringLiteral)
+            {
+                throw IRCompilerException(SafePrintf("Invalid argument passed to play_wav(), expected wav filename", fnName));
+            }
+
+            auto& wavFilename = ((ASTStringLiteral*)arg0.get())->GetValue();
+            m_WavFilenames.insert(wavFilename);
+
+            EmitInstruction(new IRPlayWAVInstruction(wavFilename, 0), instructions);
+        }
+        else if (fnName == "transmission")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
+            }
+
+            throw IRCompilerException("transmission() is not yet implemented, sorry :(");
         }
         else if (m_FunctionDeclarations.find(fnName) != m_FunctionDeclarations.end())
         {

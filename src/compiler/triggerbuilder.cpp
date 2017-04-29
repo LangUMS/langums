@@ -924,4 +924,29 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_PlayWAV(unsigned int wavStringId, unsigned int wavTime)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::PlayWAV;
+        action.m_WAVStringIndex = wavStringId + 1;
+        action.m_Milliseconds = wavTime;
+        m_HasChanges = true;
+    }
+
+    void TriggerBuilder::Action_Transmission(unsigned int stringId, unsigned int unitId, unsigned int locationId,
+        unsigned int time, CHK::TriggerActionState modifier, unsigned int wavStringId, unsigned int wavTime)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::Transmission;
+        action.m_WAVStringIndex = wavStringId + 1;
+        action.m_Milliseconds = time;
+        action.m_Modifier = (uint8_t)modifier;
+        action.m_TriggerText = stringId + 1;
+        action.m_Arg1 = unitId;
+        action.m_Source = locationId + 1;
+        m_HasChanges = true;
+    }
+
 }

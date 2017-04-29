@@ -197,6 +197,9 @@
     <ClCompile Include="..\src\libchk\cuwpchunk.cpp">
       <Filter>libchk</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\wavinfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libmpq\MpqBlockTable.h">
@@ -365,6 +368,12 @@
       <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\cuwpusedchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wavinfo.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\wavchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>

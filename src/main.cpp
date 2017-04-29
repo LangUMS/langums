@@ -13,6 +13,7 @@
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
 #include "compiler/registermap_parser.h"
+#include "wavinfo.h"
 
 #undef min
 #undef max
@@ -188,6 +189,18 @@ int main(int argc, char* argv[])
     auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
     triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
 
+    auto& stringsChunk = chk.GetFirstChunk<CHKStringsChunk>("STR ");
+
+    if (!chk.HasChunk("WAV "))
+    {
+        std::vector<char> data;
+        data.resize(512 * sizeof(uint32_t));
+
+        chk.AddChunk("WAV ", std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
+    }
+
+    auto& wavChunk = chk.GetFirstChunk<CHKWavChunk>("WAV ");
+
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
     LOG_F("Pre-existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
@@ -320,11 +333,88 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    std::unordered_map<std::string, unsigned int> wavLengths;
+    
+    auto& wavFilenames = ir.GetWavFilenames();
+    LOG_F("Need to import % .wav files.", wavFilenames.size());
+    for (auto& filename : wavFilenames)
+    {
+        auto pathToWav = srcPath.relative_path().remove_filename();
+        pathToWav.append(filename);
+
+        auto path = pathToWav.generic_u8string();
+
+        WAVInfo wavInfo;
+        if (!wavInfo.ReadInfo(path))
+        {
+            LOG_EXITERR("(!) Error - failed to read \"%\", make sure it exists and is a valid WAV file", path);
+            return 1;
+        }
+
+        auto length = wavInfo.GetLengthMilliseconds();
+        wavLengths.insert(std::make_pair(filename, length));
+
+        LOG_F("Importing from \"%\" (% seconds)", filename, (float)length / 1000.0f);
+
+        auto& wavBytes = wavInfo.GetData();
+
+        auto mpqFilename = SafePrintf("staredit\\wav\\%", filename);
+        if (!MpqAddFileFromBuffer(mpq, wavBytes.data(), wavBytes.size(), mpqFilename.c_str(), MAFA_REPLACE_EXISTING | MAFA_COMPRESS))
+        {
+            LOG_EXITERR("(!) Error - failed to add \"%\" to MPQ archive.", path);
+            return 1;
+        }
+        else
+        {
+            LOG_F("Successfully added \"%\" to MPQ archive.", filename);
+        }
+    }
+
+    auto& instructions = ir.GetInstructions();
+
+    for (auto& instruction : instructions)
+    {
+        if (instruction->GetType() == IRInstructionType::PlayWAV)
+        {
+            auto playWav = (IRPlayWAVInstruction*)instruction.get();
+            auto& name = playWav->GetWavName();
+
+            auto stringId = stringsChunk.InsertString(SafePrintf("staredit\\wav\\%", name));
+            auto wavStringId = wavChunk.FindFreeIndex();
+            wavChunk.Set(wavStringId, stringId + 1);
+            playWav->SetWavStringId(wavStringId);
+
+            if (wavLengths.find(name) == wavLengths.end())
+            {
+                LOG_F("(!) Warning! WAV length for \"%\" is missing, the file will not play in-game.", name);
+                continue;
+            }
+
+            playWav->SetWavTime(wavLengths[name]);
+        }
+        else if (instruction->GetType() == IRInstructionType::Transmission)
+        {
+            auto transmission = (IRTransmissionInstructrion*)instruction.get();
+
+            auto& name = transmission->GetWavName();
+            if (wavLengths.find(name) == wavLengths.end())
+            {
+                LOG_F("(!) Warning! WAV length for \"%\" is missing, the file will not play in-game.", name);
+                continue;
+            }
+
+            auto stringId = stringsChunk.InsertString(SafePrintf("staredit\\wav\\%", name));
+            auto wavStringId = wavChunk.FindFreeIndex();
+            wavChunk.Set(wavStringId, stringId + 1);
+            transmission->SetWavStringId(wavStringId);
+
+            transmission->SetWavTime(wavLengths[name]);
+        }
+    }
+
     LOG_F("\n----------- IR Dump -----------");
     LOG_F("%", ir.DumpInstructions(true));
     LOG_F("-------------------------------\n");
-
-    auto& instructions = ir.GetInstructions();
 
     LOG_F("Emitted % instructions.", instructions.size());
 
@@ -427,7 +517,7 @@ int main(int argc, char* argv[])
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);
 
-    if (!MpqAddFileFromBuffer(mpq, chkBytes.data(), chkBytes.size(), SCENARIO_FILENAME, MAFA_REPLACE_EXISTING))
+    if (!MpqAddFileFromBuffer(mpq, chkBytes.data(), chkBytes.size(), SCENARIO_FILENAME, MAFA_REPLACE_EXISTING | MAFA_COMPRESS))
     {
         LOG_EXITERR("Failed to write out scenario.chk to MPQ archive.");
         return 1;

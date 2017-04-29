@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <set>
 #include <algorithm>
 
 #include "../ast/ast.h"
@@ -100,7 +101,8 @@ namespace Langums
         NextScen,       // sets the next scenario (singleplayer)
         Leaderboard,    // shows the leaderboard
         LeaderboardCpu, // whether to show cpu players in the leaderboard
-        SetGoal,        // sets the leaderboard goal
+        PlayWAV,        // plays a .wav file
+        Transmission,    // combined display msg, unit portrait and play wav
         // conditions
         Event,
         BringCond,      // Bring trigger condition
@@ -2186,6 +2188,109 @@ namespace Langums
         TriggerActionState m_State;
     };
 
+    class IRPlayWAVInstruction : public IIRInstruction
+    {
+        public:
+        IRPlayWAVInstruction(const std::string& wavName, unsigned int wavTime) :
+            m_WavName(wavName), m_WavTime(wavTime), IIRInstruction(IRInstructionType::PlayWAV) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("PLAYWAV % %", m_WavName, m_WavTime);
+        }
+
+        const std::string& GetWavName() const
+        {
+            return m_WavName;
+        }
+
+        unsigned int GetWavTime() const
+        {
+            return m_WavTime;
+        }
+
+        void SetWavTime(unsigned int wavTime)
+        {
+            m_WavTime = wavTime;
+        }
+
+        unsigned int GetWavStringId() const
+        {
+            return m_WavStringId;
+        }
+
+        void SetWavStringId(unsigned int wavStringId)
+        {
+            m_WavStringId = wavStringId;
+        }
+
+        private:
+        std::string m_WavName;
+        unsigned int m_WavTime;
+        unsigned int m_WavStringId;
+    };
+
+    class IRTransmissionInstructrion : public IIRInstruction
+    {
+        public:
+        IRTransmissionInstructrion(const std::string& text, uint8_t unitId, const std::string& wavName, const std::string& locationName, unsigned int time) :
+            m_Text(text), m_UnitId(unitId), m_WavName(wavName), m_LocationName(locationName), m_Time(time), IIRInstruction(IRInstructionType::Transmission) {}
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("TRASM \"%\" % % %", m_Text, m_UnitId, m_WavName, m_LocationName);
+        }
+
+        const std::string& GetWavName() const
+        {
+            return m_WavName;
+        }
+
+        const std::string& GetLocationName() const
+        {
+            return m_LocationName;
+        }
+
+        uint8_t GetUnitId() const
+        {
+            return m_UnitId;
+        }
+
+        unsigned int GetTime() const
+        {
+            return m_Time;
+        }
+
+        unsigned int GetWavTime() const
+        {
+            return m_WavTime;
+        }
+
+        void SetWavTime(unsigned int wavTime)
+        {
+            m_WavTime = wavTime;
+        }
+
+        unsigned int GetWavStringId() const
+        {
+            return m_WavStringId;
+        }
+
+        void SetWavStringId(unsigned int wavStringId)
+        {
+            m_WavStringId = wavStringId;
+        }
+    
+        private:
+        std::string m_Text;
+        uint8_t m_UnitId;
+        std::string m_WavName;
+        std::string m_LocationName;
+        unsigned int m_Time;
+        unsigned int m_WavTime;
+        unsigned int m_WavStringId;
+    };
+
     class IREventInstruction : public IIRInstruction
     {
         public:
@@ -2944,6 +3049,11 @@ namespace Langums
             return dump;
         }
 
+        const std::set<std::string>& GetWavFilenames() const
+        {
+            return m_WavFilenames;
+        }
+
         private:
         void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions)
         {
@@ -2991,7 +3101,9 @@ namespace Langums
         RegisterAliases m_GlobalAliases;
 
         std::vector<std::unique_ptr<IIRInstruction>> m_PollEventsInstructions;
+
         bool m_HasEvents = false;
+        std::set<std::string> m_WavFilenames;
     };
 
 }
