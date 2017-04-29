@@ -13,6 +13,8 @@ fn main() {
     print("Players 1 and 2 are here.");
   }
   
+  var playerCount = is_present();
+  
   while (true) {
     poll_events();
   }

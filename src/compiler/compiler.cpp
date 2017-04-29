@@ -787,26 +787,24 @@ namespace Langums
                 auto address = nextAddress++;
                 auto retAddress = nextAddress++;
 
+                auto stackTop = m_StackPointer--;
+
                 current.Action_JumpTo(address);
+                current.Action_SetReg(stackTop, 0);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto ifTrue = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
-                auto stackTop = m_StackPointer--;
+                auto checkPresent = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                checkPresent.Action_Wait(0);
+                checkPresent.Action_JumpTo(retAddress);
+                m_Triggers.push_back(checkPresent.GetTrigger());
 
                 for (auto& playerId : playerIds)
                 {
-                    ifTrue.Cond_TestSwitch(Switch_Player1 + playerId, true);
-
-                    auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
-                    ifFalse.Cond_TestSwitch(Switch_Player1 + playerId, false);
-                    ifFalse.Action_SetReg(stackTop, 0);
-                    ifFalse.Action_JumpTo(retAddress);
-                    m_Triggers.push_back(ifFalse.GetTrigger());
+                    auto countPresent = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    countPresent.Cond_TestSwitch(Switch_Player1 + playerId, true);
+                    countPresent.Action_IncReg(stackTop, 1);
+                    m_Triggers.push_back(countPresent.GetTrigger());
                 }
-
-                ifTrue.Action_SetReg(stackTop, 1);
-                ifTrue.Action_JumpTo(retAddress);
-                m_Triggers.push_back(ifTrue.GetTrigger());
 
                 current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
             }

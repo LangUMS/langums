@@ -56,6 +56,8 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 4. Now you can run `my_map_final.scx` directly in the game or open it with an editor.
 
+There is [a wonderful extension for VS Code](https://marketplace.visualstudio.com/items?itemName=glenstorm.langums) by Matthew Burton (aka Glenstorm) if you like your code neatly formatted and highlighted. It also has automated code completion.
+
 ## Language features
 
 - C-like syntax
@@ -262,17 +264,17 @@ Notes:
 
 ### Misc functions
 
-| Function prototype                       | Description                                                                          |
-|----------------------------------------- |--------------------------------------------------------------------------------------|
-| poll_events()                            | Runs any associated event handlers.                                                  |
-| print(Text, optional: [Player](#player)) | Prints a message, defaults to all players.                                           |
-| random()                                 | Returns a random value between 0 and 255 (inclusive).                                |
-| is_present([Player](#player), ...)       | Returns true if the given player (or players) are currently present in the game.     |
-| sleep(Quantity)                          | Waits for a given amount of milliseconds. (Use with care!)                           |
-| pause_game()                             | Pauses the game (singleplayer only)                                                  |
-| unpause_game()                           | Unpauses the game (singleplayer only)                                                |
-| set_next_scenario(Text)                  | Sets the next map to run (singleplayer only)                                         |
-| play_sound(Text)                         | Plays a sound from a .wav file. [See here for more info](#how-do-you-use-play_sound) |
+| Function prototype                            | Description                                                                                                                                           |
+|-----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| poll_events()                                 | Runs any associated event handlers.                                                                                                                   |
+| print(Text, optional: [Player](#player))      | Prints a message, defaults to all players.                                                                                                            |
+| random()                                      | Returns a random value between 0 and 255 (inclusive).                                                                                                 |
+| is_present([Player](#player), ...)            | Checks if a player is in the game. [See here for more info](#how-can-you-tell-if-a-player-is-in-the-game-how-do-you-get-the-total-number-of-players). |
+| sleep(Quantity)                               | Waits for a given amount of milliseconds. (Use with care!)                                                                                            |
+| pause_game()                                  | Pauses the game (singleplayer only)                                                                                                                   |
+| unpause_game()                                | Unpauses the game (singleplayer only)                                                                                                                 |
+| set_next_scenario(Text)                       | Sets the next map to run (singleplayer only)                                                                                                          |
+| play_sound(Text, optional: [Player](#player)) | Plays a sound from a .wav file. Defaults to all players. [See here for more info](#how-do-you-use-play_sound).                                        |
 
 ### Score functions
 
@@ -384,37 +386,37 @@ fn main() {
 The `show_leaderboard()` built-in has several variants that take different arguments. They are listed below.
 
 ```c
-show_leaderboard("My Leaderboard", Control, Unit)
-show_leaderboard("My Leaderboard", ControlAtLocation, Unit, Location)
-show_leaderboard("My Leaderboard", Kills, Unit)
-show_leaderboard("My Leaderboard", Points, ScoreType)
-show_leaderboard("My Leaderboard", Resources, ResourceType)
-show_leaderboard("My Leaderboard", Greed)
+show_leaderboard("My Leaderboard", Control, Unit);
+show_leaderboard("My Leaderboard", ControlAtLocation, Unit, Location);
+show_leaderboard("My Leaderboard", Kills, Unit);
+show_leaderboard("My Leaderboard", Points, ScoreType);
+show_leaderboard("My Leaderboard", Resources, ResourceType);
+show_leaderboard("My Leaderboard", Greed);
 
-show_leaderboard_goal("My Leaderboard", Control, Quantity, Unit)
-show_leaderboard_goal("My Leaderboard", ControlAtLocation, Quantity, Unit, Location)
-show_leaderboard_goal("My Leaderboard", Kills, Quantity, Unit)
-show_leaderboard_goal("My Leaderboard", Points, Quantity, ScoreType)
-show_leaderboard_goal("My Leaderboard", Resources, Quantity, ResourceType)
-show_leaderboard_goal("My Leaderboard", Greed, Quantity)
+show_leaderboard_goal("My Leaderboard", Control, Quantity, Unit);
+show_leaderboard_goal("My Leaderboard", ControlAtLocation, Quantity, Unit, Location);
+show_leaderboard_goal("My Leaderboard", Kills, Quantity, Unit);
+show_leaderboard_goal("My Leaderboard", Points, Quantity, ScoreType);
+show_leaderboard_goal("My Leaderboard", Resources, Quantity, ResourceType);
+show_leaderboard_goal("My Leaderboard", Greed, Quantity);
 ```
 
 Example usage of all of the above:
 
 ```c
-show_leaderboard("My Leaderboard", Control, TerranMarine)
-show_leaderboard("My Leaderboard", ControlAtLocation, ZergZergling, "MyLocation")
-show_leaderboard("My Leaderboard", Kills, ZergHydralisk)
-show_leaderboard("My Leaderboard", Points, Buildings)
-show_leaderboard("My Leaderboard", Resources, Gas)
-show_leaderboard("My Leaderboard", Greed)
+show_leaderboard("My Leaderboard", Control, TerranMarine);
+show_leaderboard("My Leaderboard", ControlAtLocation, ZergZergling, "MyLocation");
+show_leaderboard("My Leaderboard", Kills, ZergHydralisk);
+show_leaderboard("My Leaderboard", Points, Buildings);
+show_leaderboard("My Leaderboard", Resources, Gas);
+show_leaderboard("My Leaderboard", Greed);
 
-show_leaderboard_goal("My Leaderboard", Control, 100, ZergZergling)
-show_leaderboard_goal("My Leaderboard", ControlAtLocation, 100, TerranMarine, "MyLocation")
-show_leaderboard_goal("My Leaderboard", Kills, 100, ZergHydralisk)
-show_leaderboard_goal("My Leaderboard", Points, 100, Units)
-show_leaderboard_goal("My Leaderboard", Resources, 100, Minerals)
-show_leaderboard_goal("My Leaderboard", Greed, 100)
+show_leaderboard_goal("My Leaderboard", Control, 100, ZergZergling);
+show_leaderboard_goal("My Leaderboard", ControlAtLocation, 100, TerranMarine, "MyLocation");
+show_leaderboard_goal("My Leaderboard", Kills, 100, ZergHydralisk);
+show_leaderboard_goal("My Leaderboard", Points, 100, Units);
+show_leaderboard_goal("My Leaderboard", Resources, 100, Minerals);
+show_leaderboard_goal("My Leaderboard", Greed, 100);
 ```
 
 ## Preprocessor
@@ -486,12 +488,13 @@ Use the `--reg` command-line option to pass a registers file. See `Integrating w
 Please report it [by adding a new issue here](https://github.com/AlexanderDzhoganov/langums/issues/new).
 You can try using the `--disable-optimizations` option, if that fixes the issue it's a bug in the optimizer. In any case please report it.
 
-#### The compiler emits way more triggers than I'd like. What can I do?
+#### The compiler emits more triggers than I'd like. What can I do?
 
 The biggest culprit for this is the amount of triggers emitted for arithmetic operations.
-By default LangUMS is tweaked for values up to 65535, but if you don't need such large values in your map you can set the `--copy-batch-size` command-line argument to a lower value e.g. 1024.
-This will drastically lower the amount of emitted triggers with the tradeoff that any arithmetic on larger numbers will take more than one cycle. In any case you should set the value to the
-next power of 2 of the largest number you use in your map. If uncertain leave it to the default value.
+By default LangUMS is tweaked for values up to 65535. If you don't need such large values in your map you can set the `--copy-batch-size` command-line argument to a lower value e.g. 1024.
+This will drastically lower the amount of emitted triggers with the tradeoff that any arithmetic on larger numbers will take more than one cycle.
+
+As a general rule you should set `--copy-batch-size` to the next power of 2 of the largest number you use in your map. If uncertain leave it to the default value.
 
 #### What happens when the main() function returns?
 
@@ -516,6 +519,26 @@ play_sound("my_sound.wav");
 ```
 
 LangUMS will take care of adding the sound file to the map archive for you.
+
+#### How can you tell if a player is in the game? How do you get the total number of players?
+
+Use `is_present()` for both. To check if a player or players are in game you can do it like this
+
+```c
+if (is_present(Player1, Player2)) {
+  print("Player 1 and player 2 are in the game");
+}
+```
+
+To get the total number of players in the game call it without arguments like this:
+
+```c
+var playerCount = is_present();
+```
+
+#### Can you put non-ASCII strings in the Text arguments?
+
+Yes. Make sure to save your code source file as UTF-8 and non-ASCII characters should display properly in the game. It is currently unknown if this applies to patches before 1.18 which added unicode support to the game.
 
 #### Do you plan to rewrite this in Rust?
 

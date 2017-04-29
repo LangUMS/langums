@@ -336,19 +336,24 @@ namespace Langums
         }
         else if (fnName == "is_present")
         {
-            if (!fnCall->HasChildren())
-            {
-                throw IRCompilerException("is_present() called without arguments");
-            }
-
             auto isPresent = new IRIsPresentInstruction();
 
             auto argCount = fnCall->GetChildCount();
 
-            for (auto i = 0u; i < argCount; i++)
+            if (argCount == 0)
             {
-                auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(i), fnName, i);
-                isPresent->AddPlayerId(playerId);
+                for (auto i = 0u; i < 8; i++)
+                {
+                    isPresent->AddPlayerId(i);
+                }
+            }
+            else
+            {
+                for (auto i = 0u; i < argCount; i++)
+                {
+                    auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(i), fnName, i);
+                    isPresent->AddPlayerId(playerId);
+                }
             }
 
             EmitInstruction(isPresent, instructions);
