@@ -467,10 +467,6 @@ Feel free to contribute your own.
 LangUMS is compiled into a linearized intermediate representation. The IR is then optimized and emitted as trigger chains.
 Think of it as a kind of wacky virtual machine.
 
-#### Code documentation?
-
-Will happen sometime in the future. You can help.
-
 #### Can you stop the compiler from replacing the existing triggers in the map?
 
 Yes. Use the `--preserve-triggers` option.
@@ -524,7 +520,7 @@ LangUMS will take care of adding the sound file to the map archive for you.
 
 #### How can you tell if a player is in the game? How do you get the total number of players?
 
-Use `is_present()` for both. To check if a player or players are in game you can do it like this
+You can call `is_present()` for both cases. To check if a player or players are in game:
 
 ```c
 if (is_present(Player1, Player2)) {
@@ -532,7 +528,7 @@ if (is_present(Player1, Player2)) {
 }
 ```
 
-To get the total number of players in the game call it without arguments like this:
+To get the total number of players in the game call `is_present()` with no arguments:
 
 ```c
 var playerCount = is_present();

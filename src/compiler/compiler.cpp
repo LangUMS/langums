@@ -669,6 +669,88 @@ namespace Langums
                 pushDone.Action_JumpTo(retAddress);
                 m_Triggers.push_back(pushDone.GetTrigger());
             }
+            else if (instruction->GetType() == IRInstructionType::MulConst)
+            {
+                auto mulConst = (IRMulConstInstruction*)instruction.get();
+                auto value = mulConst->GetValue();
+
+                auto numShifts = 0;
+                for (auto i = 1; i < 32; i++)
+                {
+                    numShifts += (value & (1 << i)) ? i : 0;
+                }
+
+                auto isOdd = value % 2;
+                auto regId = m_StackPointer + 1;
+                auto mulAddress = ++nextAddress;
+                auto mulAddress2 = ++nextAddress;
+
+                current.Action_SetReg(Reg_MulLeft, 0);
+                current.Action_SetReg(Reg_MulRight, 0);
+                current.Action_JumpTo(mulAddress);
+                m_Triggers.push_back(current.GetTrigger());
+
+                auto retAddress = nextAddress++;
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+
+                for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                {
+                    auto copy = TriggerBuilder(mulAddress, instruction.get(), m_TriggersOwner);
+                    copy.Cond_TestReg(regId, i, TriggerComparisonType::AtLeast);
+                    copy.Action_DecReg(regId, i);
+                    copy.Action_IncReg(Reg_MulLeft, i);
+                    copy.Action_IncReg(Reg_MulRight, i);
+                    m_Triggers.push_back(copy.GetTrigger());
+                }
+
+                auto copyFinish = TriggerBuilder(mulAddress, instruction.get(), m_TriggersOwner);
+                copyFinish.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                copyFinish.Action_JumpTo(mulAddress2);
+                m_Triggers.push_back(copyFinish.GetTrigger());
+
+                for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                {
+                    auto mul = TriggerBuilder(mulAddress2, instruction.get(), m_TriggersOwner);
+                    mul.Cond_TestReg(Reg_MulLeft, i, TriggerComparisonType::AtLeast);
+                    mul.Action_DecReg(Reg_MulLeft, i);
+                    mul.Action_IncReg(regId, i * (int)pow(2, numShifts));
+                    m_Triggers.push_back(mul.GetTrigger());
+                }
+
+                auto mulFinish = TriggerBuilder(mulAddress2, instruction.get(), m_TriggersOwner);
+                mulFinish.Cond_TestReg(Reg_MulLeft, 0, TriggerComparisonType::Exactly);
+                
+                auto mulAddress3 = -1;
+
+                if (!isOdd)
+                {
+                    mulFinish.Action_JumpTo(retAddress);
+                }
+                else
+                {
+                    mulAddress3 = nextAddress++;
+                    mulFinish.Action_JumpTo(mulAddress3);
+                }
+
+                m_Triggers.push_back(mulFinish.GetTrigger());
+
+                if (isOdd)
+                {
+                    for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+                    {
+                        auto addOdd = TriggerBuilder(mulAddress3, instruction.get(), m_TriggersOwner);
+                        addOdd.Cond_TestReg(Reg_MulRight, i, TriggerComparisonType::AtLeast);
+                        addOdd.Action_DecReg(Reg_MulRight, i);
+                        addOdd.Action_IncReg(regId, i);
+                        m_Triggers.push_back(addOdd.GetTrigger());
+                    }
+
+                    auto addOddFinish = TriggerBuilder(mulAddress3, instruction.get(), m_TriggersOwner);
+                    addOddFinish.Cond_TestReg(Reg_MulRight, 0, TriggerComparisonType::Exactly);
+                    addOddFinish.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(addOddFinish.GetTrigger());
+                }
+            }
             else if (instruction->GetType() == IRInstructionType::Div)
             {
                 throw CompilerException("Malformed IR. Native Div is not implemented yet");

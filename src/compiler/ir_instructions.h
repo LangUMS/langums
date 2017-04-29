@@ -19,6 +19,7 @@ namespace Langums
         Add,            // pops two values off the stack and adds them together, pushes the result on the stack
         Sub,            // pops two values off the stack, subtracts the second from the first, pushes the result on the stack
         Mul,            // pops two values off the stack, multiplies them together, pushes the result on the stack
+        MulConst,       // pops a value off the stack and multiplies it with a constant, pushes the result on the stack
         Div,            // pops two values off the stack, divides the second by the first, pushes the result on the stack
         BLShift,        // performs binary left shift (aka multiply by 2) on the top value of the stack, needs 1 free stack slot for the result, increments the stack pointer
         BRShift,        // performs binary right shift (aka divide by 2) on the top value of the stack, needs 1 free stack slot for the result, increments the stack pointer
@@ -341,6 +342,26 @@ namespace Langums
         {
             return "MUL";
         }
+    };
+
+    class IRMulConstInstruction : public IIRInstruction
+    {
+        public:
+        IRMulConstInstruction (unsigned int value) : m_Value(value), IIRInstruction (IRInstructionType::MulConst)
+        {}
+
+        std::string DebugDump () const
+        {
+            return SafePrintf("MULCONST %", m_Value);
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        private:
+        unsigned int m_Value;
     };
 
     class IRDivInstruction : public IIRInstruction

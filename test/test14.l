@@ -1,6 +1,6 @@
 #define CONSTANT_A 3
 #define CONSTANT_B 2
-#define CONSTANT_C 5
+#define CONSTANT_C 8
 
 fn main() {
   print("hello world");

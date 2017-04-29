@@ -1204,6 +1204,10 @@ namespace Langums
                     EmitInstruction(new IRAddInstruction(), instructions);
                     return;
                 }
+
+                EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
+                EmitInstruction(new IRMulConstInstruction(value), instructions);
+                return;
             }
 
             EmitExpression(lhs.get(), instructions, aliases);
