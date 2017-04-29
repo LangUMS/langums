@@ -630,7 +630,7 @@ namespace Langums
                     auto countBits = TriggerBuilder(mulAddress, instruction.get(), m_TriggersOwner);
                     countBits.Cond_TestReg(right, i, TriggerComparisonType::AtLeast);
                     countBits.Action_DecReg(right, i);
-                    countBits.Action_IncReg(Reg_Temp0, std::log2(i));
+                    countBits.Action_IncReg(Reg_Temp0, (int)std::log2(i));
                     m_Triggers.push_back(countBits.GetTrigger());
                 }
 

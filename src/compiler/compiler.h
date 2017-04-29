@@ -54,7 +54,7 @@ namespace Langums
         unsigned int GetLocationIdByName(const std::string& name);
 
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
-        uint32_t m_CopyBatchSize = 65536u;
+        uint32_t m_CopyBatchSize = 8192u;
         uint32_t m_HyperTriggerCount = 5;
         uint8_t m_TriggersOwner = 1;
 
