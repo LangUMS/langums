@@ -915,4 +915,13 @@ namespace Langums
         m_HasChanges = true;
     }
 
+    void TriggerBuilder::Action_LeaderboardShowComputerPlayers(CHK::TriggerActionState state)
+    {
+        using namespace CHK;
+        auto& action = m_Trigger.m_Actions[m_NextAction++];
+        action.m_ActionType = TriggerActionType::LeaderboardComputerPlayers;
+        action.m_Modifier = (uint8_t)state;
+        m_HasChanges = true;
+    }
+
 }

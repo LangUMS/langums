@@ -810,6 +810,18 @@ namespace Langums
 
             EmitInstruction(showLeaderboard, instructions);
         }
+        else if (fnName == "leaderboard_show_cpu")
+        {
+            if (!fnCall->HasChildren())
+            {
+                EmitInstruction(new IRLeaderboardCpuInstruction(TriggerActionState::SetSwitch), instructions);
+            }
+            else
+            {
+                auto state = ParseToggleState(fnCall->GetArgument(0), fnName, 0);
+                EmitInstruction(new IRLeaderboardCpuInstruction(state), instructions);
+            }
+        }
         else if (fnName == "center_view")
         {
             if (!fnCall->HasChildren())

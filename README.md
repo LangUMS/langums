@@ -224,8 +224,8 @@ fn main() {
 Notes:
 
 * Arguments named `Expression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
-* Text arguments must be passed in `"` quotes e.g. "This is some text"
-* Location arguments can be passed without quotes if they do not contain spaces e.g. MyLocation, but "My Location" needs to be in quotes.
+* Text arguments must be passed in `"` quotes e.g. `"This is some text"`.
+* Location arguments can be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
 
 ### Unit functions
 
@@ -286,6 +286,7 @@ Notes:
 | remove_deaths([Player](#player), [Unit](#unit), Expression)                     | Subtracts from the death count for a unit. (Caution!)                                                    |
 | show_leaderboard(Text, [LeaderboardType](#leaderboardtype), ...)                | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in)             |
 | show_leaderboard_goal(Text, [LeaderboardType](#leaderboardtype), Quantity, ...) | Shows the leaderboard with a goal. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
+| leaderboard_show_cpu([State](#state))                                           | Shows/ hides computer players from the leaderboard.                                                      |
 
 ### Game functions
 
@@ -355,7 +356,7 @@ unit MyInvincibleUnit {
 }
 ```
 
-After you have your unit declarations you can use them to spawn units by passing the name as the fifth property to the `spawn()` built-in e.g.
+After you have your unit declarations you can use them to spawn units by passing the name as the fifth argument to the `spawn()` built-in e.g.
 
 ```c
 spawn(TerranMarine, Player1, 1, "TestLocation", MyUnitProps);
@@ -1001,10 +1002,7 @@ Resources
 
 ## Stuff that's not implemented yet
 
-#### Built-ins
-
 ```
-Leaderboard Computer Players
 Play WAV
 Transmission
 ```

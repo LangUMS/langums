@@ -1849,6 +1849,11 @@ namespace Langums
                     current.Action_LeaderboardResources(stringId, leaderboard->GetResourceType());
                 }
             }
+            else if (instruction->GetType() == IRInstructionType::LeaderboardCpu)
+            {
+                auto leaderboardCpu = (IRLeaderboardCpuInstruction*)instruction.get();
+                current.Action_LeaderboardShowComputerPlayers(leaderboardCpu->GetState());
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||

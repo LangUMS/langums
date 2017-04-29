@@ -91,6 +91,7 @@ namespace Langums
         void Action_LeaderboardKills(unsigned int stringId, unsigned int unitId);
         void Action_LeaderboardPoints(unsigned int stringId, CHK::ScoreType scoreType);
         void Action_LeaderboardGreed(unsigned int stringId);
+        void Action_LeaderboardShowComputerPlayers(CHK::TriggerActionState state);
 
         const CHK::Trigger& GetTrigger()
         {

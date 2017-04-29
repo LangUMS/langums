@@ -99,6 +99,7 @@ namespace Langums
         PauseGame,      // pauses the game (singleplayer)
         NextScen,       // sets the next scenario (singleplayer)
         Leaderboard,    // shows the leaderboard
+        LeaderboardCpu, // whether to show cpu players in the leaderboard
         SetGoal,        // sets the leaderboard goal
         // conditions
         Event,
@@ -2092,11 +2093,11 @@ namespace Langums
 
             if (m_GoalQuantity == -1)
             {
-                return SafePrintf("LDRBOARD % %", m_Text, type);
+                return SafePrintf("LDRBOARD \"%\" %", m_Text, type);
             }
             else
             {
-                return SafePrintf("LDRBOARD % % [GOAL %]", m_Text, type, m_GoalQuantity);
+                return SafePrintf("LDRBOARD \"%\" % [GOAL %]", m_Text, type, m_GoalQuantity);
             }
         }
 
@@ -2163,6 +2164,26 @@ namespace Langums
         std::string m_Text;
         std::string m_LocationName;
         int m_GoalQuantity;
+    };
+
+    class IRLeaderboardCpuInstruction : public IIRInstruction
+    {
+        public:
+        IRLeaderboardCpuInstruction(TriggerActionState state) :
+            m_State(state), IIRInstruction(IRInstructionType::LeaderboardCpu) {}
+        
+        TriggerActionState GetState() const
+        {
+            return m_State;
+        }
+
+        std::string DebugDump() const
+        {
+            return SafePrintf("LDRBOARDCPU %", (int)m_State);
+        }
+
+        private:
+        TriggerActionState m_State;
     };
 
     class IREventInstruction : public IIRInstruction
