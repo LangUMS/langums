@@ -143,15 +143,16 @@ fn main() {
 
 Any useful LangUMS program will need to execute code in response to in-game events. The facility for this is called event handlers.
 
-An event handler is somewhat like a function that takes no arguments and returns no values. Instead it specifies one or more conditions and a block of code to execute.
+An event handler is somewhat like a function that takes no arguments and returns no values. Instead it specifies one or more conditions separated by commas and a block of code to execute.
 
-Whenever all the specified conditions become true the code for the handler will be executed. At this point the event handler acts more or less like a normal function i.e. you can call
+Whenever all the specified conditions for the handler are true the code in its body will be executed. At this point it acts like a normal function i.e. you can call
 other functions from it, set global variables, call built-ins.
 
-Here is an event handler that executes whenever Player1 brings 5 marines to the location named `BringMarinesHere`:
+Here is an event handler that executes whenever Player1 brings 5 marines to the location named `BringMarinesHere` and has at least 25 gas:
 
 ```c
-bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
+bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere"),
+accumulate(Player1, AtLeast, 25, Gas) => {
   print("The marines have arrived!");
 }
 ```
@@ -159,7 +160,8 @@ bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
 Once we have our handlers setup we need to call the built-in function `poll_events()` at regular intervals. The whole program demonstrating the event above would look like:
 
 ```c
-bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere") => {
+bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere"),
+accumulate(Player1, AtLeast, 25, Gas) => {
   print("The marines have arrived!");
 }
 
@@ -265,6 +267,7 @@ Notes:
 | poll_events()                            | Runs any associated event handlers.                                                  |
 | print(Text, optional: [Player](#player)) | Prints a message, defaults to all players.                                           |
 | random()                                 | Returns a random value between 0 and 255 (inclusive).                                |
+| is_present([Player](#player), ...)       | Returns true if the given player (or players) are currently present in the game.     |
 | sleep(Quantity)                          | Waits for a given amount of milliseconds. (Use with care!)                           |
 | pause_game()                             | Pauses the game (singleplayer only)                                                  |
 | unpause_game()                           | Unpauses the game (singleplayer only)                                                |
@@ -523,7 +526,7 @@ No, but thanks for asking.
 - The player selected with `--triggers-owner` (player 1 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
 - There are about 410 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
 - All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions that are called from many places. Recursion of any kind is not allowed.
-- Currently you can have up to 246 event handlers, this limitation will be lifted in the future.
+- Currently you can have up to 238 event handlers, this limitation will be lifted in the future.
 - Multiplication and division can take many cycles to complete especially with very large numbers.
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 

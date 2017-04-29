@@ -752,6 +752,64 @@ namespace Langums
                 auto setSwitch = (IRSetSwInstruction*)instruction.get();
                 current.Action_SetSwitch(setSwitch->GetSwitchId(), setSwitch->GetState() ? TriggerActionState::SetSwitch : TriggerActionState::ClearSwitch);
             }
+            else if (instruction->GetType() == IRInstructionType::ChkPlayers)
+            {
+                auto startAddress = nextAddress++;
+
+                for (auto i = 0u; i < 8; i++)
+                {
+                    current.Action_SetSwitch(Switch_Player1 + i, TriggerActionState::ClearSwitch);
+                }
+
+                current.Action_JumpTo(startAddress);
+                m_Triggers.push_back(current.GetTrigger());
+                current = TriggerBuilder(startAddress, nullptr, m_TriggersOwner);
+                current.Action_SetSwitch(Switch_Player1 + m_TriggersOwner - 1, TriggerActionState::SetSwitch);
+                current.Action_Wait(0);
+
+                for (auto i = 0u; i < 8; i++)
+                {
+                    if (i + 1 == m_TriggersOwner)
+                    {
+                        continue;
+                    }
+
+                    auto checkIfPlayerActive = TriggerBuilder(startAddress, nullptr, i + 1);
+                    checkIfPlayerActive.Action_SetSwitch(Switch_Player1 + i, TriggerActionState::SetSwitch);
+                    m_Triggers.push_back(checkIfPlayerActive.GetTrigger());
+                }
+            }
+            else if (instruction->GetType() == IRInstructionType::IsPresent)
+            {
+                auto isPresent = (IRIsPresentInstruction*)instruction.get();
+                auto& playerIds = isPresent->GetPlayerIds();
+
+                auto address = nextAddress++;
+                auto retAddress = nextAddress++;
+
+                current.Action_JumpTo(address);
+                m_Triggers.push_back(current.GetTrigger());
+
+                auto ifTrue = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                auto stackTop = m_StackPointer--;
+
+                for (auto& playerId : playerIds)
+                {
+                    ifTrue.Cond_TestSwitch(Switch_Player1 + playerId, true);
+
+                    auto ifFalse = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    ifFalse.Cond_TestSwitch(Switch_Player1 + playerId, false);
+                    ifFalse.Action_SetReg(stackTop, 0);
+                    ifFalse.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(ifFalse.GetTrigger());
+                }
+
+                ifTrue.Action_SetReg(stackTop, 1);
+                ifTrue.Action_JumpTo(retAddress);
+                m_Triggers.push_back(ifTrue.GetTrigger());
+
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+            }
             else if (instruction->GetType() == IRInstructionType::DisplayMsg)
             {
                 auto displayMsgReg = (IRDisplayMsgInstruction*)instruction.get();

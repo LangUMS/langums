@@ -25,7 +25,8 @@ namespace Langums
         JmpIfSwNotSet,  // jumps to an instruction if a switch is not set
         JmpIfSwSet,     // jumps to an instruction if a switch is set
         SetSw,          // sets a switch
-
+        ChkPlayers,     // runs checks which players are in-game
+        IsPresent,      // pushes 1 or 0 on top of the stack depending on whether given players are in-game or not
                         // actions
         Wait,           // waits for an amount of time
         DisplayMsg,     // displays a text message
@@ -637,6 +638,49 @@ namespace Langums
         private:
         unsigned int m_SwitchId = 0;
         bool m_State;
+    };
+
+    class IRChkPlayers : public IIRInstruction
+    {
+        public:
+        IRChkPlayers () : IIRInstruction (IRInstructionType::ChkPlayers)
+        {}
+
+        std::string DebugDump () const
+        {
+            return "CHKPLAYERS";
+        }
+    };
+
+    class IRIsPresentInstruction : public IIRInstruction
+    {
+        public:
+        IRIsPresentInstruction () : IIRInstruction (IRInstructionType::IsPresent)
+        {}
+
+        std::string DebugDump () const
+        {
+            std::string s = "ISPRESENT";
+            for (auto& playerId : m_PlayerIds)
+            {
+                s = SafePrintf("% %", s, CHK::PlayersByName[playerId]);
+            }
+
+            return s;
+        }
+
+        void AddPlayerId(uint8_t playerId)
+        {
+            m_PlayerIds.push_back(playerId);
+        }
+
+        const std::vector<uint8_t>& GetPlayerIds() const
+        {
+            return m_PlayerIds;
+        }
+
+        private:
+        std::vector<uint8_t> m_PlayerIds;
     };
 
     class IRWaitInstruction : public IIRInstruction

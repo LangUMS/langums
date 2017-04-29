@@ -249,12 +249,17 @@ namespace Langums
             }
             if (token.m_Type == TokenType::FunctionArgumentSeparator)
             {
-                if (stack[0].m_Type != TokenType::FunctionName)
+                auto fnIndex = (int)stack.size() - 1;
+                while (stack[fnIndex].m_Type != TokenType::FunctionName)
                 {
-                    throw ParserException(m_CurrentChar, "Syntax error.");
+                    fnIndex--;
+                    if (fnIndex < 0)
+                    {
+                        throw ParserException(m_CurrentChar, "Syntax error");
+                    }
                 }
 
-                stack[0].m_NumberValue++;
+                stack[fnIndex].m_NumberValue++;
 
                 while (stack.back().m_Type != TokenType::LeftParenthesis)
                 {

@@ -28,6 +28,14 @@ namespace Langums
         Switch_Random5,
         Switch_Random6,
         Switch_Random7,
+        Switch_Player1,
+        Switch_Player2,
+        Switch_Player3,
+        Switch_Player4,
+        Switch_Player5,
+        Switch_Player6,
+        Switch_Player7,
+        Switch_Player8,
         Switch_ReservedEnd
     };
 

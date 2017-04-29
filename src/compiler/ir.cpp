@@ -267,6 +267,7 @@ namespace Langums
         m_HasEvents = false;
 
         m_PollEventsInstructions.clear();
+        EmitInstruction(new IRChkPlayers(), m_PollEventsInstructions);
 
         for (auto& node : unitNodes)
         {
@@ -296,6 +297,8 @@ namespace Langums
         }
 
         EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_PollEventsInstructions);
+
+        EmitInstruction(new IRChkPlayers(), m_Instructions);
 
         auto main = m_FunctionDeclarations["main"];
         EmitFunction(main, m_Instructions, m_GlobalAliases);
@@ -330,6 +333,25 @@ namespace Langums
              
                 m_PollEventsInstructions.clear();
             }
+        }
+        else if (fnName == "is_present")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("is_present() called without arguments");
+            }
+
+            auto isPresent = new IRIsPresentInstruction();
+
+            auto argCount = fnCall->GetChildCount();
+
+            for (auto i = 0u; i < argCount; i++)
+            {
+                auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(i), fnName, i);
+                isPresent->AddPlayerId(playerId);
+            }
+
+            EmitInstruction(isPresent, instructions);
         }
         else if (fnName == "rnd256" || fnName == "random")
         {
