@@ -229,23 +229,6 @@ Notes:
 * Text arguments must be passed in `"` quotes e.g. "This is some text"
 * Location arguments can be passed without quotes if they do not contain spaces e.g. MyLocation, but "My Location" needs to be in quotes.
 
-### Misc functions
-
-| Function prototype                                                                          | Description                                                                                              |
-|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| poll_events()                                                                               | Runs any associated event handlers.                                                                      |
-| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all players.                                                               |
-| random()                                                                                    | Returns a random value between 0 and 255 (inclusive).                                                    |
-| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition).                                             |
-| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                                                            |
-| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                                                             |
-| show_leaderboard(Text, [LeaderboardType](#leaderboardtype), ...)                            | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in)             |
-| show_leaderboard_goal(Text, [LeaderboardType](#leaderboardtype), Quantity, ...)             | Shows the leaderboard with a goal. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
-| sleep(Quantity)                                                                             | Waits for a given amount of milliseconds. (Use with care!)                                               |
-| pause_game()                                                                                | Pauses the game (singleplayer only)                                                                      |
-| unpause_game()                                                                              | Unpauses the game (singleplayer only)                                                                    |
-| set_next_scenario(Text)                                                                     | Sets the next map to run (singleplayer only)                                                             |
-
 ### Unit functions
 
 | Function prototype                                                                               | Description                                          |
@@ -261,25 +244,6 @@ Notes:
 | set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Sets/ toggles invincibility for units at location.   |
 | run_ai_script([Player](#player), [AIScript](#aiscript), optional: Location)                      | Runs an AI script.                                   |
 
-### Resource functions
-
-| Function prototype                                                          | Description                           |
-|-----------------------------------------------------------------------------|---------------------------------------|
-| set_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Sets the resource count for a player. |
-| add_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Gives resources to a player.          |
-| take_resource([Player](#player), [ResourceType](#resourcetype), Expression) | Takes resources from a player.        |
-
-### Score functions
-
-| Function prototype                                                        | Description                                           |
-|---------------------------------------------------------------------------|-------------------------------------------------------|
-| set_score([Player](#player), [ScoreType](#scoretype), Expression)         | Sets the score of a player.                           |
-| add_score([Player](#player), [ScoreType](#scoretype), Expression)         | Add to the score of a player.                         |
-| subtract_score([Player](#player), [ScoreType](#scoretype), Expression)    | Subtracts from the score of a player.                 |
-| set_deaths([Player](#player), [Unit](#unit), Expression)                  | Sets the death count for a unit. (Caution!)           |
-| add_deaths([Player](#player), [Unit](#unit), Expression)                  | Adds to the death count for a unit. (Caution!)        |
-| remove_deaths([Player](#player), [Unit](#unit), Expression)               | Subtracts from the death count for a unit. (Caution!) |
-
 ### UI functions
 
 | Function prototype                                                     | Description                                               |
@@ -288,11 +252,42 @@ Notes:
 | ping([Player](#player), Location)                                      | Triggers a minimap ping on a location for a player.       |
 | talking_portrait([Player](#player), [Unit](#unit), Quantity)           | Shows the unit talking portrait for an amount of seconds. |
 
-### Location functions
+### Resource functions
 
-| Function prototype                                                     | Description                                   |
-|------------------------------------------------------------------------|-----------------------------------------------|
-| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)   | Centers DstLocation on a unit at SrcLocation. |
+| Function prototype                                                          | Description                           |
+|-----------------------------------------------------------------------------|---------------------------------------|
+| set_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Sets the resource count for a player. |
+| add_resource([Player](#player), [ResourceType](#resourcetype), Expression)  | Gives resources to a player.          |
+| take_resource([Player](#player), [ResourceType](#resourcetype), Expression) | Takes resources from a player.        |
+
+### Misc functions
+
+| Function prototype                                                                          | Description                                                                                              |
+|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| poll_events()                                                                               | Runs any associated event handlers.                                                                      |
+| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all players.                                                               |
+| random()                                                                                    | Returns a random value between 0 and 255 (inclusive).                                                    |
+| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)                        | Centers DstLocation on a unit at SrcLocation.                                                            |
+| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition).                                             |
+| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                                                            |
+| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                                                             |
+| sleep(Quantity)                                                                             | Waits for a given amount of milliseconds. (Use with care!)                                               |
+| pause_game()                                                                                | Pauses the game (singleplayer only)                                                                      |
+| unpause_game()                                                                              | Unpauses the game (singleplayer only)                                                                    |
+| set_next_scenario(Text)                                                                     | Sets the next map to run (singleplayer only)                                                             |
+
+### Score functions
+
+| Function prototype                                                              | Description                                                                                              |
+|---------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| set_score([Player](#player), [ScoreType](#scoretype), Expression)               | Sets the score of a player.                                                                              |
+| add_score([Player](#player), [ScoreType](#scoretype), Expression)               | Add to the score of a player.                                                                            |
+| subtract_score([Player](#player), [ScoreType](#scoretype), Expression)          | Subtracts from the score of a player.                                                                    |
+| set_deaths([Player](#player), [Unit](#unit), Expression)                        | Sets the death count for a unit. (Caution!)                                                              |
+| add_deaths([Player](#player), [Unit](#unit), Expression)                        | Adds to the death count for a unit. (Caution!)                                                           |
+| remove_deaths([Player](#player), [Unit](#unit), Expression)                     | Subtracts from the death count for a unit. (Caution!)                                                    |
+| show_leaderboard(Text, [LeaderboardType](#leaderboardtype), ...)                | Shows the leaderboard. [See here for more info.](#variants-of-the-show_leaderboard-built-in)             |
+| show_leaderboard_goal(Text, [LeaderboardType](#leaderboardtype), Quantity, ...) | Shows the leaderboard with a goal. [See here for more info.](#variants-of-the-show_leaderboard-built-in) |
 
 ### Game functions
 
