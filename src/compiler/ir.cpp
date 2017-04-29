@@ -1069,7 +1069,7 @@ namespace Langums
 
             EmitInstruction(new IRMoveLocInstruction(playerId, unitId, srcLocName, dstLocName), instructions);
         }
-        else if (fnName == "play_wav")
+        else if (fnName == "play_sound")
         {
             if (!fnCall->HasChildren())
             {
@@ -1079,7 +1079,7 @@ namespace Langums
             auto arg0 = fnCall->GetArgument(0);
             if (arg0->GetType() != ASTNodeType::StringLiteral)
             {
-                throw IRCompilerException(SafePrintf("Invalid argument passed to play_wav(), expected wav filename", fnName));
+                throw IRCompilerException(SafePrintf("Invalid argument passed to play_sound(), expected .wav filename", fnName));
             }
 
             auto& wavFilename = ((ASTStringLiteral*)arg0.get())->GetValue();
@@ -1087,7 +1087,7 @@ namespace Langums
 
             EmitInstruction(new IRPlayWAVInstruction(wavFilename, 0), instructions);
         }
-        else if (fnName == "transmission")
+        /*else if (fnName == "transmission")
         {
             if (!fnCall->HasChildren())
             {
@@ -1095,7 +1095,7 @@ namespace Langums
             }
 
             throw IRCompilerException("transmission() is not yet implemented, sorry :(");
-        }
+        }*/
         else if (m_FunctionDeclarations.find(fnName) != m_FunctionDeclarations.end())
         {
             auto declaration = m_FunctionDeclarations[fnName];

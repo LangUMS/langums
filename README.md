@@ -260,19 +260,16 @@ Notes:
 
 ### Misc functions
 
-| Function prototype                                                                          | Description                                                                                              |
-|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| poll_events()                                                                               | Runs any associated event handlers.                                                                      |
-| print(Text, optional: [Player](#player))                                                    | Prints a message, defaults to all players.                                                               |
-| random()                                                                                    | Returns a random value between 0 and 255 (inclusive).                                                    |
-| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)                        | Centers DstLocation on a unit at SrcLocation.                                                            |
-| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition).                                             |
-| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                                                            |
-| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                                                             |
-| sleep(Quantity)                                                                             | Waits for a given amount of milliseconds. (Use with care!)                                               |
-| pause_game()                                                                                | Pauses the game (singleplayer only)                                                                      |
-| unpause_game()                                                                              | Unpauses the game (singleplayer only)                                                                    |
-| set_next_scenario(Text)                                                                     | Sets the next map to run (singleplayer only)                                                             |
+| Function prototype                       | Description                                                |
+|----------------------------------------- |------------------------------------------------------------|
+| poll_events()                            | Runs any associated event handlers.                        |
+| print(Text, optional: [Player](#player)) | Prints a message, defaults to all players.                 |
+| random()                                 | Returns a random value between 0 and 255 (inclusive).      |
+| sleep(Quantity)                          | Waits for a given amount of milliseconds. (Use with care!) |
+| pause_game()                             | Pauses the game (singleplayer only)                        |
+| unpause_game()                           | Unpauses the game (singleplayer only)                      |
+| set_next_scenario(Text)                  | Sets the next map to run (singleplayer only)               |
+| play_sound(Text)                         | Plays a sound from a .wav file.                            |
 
 ### Score functions
 
@@ -290,13 +287,17 @@ Notes:
 
 ### Game functions
 
-| Function prototype                                                     | Description                   |
-|------------------------------------------------------------------------|-------------------------------|
-| set_countdown(Expression)                                              | Sets the countdown timer.     |
-| pause_countdown()                                                      | Pauses the countdown timer.   |
-| unpause_countdown()                                                    | Unpauses the countdown timer. |
-| mute_unit_speech()                                                     | Mutes unit speech.            |
-| unmute_unit_speech()                                                   | Unmutes unit speech.          |
+| Function prototype                                                                          | Description                                                  |
+|---------------------------------------------------------------------------------------------|--------------------------------------------------------------|
+| end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition). |
+| set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                |
+| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                 |
+| move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)                        | Centers DstLocation on a unit at SrcLocation.                |
+| set_countdown(Expression)                                                                   | Sets the countdown timer.                                    |
+| pause_countdown()                                                                           | Pauses the countdown timer.                                  |
+| unpause_countdown()                                                                         | Unpauses the countdown timer.                                |
+| mute_unit_speech()                                                                          | Mutes unit speech.                                           |
+| unmute_unit_speech()                                                                        | Unmutes unit speech.                                         |
 
 ## Built-in event conditions
 
@@ -372,10 +373,6 @@ unit LurkerType1 {
 
 fn main() {
   spawn(ZergLurker, Player1, 1, "TestLocation", LurkerType1);
-  
-  while (true) {
-    poll_events();
-  }
 }
 ```
 
@@ -506,6 +503,16 @@ set_mission_objectives("""My multi-line string
 This is a second line
 This is a third line""");
 ```
+
+#### How do you use play_sound()?
+
+Put your sounds in .wav format in the same folder as your source .scx map file. For example if you have `my_sound.wav` you can play it with
+
+```
+play_sound("my_sound.wav");
+```
+
+LangUMS will take care of adding the sound file to the map archive for you.
 
 #### Do you plan to rewrite this in Rust?
 
@@ -998,11 +1005,4 @@ Greed
 Kills
 Points
 Resources
-```
-
-## Stuff that's not implemented yet
-
-```
-Play WAV
-Transmission
 ```

@@ -4,7 +4,7 @@
 #include "log.h"
 #include "cxxopts.h"
 #include "stringutil.h"
-#include "libmpq/SFmpqapi.h"
+#include "stormlib/StormLib.h"
 #include "libchk/chk.h"
 #include "parser/preprocessor.h"
 #include "parser/parser.h"
@@ -112,9 +112,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    MPQHANDLE mpq = nullptr;
+    HANDLE mpq = nullptr;
     auto mpqPath = tempPath.generic_u8string();
-    if (!SFileOpenArchive(mpqPath.c_str(), 0, SFILE_OPEN_ALLOW_WRITE, &mpq))
+    if (!SFileOpenArchive(mpqPath.c_str(), 0, 0, &mpq))
     {
         auto errorCode = GetLastError();
         LOG_EXITERR("\n(!) SFileOpenArchive failed, error code: %. Looks like an invalid scx file.", errorCode);
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
     LOG_F("Looks like a valid MPQ file.");
      
-    MPQHANDLE scenarioFile = nullptr;
+    HANDLE scenarioFile = nullptr;
     if (!SFileOpenFileEx(mpq, SCENARIO_FILENAME, 0, &scenarioFile))
     {
         LOG_EXITERR("\n(!) Failed to find scenario.chk inside MPQ, not a Brood War map file?");
@@ -145,13 +145,6 @@ int main(int argc, char* argv[])
 
     auto stripExtraData = opts["strip"].count() > 0;
     CHK::File chk(scenarioBytes, stripExtraData);
-    if (!SFileCloseFile(scenarioFile))
-    {
-        LOG_EXITERR("\n(!) Failed to close scenario.chk file.");
-        return 1;
-    }
-
-    scenarioFile = nullptr;
 
     if (!chk.HasChunk("VER "))
     {
@@ -359,7 +352,7 @@ int main(int argc, char* argv[])
         auto& wavBytes = wavInfo.GetData();
 
         auto mpqFilename = SafePrintf("staredit\\wav\\%", filename);
-        if (!MpqAddFileFromBuffer(mpq, wavBytes.data(), wavBytes.size(), mpqFilename.c_str(), MAFA_REPLACE_EXISTING | MAFA_COMPRESS))
+        if (!SFileAddWave(mpq, path.c_str(), mpqFilename.c_str(), MPQ_COMPRESSION_ADPCM_STEREO, MPQ_WAVE_QUALITY_HIGH))
         {
             LOG_EXITERR("(!) Error - failed to add \"%\" to MPQ archive.", path);
             return 1;
@@ -517,13 +510,22 @@ int main(int argc, char* argv[])
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);
 
-    if (!MpqAddFileFromBuffer(mpq, chkBytes.data(), chkBytes.size(), SCENARIO_FILENAME, MAFA_REPLACE_EXISTING | MAFA_COMPRESS))
+    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, MPQ_FILE_REPLACEEXISTING, &scenarioFile))
+    {
+        LOG_EXITERR("Failed to open scenario.chk for writing.");
+        return 1;
+    }
+
+    if (!SFileWriteFile(scenarioFile, chkBytes.data(), chkBytes.size(), MPQ_COMPRESSION_ZLIB))
     {
         LOG_EXITERR("Failed to write out scenario.chk to MPQ archive.");
         return 1;
     }
 
+    SFileCloseFile(scenarioFile);
+    scenarioFile = nullptr;
     SFileCloseArchive(mpq);
+    mpq = nullptr;
 
     auto fileSize = std::experimental::filesystem::file_size(tempPath);
     LOG_F("Final size: % kb", fileSize / 1024);
