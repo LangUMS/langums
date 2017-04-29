@@ -1,8 +1,25 @@
 #ifndef __LIBCHK_ENUMS_H
 #define __LIBCHK_ENUMS_H
 
+#include <string>
+
 namespace CHK
 {
+
+    enum class ChunkType : uint8_t
+    {
+        DimChunk = 0,
+        IOwnChunk,
+        OwnrChunk,
+        StringsChunk,
+        WavChunk,
+        VerChunk,
+        TriggersChunk,
+        TilesetsChunk,
+        LocationsChunk,
+        CuwpChunk,
+        CuwpUsedChunk
+    };
 
     enum class TriggerConditionType : uint8_t
     {
@@ -190,6 +207,16 @@ namespace CHK
         Unused3,
         Unused4,
         NonAlliedVictoryPlayers
+    };
+
+    enum class PlayerType : uint8_t
+    {
+        Inactive = 0,
+        RescuePassive = 3,
+        Unused = 4,
+        Computer = 5,
+        Human = 6,
+        Neutral = 7
     };
 
     enum class TechnologyId : uint8_t

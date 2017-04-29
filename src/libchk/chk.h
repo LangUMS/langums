@@ -13,6 +13,7 @@
 #include "triggerschunk.h"
 #include "locationschunk.h"
 #include "ownrchunk.h"
+#include "iownchunk.h"
 #include "dimchunk.h"
 #include "cuwpchunk.h"
 #include "cuwpusedchunk.h"
@@ -73,21 +74,67 @@ namespace CHK
             m_Chunks[type].push_back(std::move(chunk));
         }
 
-        bool HasChunk(const std::string& type) const
+        bool HasChunk(ChunkType type) const
         {
-            return m_Chunks.find(type) != m_Chunks.end();
+            switch (type)
+            {
+            case ChunkType::DimChunk:
+                return HasChunk("DIM ");
+            case ChunkType::IOwnChunk:
+                return HasChunk("IOWN");
+            case ChunkType::OwnrChunk:
+                return HasChunk("OWNR");
+            case ChunkType::StringsChunk:
+                return HasChunk("STR ");
+            case ChunkType::WavChunk:
+                return HasChunk("WAV ");
+            case ChunkType::VerChunk:
+                return HasChunk("VER ");
+            case ChunkType::TriggersChunk:
+                return HasChunk("TRIG");
+            case ChunkType::TilesetsChunk:
+                return HasChunk("ERA ");
+            case ChunkType::LocationsChunk:
+                return HasChunk("MRGN");
+            case ChunkType::CuwpChunk:
+                return HasChunk("UPRP");
+            case ChunkType::CuwpUsedChunk:
+                return HasChunk("UPUS");
+            }
+
+            return false;
         }
 
         template <typename T>
-        T& GetFirstChunk(const std::string& type) const
+        T& GetFirstChunk(ChunkType type) const
         {
-            auto it = m_Chunks.find(type);
-            if (it == m_Chunks.end())
+            switch (type)
             {
-                return *(T*)nullptr;
+                case ChunkType::DimChunk:
+                    return GetFirstChunk<T>("DIM ");
+                case ChunkType::IOwnChunk:
+                    return GetFirstChunk<T>("IOWN");
+                case ChunkType::OwnrChunk:
+                    return GetFirstChunk<T>("OWNR");
+                case ChunkType::StringsChunk:
+                    return GetFirstChunk<T>("STR ");
+                case ChunkType::WavChunk:
+                    return GetFirstChunk<T>("WAV ");
+                case ChunkType::VerChunk:
+                    return GetFirstChunk<T>("VER ");
+                case ChunkType::TriggersChunk:
+                    return GetFirstChunk<T>("TRIG");
+                case ChunkType::TilesetsChunk:
+                    return GetFirstChunk<T>("ERA ");
+                case ChunkType::LocationsChunk:
+                    return GetFirstChunk<T>("MRGN");
+                case ChunkType::CuwpChunk:
+                    return GetFirstChunk<T>("UPRP");
+                case ChunkType::CuwpUsedChunk:
+                    return GetFirstChunk<T>("UPUS");
             }
 
-            return *((T*)((*it).second.front().get()));
+            return GetFirstChunk<T>("DIM ");
         }
 
         template <typename T>
@@ -120,6 +167,24 @@ namespace CHK
         }
 
         private:
+        bool HasChunk(const std::string& type) const
+        {
+            return m_Chunks.find(type) != m_Chunks.end();
+        }
+
+
+        template <typename T>
+        T& GetFirstChunk(const std::string& type) const
+        {
+            auto it = m_Chunks.find(type);
+            if (it == m_Chunks.end())
+            {
+                return *(T*)nullptr;
+            }
+
+            return *((T*)((*it).second.front().get()));
+        }
+
         std::unordered_map<std::string, std::vector<std::unique_ptr<IChunk>>> m_Chunks;
         std::set<std::string> m_ChunkTypes;
     };

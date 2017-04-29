@@ -1,5 +1,5 @@
-#ifndef __LIBCHK_OWNRCHUNK_H
-#define __LIBCHK_OWNRCHUNK_H
+#ifndef __LIBCHK_IOWNCHUNK_H
+#define __LIBCHK_IOWNCHUNK_H
 
 #include <unordered_map>
 #include <string>
@@ -10,10 +10,10 @@
 namespace CHK
 {
 
-    class CHKOwnrChunk : public IChunk
+    class CHKIOwnChunk : public IChunk
     {
         public:
-        CHKOwnrChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
+        CHKIOwnChunk(const std::vector<char>& data, const std::string& type) : IChunk(type)
         {
             SetBytes(data);
         }

@@ -1,16 +1,16 @@
 #include "enums.h"
-#include "ownrchunk.h"
+#include "iownchunk.h"
 
 namespace CHK
 {
 
-    void CHKOwnrChunk::SetBytes(const std::vector<char>& data)
+    void CHKIOwnChunk::SetBytes(const std::vector<char>& data)
     {
         IChunk::SetBytes(data);
         memcpy(m_PlayerTypes, data.data(), 12);
     }
 
-    void CHKOwnrChunk::SetPlayerType(int playerId, PlayerType type)
+    void CHKIOwnChunk::SetPlayerType(int playerId, PlayerType type)
     {
         m_PlayerTypes[playerId] = (uint8_t)type;
 

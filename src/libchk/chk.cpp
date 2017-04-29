@@ -42,6 +42,10 @@ namespace CHK
             {
                 chunk = std::make_unique<CHKOwnrChunk>(bytes, type);
             }
+            else if (type == "IOWN")
+            {
+                chunk = std::make_unique<CHKIOwnChunk>(bytes, type);
+            }
             else if (type == "DIM ")
             {
                 chunk = std::make_unique<CHKDimChunk>(bytes, type);

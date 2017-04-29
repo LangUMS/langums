@@ -166,13 +166,13 @@ int main(int argc, char* argv[])
 
     LOG_F("Discovered chunks: %", chunkTypesString);
 
-    if (!chk.HasChunk("VER "))
+    if (!chk.HasChunk(ChunkType::VerChunk))
     {
         LOG_EXITERR("\n(!) VER chunk not found in scenario.chk. Map file is corrupted.");
         return 1;
     }
 
-    auto& versionChunk = chk.GetFirstChunk<CHKVerChunk>("VER ");
+    auto& versionChunk = chk.GetFirstChunk<CHKVerChunk>(ChunkType::VerChunk);
     auto version = versionChunk.GetVersion();
     if (version != CHK_LATEST_MAP_VERSION)
     {
@@ -180,24 +180,23 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!chk.HasChunk("TRIG"))
+    if (!chk.HasChunk(ChunkType::TriggersChunk))
     {
-        LOG_EXITERR("\n(!) TRIG chunk not found in scenario.chk. Add at least one trigger before running LangUMS.");
-        return 1;
+        std::vector<char> bytes;
+        chk.AddChunk("TRIG", std::unique_ptr<IChunk>(new CHKTriggersChunk(bytes, "TRIG")));
     }
 
-    if (!chk.HasChunk("DIM "))
+    if (!chk.HasChunk(ChunkType::DimChunk))
     {
         LOG_EXITERR("\n(!) DIM chunk not found in scenario.chk. Map file is corrupted.");
         return 1;
     }
 
-    auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
-    triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
+    auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
 
-    auto& stringsChunk = chk.GetFirstChunk<CHKStringsChunk>("STR ");
+    auto& stringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
 
-    if (!chk.HasChunk("WAV "))
+    if (!chk.HasChunk(ChunkType::WavChunk))
     {
         std::vector<char> data;
         data.resize(512 * sizeof(uint32_t));
@@ -205,19 +204,19 @@ int main(int argc, char* argv[])
         chk.AddChunk("WAV ", std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
     }
 
-    auto& wavChunk = chk.GetFirstChunk<CHKWavChunk>("WAV ");
+    auto& wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
 
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
     LOG_F("Existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
 
-    auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>("DIM ");
+    auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>(ChunkType::DimChunk);
     LOG_F("Map size: %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
     
-    auto& tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>("ERA ");
+    auto& tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>(ChunkType::TilesetsChunk);
     LOG_F("Tileset: %", tilesetChunk.GetTilesetTypeString());
 
-    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
+    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>(ChunkType::OwnrChunk);
 
     LOG_F("");
 
@@ -467,12 +466,24 @@ int main(int argc, char* argv[])
             LOG_F("(!) Setting player % to a Computer player.", triggersOwner);
             LOG_F("(!) If you wish to override this decision call langums.exe again with the --force option.\n");
             ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+
+            if (chk.HasChunk(ChunkType::IOwnChunk))
+            {
+                auto& iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+                iownChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+            }
         }
     }
     else if (triggerOwnerType != PlayerType::Computer)
     {
-        ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
         LOG_F("(!) Setting player % to a Computer player because he's the triggers owner. Use --triggers-owner to override.", triggersOwner);
+
+        ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+        if (chk.HasChunk(ChunkType::IOwnChunk))
+        {
+            auto& iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+            iownChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+        }
     }
 
     if (opts.count("copy-batch-size") > 0)

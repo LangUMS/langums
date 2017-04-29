@@ -839,6 +839,9 @@
     <ClCompile Include="..\src\stormlib\pklib\crc32_pklib.c">
       <Filter>stormlib\pklib</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libchk\iownchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1067,6 +1070,9 @@
       <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\tilesetchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\iownchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>
