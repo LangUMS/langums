@@ -874,9 +874,6 @@
     <ClInclude Include="..\src\compiler\compiler.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\stringhash.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\compiler\ir.h">
       <Filter>compiler</Filter>
     </ClInclude>
@@ -1059,6 +1056,15 @@
     </ClInclude>
     <ClInclude Include="..\src\stormlib\pklib\pklib.h">
       <Filter>stormlib\pklib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir_instructions.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir_utility.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir_constants.h">
+      <Filter>compiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

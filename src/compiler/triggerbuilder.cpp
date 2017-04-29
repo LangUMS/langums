@@ -941,9 +941,10 @@ namespace Langums
         auto& action = m_Trigger.m_Actions[m_NextAction++];
         action.m_ActionType = TriggerActionType::Transmission;
         action.m_WAVStringIndex = wavStringId + 1;
-        action.m_Milliseconds = time;
+        action.m_Milliseconds = wavTime;
         action.m_Modifier = (uint8_t)modifier;
         action.m_TriggerText = stringId + 1;
+        action.m_Arg0 = time;
         action.m_Arg1 = unitId;
         action.m_Source = locationId + 1;
         m_HasChanges = true;

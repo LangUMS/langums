@@ -68,7 +68,7 @@ namespace Langums
         std::set<IIRInstruction*> m_JumpTargets;
         std::unordered_map<IIRInstruction*, unsigned int> m_JumpAddresses;
 
-        unsigned int m_StackPointer = MAX_REGISTER_INDEX;
+        unsigned int m_StackPointer;
         bool m_DebugTrace = true;
 
         std::vector<RegisterDef> m_RegisterMap;

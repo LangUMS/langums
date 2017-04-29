@@ -1079,13 +1079,19 @@ namespace Langums
             auto arg0 = fnCall->GetArgument(0);
             if (arg0->GetType() != ASTNodeType::StringLiteral)
             {
-                throw IRCompilerException(SafePrintf("Invalid argument passed to play_sound(), expected .wav filename", fnName));
+                throw IRCompilerException(SafePrintf("Invalid first argument passed to play_sound(), expected .wav filename", fnName));
             }
 
             auto& wavFilename = ((ASTStringLiteral*)arg0.get())->GetValue();
             m_WavFilenames.insert(wavFilename);
 
-            EmitInstruction(new IRPlayWAVInstruction(wavFilename, 0), instructions);
+            auto playerId = -1;
+            if (fnCall->GetChildCount() > 1)
+            {
+                playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            }
+
+            EmitInstruction(new IRPlayWAVInstruction(playerId, wavFilename, 0), instructions);
         }
         /*else if (fnName == "transmission")
         {
@@ -1825,7 +1831,7 @@ namespace Langums
         {
             std::string reg(name.c_str() + 1, name.length() - 1);
             auto index = std::atoi(reg.c_str());
-            if (index == 0 || index >= MAX_REGISTER_INDEX)
+            if (index == 0)
             {
                 throw IRCompilerException(SafePrintf("Invalid register \"%\"", name));
             }

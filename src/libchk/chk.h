@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include <set>
 
 #include "constants.h"
 #include "ichunk.h"
@@ -67,6 +68,7 @@ namespace CHK
 
         void AddChunk(const std::string& type, std::unique_ptr<IChunk> chunk)
         {
+            m_ChunkTypes.insert(type);
             m_Chunks[type].push_back(std::move(chunk));
         }
 
@@ -111,8 +113,14 @@ namespace CHK
             return m_Chunks.size();
         }
 
+        const std::set<std::string>& GetChunkTypes() const
+        {
+            return m_ChunkTypes;
+        }
+
         private:
         std::unordered_map<std::string, std::vector<std::unique_ptr<IChunk>>> m_Chunks;
+        std::set<std::string> m_ChunkTypes;
     };
 
 }

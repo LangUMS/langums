@@ -14,8 +14,6 @@ namespace CHK
 
         virtual ~IChunk() {};
 
-        virtual void ApplyChanges() {}
-
         const std::string& GetType() const
         {
             return m_Type;

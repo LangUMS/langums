@@ -768,6 +768,12 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
                     auto all = false;
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
@@ -776,17 +782,15 @@ namespace Langums
                     }
 
                     auto msgTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    msgTrigger.Action_DisplayMsg(stringId);
 
                     if (all)
                     {
                         msgTrigger.SetExecuteForAllPlayers();
                     }
 
-                    msgTrigger.Action_DisplayMsg(stringId);
-
-                    auto retAddress = nextAddress++;
-                    msgTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(msgTrigger.GetTrigger());
+
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
@@ -1164,6 +1168,12 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
                     auto all = false;
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
@@ -1172,17 +1182,15 @@ namespace Langums
                     }
 
                     auto centerTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    centerTrigger.Action_CenterView(locationId + 1);
 
                     if (all)
                     {
                         centerTrigger.SetExecuteForAllPlayers();
                     }
 
-                    centerTrigger.Action_CenterView(locationId + 1);
-
-                    auto retAddress = nextAddress++;
-                    centerTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(centerTrigger.GetTrigger());
+
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
@@ -1672,6 +1680,12 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
                     auto all = false;
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
@@ -1680,17 +1694,15 @@ namespace Langums
                     }
 
                     auto talkTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    talkTrigger.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
 
                     if (all)
                     {
                         talkTrigger.SetExecuteForAllPlayers();
                     }
 
-                    talkTrigger.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
-
-                    auto retAddress = nextAddress++;
-                    talkTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(talkTrigger.GetTrigger());
+
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
@@ -1731,6 +1743,12 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
                     auto all = false;
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
@@ -1738,18 +1756,16 @@ namespace Langums
                         playerId = m_TriggersOwner;
                     }
 
-                    auto aiTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+                    auto aiTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    aiTrigger.Action_RunAIScript(playerId, aiScript->GetScriptName(), locationId);
 
                     if (all)
                     {
                         aiTrigger.SetExecuteForAllPlayers();
                     }
 
-                    aiTrigger.Action_RunAIScript(playerId, aiScript->GetScriptName(), locationId);
-
-                    auto retAddress = nextAddress++;
-                    aiTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(aiTrigger.GetTrigger());
+
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
@@ -1770,6 +1786,12 @@ namespace Langums
                     current.Action_JumpTo(address);
                     m_Triggers.push_back(current.GetTrigger());
 
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
                     auto all = false;
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
@@ -1777,18 +1799,16 @@ namespace Langums
                         playerId = m_TriggersOwner;
                     }
 
-                    auto allyTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+                    auto allyTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    allyTrigger.Action_SetAllianceStatus(playerId, targetPlayerId, setAlly->GetAllianceStatus());
 
                     if (all)
                     {
                         allyTrigger.SetExecuteForAllPlayers();
                     }
 
-                    allyTrigger.Action_SetAllianceStatus(playerId, targetPlayerId, setAlly->GetAllianceStatus());
-
-                    auto retAddress = nextAddress++;
-                    allyTrigger.Action_JumpTo(retAddress);
                     m_Triggers.push_back(allyTrigger.GetTrigger());
+
                     current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
                 }
             }
@@ -1859,7 +1879,44 @@ namespace Langums
                 auto playWav = (IRPlayWAVInstruction*)instruction.get();
                 auto name = SafePrintf("staredit\\wav\\%", playWav->GetWavName());
                 auto wavStringId = m_StringsChunk->InsertString(name);
-                current.Action_PlayWAV(wavStringId, playWav->GetWavTime());
+                auto wavTime = playWav->GetWavTime();
+                auto playerId = playWav->GetPlayerId();
+
+                if (playerId + 1 == m_TriggersOwner)
+                {
+                    current.Action_PlayWAV(wavStringId, wavTime);
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
+
+                    auto wavTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    wavTrigger.Action_PlayWAV(wavStringId, wavTime);
+
+                    if (all)
+                    {
+                        wavTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    m_Triggers.push_back(wavTrigger.GetTrigger());
+
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if (instruction->GetType() == IRInstructionType::Transmission)
             {

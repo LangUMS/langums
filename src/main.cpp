@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
         ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
         ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues)", cxxopts::value<bool>())
+        ("dump-ir", "Dumps the intermediate representation during compilation", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
 
@@ -98,6 +99,7 @@ int main(int argc, char* argv[])
     LOG_F("Source map: %", srcPath);
     LOG_F("Code source: %", langPath);
     LOG_F("Destination map: %", dstPath);
+    LOG_F("");
 
     auto filename = srcPath.filename();
 
@@ -121,7 +123,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    LOG_F("Looks like a valid MPQ file.");
+    LOG_F("Map looks like a valid MPQ file.");
      
     HANDLE scenarioFile = nullptr;
     if (!SFileOpenFileEx(mpq, SCENARIO_FILENAME, 0, &scenarioFile))
@@ -141,10 +143,28 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    LOG_F("Read scenario.chk (% bytes).", scenarioFileSize);
+    LOG_F("Reading from scenario.chk (% bytes).", scenarioFileSize);
 
     auto stripExtraData = opts["strip"].count() > 0;
     CHK::File chk(scenarioBytes, stripExtraData);
+
+    auto& chunkTypes = chk.GetChunkTypes();
+    std::string chunkTypesString;
+
+    auto i = 0u;
+    for (auto& type : chunkTypes)
+    {
+        chunkTypesString.append(trim(type));
+
+        if (i != chunkTypes.size() - 1)
+        {
+            chunkTypesString.append(", ");
+        }
+
+        i++;
+    }
+
+    LOG_F("Discovered chunks: %", chunkTypesString);
 
     if (!chk.HasChunk("VER "))
     {
@@ -172,13 +192,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    /*auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
-    if (ownrChunk.GetPlayerType(7) != PlayerType::Computer)
-    {
-        LOG_F("(!) Warning! Player 8 is not set to type \"Computer\". Overriding.");
-        ownrChunk.SetPlayerType(7, PlayerType::Computer);
-    }*/
-
     auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
     triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>("TRIG");
 
@@ -196,10 +209,10 @@ int main(int argc, char* argv[])
 
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
-    LOG_F("Pre-existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
+    LOG_F("Existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
 
     auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>("DIM ");
-    LOG_F("Map size is %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
+    LOG_F("Map size: %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
     
     LOG_F("");
 
@@ -329,7 +342,12 @@ int main(int argc, char* argv[])
     std::unordered_map<std::string, unsigned int> wavLengths;
     
     auto& wavFilenames = ir.GetWavFilenames();
-    LOG_F("Need to import % .wav files.", wavFilenames.size());
+
+    if (wavFilenames.size() > 0)
+    {
+        LOG_F("\nWill import % .wav %.", wavFilenames.size(), wavFilenames.size() == 1 ? "file" : "files");
+    }
+
     for (auto& filename : wavFilenames)
     {
         auto pathToWav = srcPath.relative_path().remove_filename();
@@ -405,11 +423,14 @@ int main(int argc, char* argv[])
         }
     }
 
-    LOG_F("\n----------- IR Dump -----------");
-    LOG_F("%", ir.DumpInstructions(true));
-    LOG_F("-------------------------------\n");
+    if (opts.count("dump-ir") > 0)
+    {
+        LOG_F("\n----------- IR DUMP -----------");
+        LOG_F("%", ir.DumpInstructions(true));
+        LOG_F("-------------------------------\n");
+    }
 
-    LOG_F("Emitted % instructions.", instructions.size());
+    LOG_F("\nEmitted % instructions.\n", instructions.size());
 
     Compiler compiler;
 
@@ -422,7 +443,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        LOG_F("Main trigger owner: %", triggerOwner);
+        LOG_F("(!) Triggers owner set to % from command-line", CHK::PlayersByName[triggerOwner - 1]);
         compiler.SetTriggersOwner(triggerOwner);
     }
 

@@ -388,6 +388,9 @@
     <ClInclude Include="..\src\ast\ast.h" />
     <ClInclude Include="..\src\compiler\compiler.h" />
     <ClInclude Include="..\src\compiler\ir.h" />
+    <ClInclude Include="..\src\compiler\ir_constants.h" />
+    <ClInclude Include="..\src\compiler\ir_utility.h" />
+    <ClInclude Include="..\src\compiler\ir_instructions.h" />
     <ClInclude Include="..\src\compiler\ir_optimizer.h" />
     <ClInclude Include="..\src\compiler\registermap_parser.h" />
     <ClInclude Include="..\src\compiler\triggerbuilder.h" />
@@ -455,7 +458,6 @@
     <ClInclude Include="..\src\stormlib\zlib\zconf.h" />
     <ClInclude Include="..\src\stormlib\zlib\zlib.h" />
     <ClInclude Include="..\src\stormlib\zlib\zutil.h" />
-    <ClInclude Include="..\src\stringhash.h" />
     <ClInclude Include="..\src\stringutil.h" />
     <ClInclude Include="..\src\wavinfo.h" />
   </ItemGroup>

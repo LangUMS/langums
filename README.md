@@ -260,16 +260,16 @@ Notes:
 
 ### Misc functions
 
-| Function prototype                       | Description                                                |
-|----------------------------------------- |------------------------------------------------------------|
-| poll_events()                            | Runs any associated event handlers.                        |
-| print(Text, optional: [Player](#player)) | Prints a message, defaults to all players.                 |
-| random()                                 | Returns a random value between 0 and 255 (inclusive).      |
-| sleep(Quantity)                          | Waits for a given amount of milliseconds. (Use with care!) |
-| pause_game()                             | Pauses the game (singleplayer only)                        |
-| unpause_game()                           | Unpauses the game (singleplayer only)                      |
-| set_next_scenario(Text)                  | Sets the next map to run (singleplayer only)               |
-| play_sound(Text)                         | Plays a sound from a .wav file.                            |
+| Function prototype                       | Description                                                                          |
+|----------------------------------------- |--------------------------------------------------------------------------------------|
+| poll_events()                            | Runs any associated event handlers.                                                  |
+| print(Text, optional: [Player](#player)) | Prints a message, defaults to all players.                                           |
+| random()                                 | Returns a random value between 0 and 255 (inclusive).                                |
+| sleep(Quantity)                          | Waits for a given amount of milliseconds. (Use with care!)                           |
+| pause_game()                             | Pauses the game (singleplayer only)                                                  |
+| unpause_game()                           | Unpauses the game (singleplayer only)                                                |
+| set_next_scenario(Text)                  | Sets the next map to run (singleplayer only)                                         |
+| play_sound(Text)                         | Plays a sound from a .wav file. [See here for more info](#how-do-you-use-play_sound) |
 
 ### Score functions
 
@@ -520,9 +520,10 @@ No, but thanks for asking.
 
 ## Limitations
 
+- The player selected with `--triggers-owner` (player 1 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
 - There are about 410 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
 - All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions that are called from many places. Recursion of any kind is not allowed.
-- Currently you can have up to 240 event handlers, this limitation will be lifted in the future.
+- Currently you can have up to 246 event handlers, this limitation will be lifted in the future.
 - Multiplication and division can take many cycles to complete especially with very large numbers.
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 
@@ -584,7 +585,7 @@ A Visual Studio 2015 project is provided in the [langums/](https://github.com/Al
 
 #### Backend (IR)
 
-- [IR language](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.h)
+- [IR language](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_instructions.h)
 - [IR generation](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.cpp)
 - [IR optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_optimizer.cpp)
 

@@ -20,6 +20,8 @@ namespace CHK
 
             std::unique_ptr<IChunk> chunk = nullptr;
             
+            m_ChunkTypes.insert(type);
+
             if (type == "VER ")
             {
                 chunk = std::make_unique<CHKVerChunk>(bytes, type);
