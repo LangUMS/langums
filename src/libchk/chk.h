@@ -17,6 +17,7 @@
 #include "cuwpchunk.h"
 #include "cuwpusedchunk.h"
 #include "wavchunk.h"
+#include "tilesetchunk.h"
 
 namespace CHK
 {

@@ -37,11 +37,12 @@ int main(int argc, char* argv[])
         ("l,lang", "Source .l script file", cxxopts::value<std::string>())
         ("r,reg", "Available registers map file", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
-        ("preserve-triggers", "Preserves already existing triggers in the map. (Use with caution!)", cxxopts::value<bool>())
-        ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers. (default: 65536)", cxxopts::value<unsigned int>())
-        ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1)", cxxopts::value<unsigned int>())
-        ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues)", cxxopts::value<bool>())
-        ("dump-ir", "Dumps the intermediate representation during compilation", cxxopts::value<bool>())
+        ("preserve-triggers", "Preserves already existing triggers in the map (use with caution!).", cxxopts::value<bool>())
+        ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers (default: 65536).", cxxopts::value<unsigned int>())
+        ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1).", cxxopts::value<unsigned int>())
+        ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues).", cxxopts::value<bool>())
+        ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
+        ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
 
@@ -145,8 +146,7 @@ int main(int argc, char* argv[])
 
     LOG_F("Reading from scenario.chk (% bytes).", scenarioFileSize);
 
-    auto stripExtraData = opts["strip"].count() > 0;
-    CHK::File chk(scenarioBytes, stripExtraData);
+    CHK::File chk(scenarioBytes, opts["strip"].count() > 0);
 
     auto& chunkTypes = chk.GetChunkTypes();
     std::string chunkTypesString;
@@ -214,6 +214,11 @@ int main(int argc, char* argv[])
     auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>("DIM ");
     LOG_F("Map size: %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
     
+    auto& tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>("ERA ");
+    LOG_F("Tileset: %", tilesetChunk.GetTilesetTypeString());
+
+    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>("OWNR");
+
     LOG_F("");
 
     LOG_F("Compiling script \"%\"", langPath.generic_u8string());
@@ -434,6 +439,8 @@ int main(int argc, char* argv[])
 
     Compiler compiler;
 
+    auto triggersOwner = 8; // player 8 owns the triggers by default
+
     if (opts.count("triggers-owner") > 0)
     {
         auto triggerOwner = opts["triggers-owner"].as<unsigned int>();
@@ -444,7 +451,28 @@ int main(int argc, char* argv[])
         }
 
         LOG_F("(!) Triggers owner set to % from command-line", CHK::PlayersByName[triggerOwner - 1]);
-        compiler.SetTriggersOwner(triggerOwner);
+    }
+
+    LOG_F("Player % owns the LangUMS triggers.", triggersOwner);
+    compiler.SetTriggersOwner(triggersOwner);
+
+    auto triggerOwnerType = ownrChunk.GetPlayerType(triggersOwner - 1);
+    if (triggerOwnerType == PlayerType::Human)
+    {
+        LOG_F("\n(!) Warning! The triggers owner (player %) is currently set to a Human player.", triggersOwner);
+        LOG_F("(!) Him leaving the game will break LangUMS in a bad way.\n");
+
+        if (opts.count("force") == 0)
+        {
+            LOG_F("(!) Setting player % to a Computer player.", triggersOwner);
+            LOG_F("(!) If you wish to override this decision call langums.exe again with the --force option.\n");
+            ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+        }
+    }
+    else if (triggerOwnerType != PlayerType::Computer)
+    {
+        ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+        LOG_F("(!) Setting player % to a Computer player because he's the triggers owner. Use --triggers-owner to override.", triggersOwner);
     }
 
     if (opts.count("copy-batch-size") > 0)

@@ -755,66 +755,6 @@ namespace Langums
             {
                 throw CompilerException("Malformed IR. Native Div is not implemented yet");
             }
-            else if (instruction->GetType() == IRInstructionType::BLShift)
-            {
-                auto lshift = (IRBLShiftInstruction*)instruction.get();
-                auto numBits = lshift->GetNumBits();
-
-                auto left = ++m_StackPointer;
-                auto right = m_StackPointer + 1;
-
-                auto shiftAddress = nextAddress++;
-                current.Action_SetReg(right, 0);
-                current.Action_JumpTo(shiftAddress);
-
-                m_Triggers.push_back(current.GetTrigger());
-                auto retAddress = nextAddress++;
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
-
-                for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
-                {
-                    auto shift = TriggerBuilder(shiftAddress, instruction.get(), m_TriggersOwner);
-                    shift.Cond_TestReg(left, i, TriggerComparisonType::AtLeast);
-                    shift.Action_DecReg(left, i);
-                    shift.Action_IncReg(right, i * (1 << numBits));
-                    m_Triggers.push_back(shift.GetTrigger());
-                }
-
-                auto finishShift = TriggerBuilder(shiftAddress, instruction.get(), m_TriggersOwner);
-                finishShift.Cond_TestReg(left, 0, TriggerComparisonType::Exactly);
-                finishShift.Action_JumpTo(retAddress);
-                m_Triggers.push_back(finishShift.GetTrigger());
-            }
-            else if (instruction->GetType() == IRInstructionType::BRShift)
-            {
-                auto rshift = (IRBRShiftInstruction*)instruction.get();
-                auto numBits = rshift->GetNumBits();
-
-                auto left = ++m_StackPointer;
-                auto right = m_StackPointer + 1;
-
-                auto shiftAddress = nextAddress++;
-                current.Action_SetReg(right, 0);
-                current.Action_JumpTo(shiftAddress);
-
-                m_Triggers.push_back(current.GetTrigger());
-                auto retAddress = nextAddress++;
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
-
-                for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
-                {
-                    auto shift = TriggerBuilder(shiftAddress, instruction.get(), m_TriggersOwner);
-                    shift.Cond_TestReg(left, i, TriggerComparisonType::AtLeast);
-                    shift.Action_DecReg(left, i);
-                    shift.Action_IncReg(right, i / (1 << numBits));
-                    m_Triggers.push_back(shift.GetTrigger());
-                }
-
-                auto finishShift = TriggerBuilder(shiftAddress, instruction.get(), m_TriggersOwner);
-                finishShift.Cond_TestReg(left, 0, TriggerComparisonType::Exactly);
-                finishShift.Action_JumpTo(retAddress);
-                m_Triggers.push_back(finishShift.GetTrigger());
-            }
             else if (instruction->GetType() == IRInstructionType::Rnd256)
             {
                 auto rndAddress = nextAddress++;

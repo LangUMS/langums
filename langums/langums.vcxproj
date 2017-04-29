@@ -405,6 +405,7 @@
     <ClInclude Include="..\src\libchk\locationschunk.h" />
     <ClInclude Include="..\src\libchk\ownrchunk.h" />
     <ClInclude Include="..\src\libchk\stringschunk.h" />
+    <ClInclude Include="..\src\libchk\tilesetchunk.h" />
     <ClInclude Include="..\src\libchk\triggerschunk.h" />
     <ClInclude Include="..\src\libchk\verchunk.h" />
     <ClInclude Include="..\src\libchk\wavchunk.h" />

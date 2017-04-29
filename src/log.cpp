@@ -10,7 +10,7 @@ namespace Log
 
     Log::Log()
     {
-        m_LogFile = std::make_unique<std::ofstream>(Langums::SafePrintf("log.txt"));
+        m_LogFile = std::make_unique<std::ofstream>(Langums::SafePrintf("langums_log.txt"));
         if (!m_LogFile->is_open())
         {
             m_LogFile = nullptr;

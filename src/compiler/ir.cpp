@@ -1196,7 +1196,7 @@ namespace Langums
                     return;
                 }
 
-                if (value == 2) // multiplication with 2 is converted to an addition
+                if (value == 2) // multiplication by 2 is converted to an addition
                 {
                     EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
                     EmitInstruction(new IRPushInstruction(0, true), instructions);

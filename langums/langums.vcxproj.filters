@@ -1066,5 +1066,8 @@
     <ClInclude Include="..\src\compiler\ir_constants.h">
       <Filter>compiler</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libchk\tilesetchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,8 +21,6 @@ namespace Langums
         Mul,            // pops two values off the stack, multiplies them together, pushes the result on the stack
         MulConst,       // pops a value off the stack and multiplies it with a constant, pushes the result on the stack
         Div,            // pops two values off the stack, divides the second by the first, pushes the result on the stack
-        BLShift,        // performs binary left shift (aka multiply by 2) on the top value of the stack, needs 1 free stack slot for the result, increments the stack pointer
-        BRShift,        // performs binary right shift (aka divide by 2) on the top value of the stack, needs 1 free stack slot for the result, increments the stack pointer
         Rnd256,         // pushes a random value between 0 and 255 on top of the stack
         Jmp,            // jumps to an instruction using a relative or an absolute offset
         JmpIfEqZero,    // jumps to an instruction if a register is equal to zero, if register == stackTop it will increment the stack pointer
@@ -374,46 +372,6 @@ namespace Langums
         {
             return "DIV";
         }
-    };
-
-    class IRBLShiftInstruction : public IIRInstruction
-    {
-        public:
-        IRBLShiftInstruction (unsigned int numBits = 1) : m_NumBits(numBits), IIRInstruction (IRInstructionType::BLShift)
-        {}
-
-        std::string DebugDump () const
-        {
-            return SafePrintf("BLSHIFT %", m_NumBits);
-        }
-
-        unsigned int GetNumBits() const
-        {
-            return m_NumBits;
-        }
-
-        private:
-        unsigned int m_NumBits;
-    };
-
-    class IRBRShiftInstruction : public IIRInstruction
-    {
-        public:
-        IRBRShiftInstruction (unsigned int numBits = 1) : m_NumBits(numBits), IIRInstruction (IRInstructionType::BRShift)
-        {}
-
-        std::string DebugDump () const
-        {
-            return SafePrintf("BRSHIFT %", m_NumBits);
-        }
-
-        unsigned int GetNumBits() const
-        {
-            return m_NumBits;
-        }
-
-        private:
-        unsigned int m_NumBits;
     };
 
     class IRRnd256Instruction : public IIRInstruction
