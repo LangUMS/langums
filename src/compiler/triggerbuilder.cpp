@@ -18,6 +18,7 @@ namespace Langums
         if (address >= 0)
         {
             Cond_TestReg(Reg_InstructionCounter, address, TriggerComparisonType::Exactly);
+            Cond_TestSwitch(Switch_InstructionCounterMutex, false);
         }
 
         // actions

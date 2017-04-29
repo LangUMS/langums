@@ -51,6 +51,10 @@ namespace Langums
         void Action_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
         void Action_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
 
+        void DoIndirectJump(TriggerBuilder& trigger);
+        void EmitIndirectJumpCode(unsigned int& nextAddress);
+        void EmitMulInstructionCode(unsigned int& nextAddress);
+
         unsigned int GetLocationIdByName(const std::string& name);
 
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
@@ -69,6 +73,8 @@ namespace Langums
         std::unordered_map<IIRInstruction*, unsigned int> m_JumpAddresses;
 
         unsigned int m_StackPointer;
+        unsigned int m_MultiplyAddress;
+
         bool m_DebugTrace = true;
 
         std::vector<RegisterDef> m_RegisterMap;

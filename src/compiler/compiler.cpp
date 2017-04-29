@@ -385,7 +385,31 @@ namespace Langums
         std::unordered_map<Trigger*, IIRInstruction*> jmpPatchups;
 
         auto nextAddress = 0u;
+        
+        bool hasMulInstructions = false;
+        for (auto& instruction : instructions)
+        {
+            if (instruction->GetType() == IRInstructionType::Mul)
+            {
+                hasMulInstructions = true;
+                break;
+            }
+        }
+
         auto current = TriggerBuilder(nextAddress++, nullptr, m_TriggersOwner);
+
+        bool needsIndirectJumps = false;
+
+        if (hasMulInstructions)
+        {
+            EmitMulInstructionCode(nextAddress);
+            needsIndirectJumps = true;
+        }
+
+        if (needsIndirectJumps)
+        {
+            EmitIndirectJumpCode(nextAddress);
+        }
 
         for (auto i = 0u; i < instructions.size(); i++)
         {
@@ -2427,6 +2451,177 @@ namespace Langums
         }
 
         return locationId;
+    }
+
+    void Compiler::DoIndirectJump(TriggerBuilder& trigger)
+    {
+        trigger.Action_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::SetSwitch);
+        trigger.Action_SetReg(Reg_InstructionCounter, 0);
+    }
+
+    void Compiler::EmitIndirectJumpCode(unsigned int& nextAddress)
+    {
+        for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+        {
+            auto indirectJump = TriggerBuilder(-1, nullptr, m_TriggersOwner);
+            indirectJump.Cond_TestSwitch(Switch_InstructionCounterMutex, true);
+            indirectJump.Cond_TestReg(Reg_IndirectJumpAddress, i, TriggerComparisonType::AtLeast);
+            indirectJump.Action_DecReg(Reg_IndirectJumpAddress, i);
+            indirectJump.Action_IncReg(Reg_InstructionCounter, i);
+            m_Triggers.push_back(indirectJump.GetTrigger());
+        }
+
+        auto indirectJumpFinish = TriggerBuilder(-1, nullptr, m_TriggersOwner);
+        indirectJumpFinish.Cond_TestSwitch(Switch_InstructionCounterMutex, true);
+        indirectJumpFinish.Cond_TestReg(Reg_IndirectJumpAddress, 0, TriggerComparisonType::Exactly);
+        indirectJumpFinish.Action_SetSwitch(Switch_InstructionCounterMutex, TriggerActionState::ClearSwitch);
+        m_Triggers.push_back(indirectJumpFinish.GetTrigger());
+    }
+
+    void Compiler::EmitMulInstructionCode(unsigned int& nextAddress)
+    {
+        auto mulAddress = nextAddress++;
+        auto rightToLeftAddress = nextAddress++;
+        auto leftToRightAddress = nextAddress++;
+        auto checkAddress = nextAddress++;
+        auto moveAddress = nextAddress++;
+        auto finishAddress = nextAddress++;
+
+        m_MultiplyAddress = nextAddress++;
+
+        auto prepare = TriggerBuilder(m_MultiplyAddress, nullptr, m_TriggersOwner);
+        prepare.Action_SetReg(Reg_Temp0, 0);
+        prepare.Action_SetReg(Reg_Temp1, 0);
+        prepare.Action_JumpTo(mulAddress);
+        m_Triggers.push_back(prepare.GetTrigger());
+
+        // handle multiply by zero
+        auto zeroR = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+        zeroR.Cond_TestReg(Reg_MulRight, 0, TriggerComparisonType::Exactly);
+        DoIndirectJump(zeroR);
+        m_Triggers.push_back(zeroR.GetTrigger());
+
+        auto zeroL = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+        zeroL.Cond_TestReg(Reg_MulLeft, 0, TriggerComparisonType::Exactly);
+        zeroL.Action_SetReg(Reg_MulRight, 0);
+        DoIndirectJump(zeroL);
+        m_Triggers.push_back(zeroL.GetTrigger());
+
+        // handle multiply by one
+        auto oneL = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+        oneL.Cond_TestReg(Reg_MulLeft, 1, TriggerComparisonType::Exactly);
+        DoIndirectJump(oneL);
+        m_Triggers.push_back(oneL.GetTrigger());
+
+        // count bits
+        for (auto i = m_CopyBatchSize; i >= 2; i /= 2)
+        {
+            auto countBits = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+            countBits.Cond_TestReg(Reg_MulRight, i, TriggerComparisonType::AtLeast);
+            countBits.Action_DecReg(Reg_MulRight, i);
+            countBits.Action_IncReg(Reg_Temp0, (int)std::log2(i));
+            m_Triggers.push_back(countBits.GetTrigger());
+        }
+
+        auto copyAddress = CodeGen_CopyReg(Reg_Temp2, Reg_MulLeft, nextAddress, checkAddress);
+
+        auto finishCountBits = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+        finishCountBits.Cond_TestReg(Reg_MulRight, 1, TriggerComparisonType::Exactly);
+        finishCountBits.Action_SetReg(Reg_Temp2, 0);
+        finishCountBits.Action_JumpTo(copyAddress);
+        m_Triggers.push_back(finishCountBits.GetTrigger());
+
+        auto finishCountBits2 = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
+        finishCountBits2.Cond_TestReg(Reg_MulRight, 0, TriggerComparisonType::Exactly);
+        finishCountBits2.Action_SetReg(Reg_Temp2, 0);
+        finishCountBits2.Action_JumpTo(checkAddress);
+        m_Triggers.push_back(finishCountBits2.GetTrigger());
+
+        for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+        {
+            auto shiftA = TriggerBuilder(rightToLeftAddress, nullptr, m_TriggersOwner);
+            shiftA.Cond_TestReg(Reg_MulRight, i, TriggerComparisonType::AtLeast);
+            shiftA.Action_DecReg(Reg_MulRight, i);
+            shiftA.Action_IncReg(Reg_MulLeft, i * 2);
+            m_Triggers.push_back(shiftA.GetTrigger());
+        }
+
+        auto shiftAFinish = TriggerBuilder(rightToLeftAddress, nullptr, m_TriggersOwner);
+        shiftAFinish.Cond_TestReg(Reg_MulRight, 0, TriggerComparisonType::Exactly);
+        shiftAFinish.Action_SetReg(Reg_Temp1, 0);
+        shiftAFinish.Action_JumpTo(checkAddress);
+        m_Triggers.push_back(shiftAFinish.GetTrigger());
+
+        for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+        {
+            auto shiftB = TriggerBuilder(leftToRightAddress, nullptr, m_TriggersOwner);
+            shiftB.Cond_TestReg(Reg_MulLeft, i, TriggerComparisonType::AtLeast);
+            shiftB.Action_DecReg(Reg_MulLeft, i);
+            shiftB.Action_IncReg(Reg_MulRight, i * 2);
+            m_Triggers.push_back(shiftB.GetTrigger());
+        }
+
+        auto shiftBFinish = TriggerBuilder(leftToRightAddress, nullptr, m_TriggersOwner);
+        shiftBFinish.Cond_TestReg(Reg_MulLeft, 0, TriggerComparisonType::Exactly);
+        shiftBFinish.Action_SetReg(Reg_Temp1, 1);
+        shiftBFinish.Action_JumpTo(checkAddress);
+        m_Triggers.push_back(shiftBFinish.GetTrigger());
+
+        for (auto i = m_CopyBatchSize; i >= 1; i /= 2) // next we'll use the counter from step 1 to multiply the other operand that many times by 2
+        {
+            auto move = TriggerBuilder(moveAddress, nullptr, m_TriggersOwner);
+            move.Cond_TestReg(Reg_MulLeft, i, TriggerComparisonType::AtLeast);
+            move.Action_DecReg(Reg_MulLeft, i);
+            move.Action_IncReg(Reg_MulRight, i);
+            m_Triggers.push_back(move.GetTrigger());
+        }
+
+        auto moveFinish = TriggerBuilder(moveAddress, nullptr, m_TriggersOwner);
+        moveFinish.Cond_TestReg(Reg_MulLeft, 0, TriggerComparisonType::Exactly);
+        moveFinish.Action_JumpTo(finishAddress);
+        m_Triggers.push_back(moveFinish.GetTrigger());
+
+        auto checkA = TriggerBuilder(checkAddress, nullptr, m_TriggersOwner);
+        checkA.Cond_TestReg(Reg_Temp0, 0, TriggerComparisonType::Exactly);
+        checkA.Cond_TestReg(Reg_Temp1, 0, TriggerComparisonType::Exactly);
+        checkA.Action_JumpTo(moveAddress);
+        m_Triggers.push_back(checkA.GetTrigger());
+
+        auto checkB = TriggerBuilder(checkAddress, nullptr, m_TriggersOwner);
+        checkB.Cond_TestReg(Reg_Temp0, 0, TriggerComparisonType::Exactly);
+        checkB.Cond_TestReg(Reg_Temp1, 1, TriggerComparisonType::Exactly);
+        checkB.Action_JumpTo(finishAddress);
+        m_Triggers.push_back(checkB.GetTrigger());
+
+        auto checkNotDoneA = TriggerBuilder(checkAddress, nullptr, m_TriggersOwner);
+        checkNotDoneA.Cond_TestReg(Reg_Temp0, 1, TriggerComparisonType::AtLeast);
+        checkNotDoneA.Cond_TestReg(Reg_Temp1, 0, TriggerComparisonType::Exactly);
+        checkNotDoneA.Action_DecReg(Reg_Temp0, 1);
+        checkNotDoneA.Action_SetReg(Reg_MulRight, 0);
+        checkNotDoneA.Action_JumpTo(leftToRightAddress);
+        m_Triggers.push_back(checkNotDoneA.GetTrigger());
+
+        auto checkNotDoneB = TriggerBuilder(checkAddress, nullptr, m_TriggersOwner);
+        checkNotDoneB.Cond_TestReg(Reg_Temp0, 1, TriggerComparisonType::AtLeast);
+        checkNotDoneB.Cond_TestReg(Reg_Temp1, 1, TriggerComparisonType::Exactly);
+        checkNotDoneB.Action_DecReg(Reg_Temp0, 1);
+        checkNotDoneB.Action_SetReg(Reg_MulLeft, 0);
+        checkNotDoneB.Action_JumpTo(rightToLeftAddress);
+        m_Triggers.push_back(checkNotDoneB.GetTrigger());
+
+        for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
+        {
+            auto finish = TriggerBuilder(finishAddress, nullptr, m_TriggersOwner);
+            finish.Cond_TestReg(Reg_Temp2, i, TriggerComparisonType::AtLeast);
+            finish.Action_DecReg(Reg_Temp2, i);
+            finish.Action_IncReg(Reg_MulRight, i);
+            m_Triggers.push_back(finish.GetTrigger());
+        }
+
+        auto finishMul = TriggerBuilder(finishAddress, nullptr, m_TriggersOwner);
+        finishMul.Cond_TestReg(Reg_Temp2, 0, TriggerComparisonType::Exactly);
+        DoIndirectJump(finishMul);
+        m_Triggers.push_back(finishMul.GetTrigger());
     }
 
 }

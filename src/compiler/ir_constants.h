@@ -8,9 +8,12 @@ namespace Langums
     {
         Reg_InstructionCounter = 0,
         Reg_CopyStorage,
+        Reg_IndirectJumpAddress,
         Reg_Temp0,
         Reg_Temp1,
         Reg_Temp2,
+        Reg_MulLeft,
+        Reg_MulRight,
         Reg_ReservedEnd,
 
         Reg_StackTop = 0x574C
@@ -18,6 +21,7 @@ namespace Langums
 
     enum ReservedSwitches
     {
+        Switch_InstructionCounterMutex,
         Switch_EventsMutex,
         Switch_ArithmeticUnderflow,
         Switch_Random0,
