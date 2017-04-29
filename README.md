@@ -550,7 +550,8 @@ No, but thanks for asking.
 - There are about 410 registers available for variables and the stack by default. The variable storage grows upwards and the stack grows downwards. Overflowing either one into the other is undefined behavior. In the future the compiler will probably catch this and refuse to continue. You can use the `--reg` option to provide a registers list that the compiler can use, see `Integrating with existing maps` section.
 - All function calls are inlined due to complexities of implementing the call & ret pair of instructions. This increases code size (number of triggers) quite a bit more than what it would be otherwise. This will probably change in the near future as I explore further options. At the current time avoid really long functions that are called from many places. Recursion of any kind is not allowed.
 - Currently you can have up to 238 event handlers, this limitation will be lifted in the future.
-- Multiplication and division can take many cycles to complete especially with very large numbers.
+- Multiplication only works with numbers up to the value set by `--copy-batch-size` (65536 by default).
+- Division is implemented suboptimally at the moment and can take many cycles to complete. This will change soon.
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 65536 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 
 ## Integration with existing maps

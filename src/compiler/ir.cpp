@@ -1181,13 +1181,7 @@ namespace Langums
         {
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
-            EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions);
-            EmitInstruction(new IRPopInstruction(Reg_Temp1), instructions);
-
-            EmitInstruction(new IRDecRegInstruction(Reg_Temp0, 1), instructions);
-            EmitInstruction(new IRPushInstruction(Reg_Temp1), instructions);
-            EmitInstruction(new IRAddInstruction(), instructions);
-            EmitInstruction(new IRJmpIfNotEqZeroInstruction(Reg_Temp0, -3), instructions);
+            EmitInstruction(new IRMulInstruction(), instructions);
         }
         else if (op == OperatorType::Divide)
         {
