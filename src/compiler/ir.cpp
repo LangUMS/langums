@@ -442,7 +442,7 @@ namespace Langums
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto endCondition = ParseEndGameCondition(fnCall->GetArgument(1), fnName, 1);
 
-            EmitInstruction(new IREndGameInstruction(playerId + 1, endCondition), instructions);
+            EmitInstruction(new IREndGameInstruction(endCondition, playerId), instructions);
         }
         else if (fnName == "set_resource")
         {
@@ -776,9 +776,16 @@ namespace Langums
                 throw IRCompilerException("set_mission_objectives() accepts a single string literal argument");
             }
 
+            auto playerId = -1;
+
+            if (fnCall->GetChildCount() > 1)
+            {
+                playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            }
+
             auto stringLiteral = (ASTStringLiteral*)arg0.get();
 
-            EmitInstruction(new IRSetObjInstruction(stringLiteral->GetValue()), instructions);
+            EmitInstruction(new IRSetObjInstruction(playerId, stringLiteral->GetValue()), instructions);
         }
         else if (fnName == "pause_game" || fnName == "unpause_game")
         {
@@ -1842,9 +1849,10 @@ namespace Langums
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 6), instructions);
+                EmitInstruction(new IRPopInstruction(), instructions);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop + 1, 0, 3), instructions);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 3), instructions);
                 EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
                 EmitInstruction(new IRJmpInstruction(2), instructions);
                 EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);

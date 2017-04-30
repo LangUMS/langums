@@ -321,7 +321,7 @@ Notes:
 |---------------------------------------------------------------------------------------------|--------------------------------------------------------------|
 | end([Player](#player), [EndCondition](#endcondition))                                       | Ends the game for player with [EndCondition](#endcondition). |
 | set_alliance([Player](#player), [TargetPlayer](#player), [AllianceStatus](#alliancestatus)) | Sets the alliance status between two players.                |
-| set_mission_objectives(Text)                                                                | Sets the mission objectives.                                 |
+| set_mission_objectives(Text, optional: [Player](#player))                                   | Sets the mission objectives, defaults to all players.        |
 | move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)                        | Centers DstLocation on a unit at SrcLocation.                |
 | set_countdown(Expression)                                                                   | Sets the countdown timer.                                    |
 | pause_countdown()                                                                           | Pauses the countdown timer.                                  |

@@ -1436,7 +1436,7 @@ namespace Langums
     class IREndGameInstruction : public IIRInstruction
     {
         public:
-        IREndGameInstruction (uint8_t playerId, EndGameType type) :
+        IREndGameInstruction (EndGameType type, int playerId) :
             m_PlayerId (playerId), m_EndGameType (type), IIRInstruction (IRInstructionType::EndGame)
         {}
 
@@ -1456,10 +1456,15 @@ namespace Langums
                 break;
             }
 
+            if (m_PlayerId == -1)
+            {
+                return SafePrintf ("END % [ALL]", condition);
+            }
+
             return SafePrintf ("END % %", CHK::PlayersByName[m_PlayerId], condition);
         }
 
-        uint8_t GetPlayerId () const
+        int GetPlayerId () const
         {
             return m_PlayerId;
         }
@@ -1470,7 +1475,7 @@ namespace Langums
         }
 
         private:
-        uint8_t m_PlayerId;
+        int m_PlayerId;
         EndGameType m_EndGameType;
     };
 
@@ -1505,7 +1510,7 @@ namespace Langums
     class IRPingInstruction : public IIRInstruction
     {
         public:
-        IRPingInstruction (uint8_t playerId, const std::string& locationName) :
+        IRPingInstruction (int playerId, const std::string& locationName) :
             m_PlayerId (playerId), m_LocationName (locationName),
             IIRInstruction (IRInstructionType::Ping)
         {}
@@ -1515,7 +1520,7 @@ namespace Langums
             return SafePrintf ("PING % %", PlayersByName[m_PlayerId], m_LocationName);
         }
 
-        uint8_t GetPlayerId () const
+        int GetPlayerId () const
         {
             return m_PlayerId;
         }
@@ -1526,7 +1531,7 @@ namespace Langums
         }
 
         private:
-        uint8_t m_PlayerId;
+        int m_PlayerId;
         std::string m_LocationName;
     };
 
@@ -2240,9 +2245,14 @@ namespace Langums
     class IRSetObjInstruction : public IIRInstruction
     {
         public:
-        IRSetObjInstruction (const std::string& text) :
-            m_Text (text), IIRInstruction (IRInstructionType::SetObj)
+        IRSetObjInstruction (int playerId, const std::string& text) :
+            m_PlayerId(playerId), m_Text (text), IIRInstruction (IRInstructionType::SetObj)
         {}
+
+        int GetPlayerId() const
+        {
+            return m_PlayerId;
+        }
 
         const std::string& GetText () const
         {
@@ -2254,11 +2264,17 @@ namespace Langums
             auto msg = m_Text;
             std::replace (msg.begin (), msg.end (), '\n', ' ');
 
-            return SafePrintf ("SETOBJ %", msg);
+            if (m_PlayerId == -1)
+            {
+                return SafePrintf ("SETOBJ % [ALL]", msg);
+            }
+
+            return SafePrintf ("SETOBJ % %", msg, PlayersByName[m_PlayerId]);
         }
 
         private:
         std::string m_Text;
+        int m_PlayerId;
     };
 
     class IRPauseGameInstruction : public IIRInstruction

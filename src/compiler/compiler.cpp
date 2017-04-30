@@ -1240,10 +1240,10 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto msgTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    auto msgTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
                     msgTrigger.Action_DisplayMsg(stringId);
 
                     if (all)
@@ -1588,30 +1588,64 @@ namespace Langums
                 auto type = endGame->GetEndGameType();
                 auto playerId = endGame->GetPlayerId();
 
-                auto address = nextAddress++;
-                current.Action_JumpTo(address);
-                m_Triggers.push_back(current.GetTrigger());
-
-                auto endGameTrigger = TriggerBuilder(address, instruction.get(), playerId);
-
-                if (type == EndGameType::Victory)
+                if (playerId + 1 == m_TriggersOwner)
                 {
-                    endGameTrigger.Action_Victory();
+                    if (type == EndGameType::Victory)
+                    {
+                        current.Action_Victory();
+                    }
+                    else if (type == EndGameType::Defeat)
+                    {
+                        current.Action_Defeat();
+                    }
+                    else if (type == EndGameType::Draw)
+                    {
+                        current.Action_Draw();
+                    }
                 }
-                else if (type == EndGameType::Defeat)
+                else
                 {
-                    endGameTrigger.Action_Defeat();
-                }
-                else if (type == EndGameType::Draw)
-                {
-                    endGameTrigger.Action_Draw();
-                }
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
 
-                auto retAddress = nextAddress++;
-                endGameTrigger.Action_JumpTo(retAddress);
-                m_Triggers.push_back(endGameTrigger.GetTrigger());
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
 
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner - 1;
+                    }
+
+                    auto endGameTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+
+                    if (type == EndGameType::Victory)
+                    {
+                        endGameTrigger.Action_Victory();
+                    }
+                    else if (type == EndGameType::Defeat)
+                    {
+                        endGameTrigger.Action_Defeat();
+                    }
+                    else if (type == EndGameType::Draw)
+                    {
+                        endGameTrigger.Action_Draw();
+                    }
+
+                    if (all)
+                    {
+                        endGameTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    m_Triggers.push_back(endGameTrigger.GetTrigger());
+
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if (instruction->GetType() == IRInstructionType::CenterView)
             {
@@ -1640,10 +1674,10 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto centerTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    auto centerTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
                     centerTrigger.Action_CenterView(locationId + 1);
 
                     if (all)
@@ -1683,10 +1717,10 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto pingTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    auto pingTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
                     pingTrigger.Action_Ping(locationId + 1);
 
                     if (all)
@@ -2174,10 +2208,10 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto talkTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    auto talkTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
                     talkTrigger.Action_TalkingPortrait(talk->GetUnitId(), talk->GetTime());
 
                     if (all)
@@ -2237,11 +2271,11 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto aiTrigger = TriggerBuilder(address, instruction.get(), playerId);
-                    aiTrigger.Action_RunAIScript(playerId, aiScript->GetScriptName(), locationId);
+                    auto aiTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+                    aiTrigger.Action_RunAIScript(aiScript->GetPlayerId(), aiScript->GetScriptName(), locationId);
 
                     if (all)
                     {
@@ -2280,11 +2314,11 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto allyTrigger = TriggerBuilder(address, instruction.get(), playerId);
-                    allyTrigger.Action_SetAllianceStatus(playerId, targetPlayerId, setAlly->GetAllianceStatus());
+                    auto allyTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+                    allyTrigger.Action_SetAllianceStatus(setAlly->GetPlayerId(), targetPlayerId, setAlly->GetAllianceStatus());
 
                     if (all)
                     {
@@ -2300,7 +2334,43 @@ namespace Langums
             {
                 auto setObj = (IRSetObjInstruction*)instruction.get();
                 auto stringId = m_StringsChunk->InsertString(setObj->GetText());
-                current.Action_SetMissionObjectives(stringId);
+                auto playerId = setObj->GetPlayerId();
+
+                if (playerId + 1 == m_TriggersOwner)
+                {
+                    current.Action_SetMissionObjectives(stringId);
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
+
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner - 1;
+                    }
+
+                    auto setObjTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
+                    setObjTrigger.Action_SetMissionObjectives(stringId);
+
+                    if (all)
+                    {
+                        setObjTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    m_Triggers.push_back(setObjTrigger.GetTrigger());
+
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if (instruction->GetType() == IRInstructionType::PauseGame)
             {
@@ -2386,10 +2456,10 @@ namespace Langums
                     if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
                     {
                         all = true;
-                        playerId = m_TriggersOwner;
+                        playerId = m_TriggersOwner - 1;
                     }
 
-                    auto wavTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    auto wavTrigger = TriggerBuilder(address, instruction.get(), playerId + 1);
                     wavTrigger.Action_PlayWAV(wavStringId, wavTime);
 
                     if (all)
