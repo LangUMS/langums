@@ -349,14 +349,34 @@ namespace Langums
                 auto jmp = (IRJmpInstruction*)instruction.get();
                 targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
             }
-            else if (type == IRInstructionType::JmpIfEqZero)
+            else if (type == IRInstructionType::JmpIfEq)
             {
-                auto jmp = (IRJmpIfEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfEqInstruction*)instruction.get();
                 targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
             }
-            else if (type == IRInstructionType::JmpIfNotEqZero)
+            else if (type == IRInstructionType::JmpIfNotEq)
             {
-                auto jmp = (IRJmpIfNotEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfNotEqInstruction*)instruction.get();
+                targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+            }
+            else if (type == IRInstructionType::JmpIfGrt)
+            {
+                auto jmp = (IRJmpIfGrtInstruction*)instruction.get();
+                targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+            }
+            else if (type == IRInstructionType::JmpIfLess)
+            {
+                auto jmp = (IRJmpIfLessInstruction*)instruction.get();
+                targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+            }
+            else if (type == IRInstructionType::JmpIfGrtOrEq)
+            {
+                auto jmp = (IRJmpIfGrtOrEqualInstruction*)instruction.get();
+                targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+            }
+            else if (type == IRInstructionType::JmpIfLessOrEq)
+            {
+                auto jmp = (IRJmpIfLessOrEqualInstruction*)instruction.get();
                 targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
             }
             else if (type == IRInstructionType::JmpIfSwNotSet)
@@ -802,9 +822,10 @@ namespace Langums
 
                 jmpPatchups.insert(std::make_pair(trigger, targetInstruction));
             }
-            else if (instruction->GetType() == IRInstructionType::JmpIfEqZero)
+            else if (instruction->GetType() == IRInstructionType::JmpIfEq)
             {
-                auto jmp = (IRJmpIfEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfEqInstruction*)instruction.get();
+                auto value = jmp->GetValue();
 
                 auto regId = jmp->GetRegisterId();
 
@@ -815,7 +836,7 @@ namespace Langums
 
                 if (regId == Reg_StackTop)
                 {
-                    regId = ++m_StackPointer;
+                    regId = m_StackPointer + 1;
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
@@ -826,24 +847,137 @@ namespace Langums
 
                 auto retAddress = nextAddress++;
 
+                auto ifTrue = current;
                 auto ifFalse = current;
 
-                current.Cond_TestReg(regId, 1, TriggerComparisonType::AtLeast);
+                if (value == 0)
+                {
+                    current.Cond_TestReg(regId, 1, TriggerComparisonType::AtLeast);
+                    current.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    ifTrue.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    m_Triggers.push_back(ifTrue.GetTrigger());
+                    jmpPatchups.insert(std::make_pair(&m_Triggers.back(), instructions[targetIndex].get()));
+                }
+                else
+                {
+                    current.Cond_TestReg(regId, value + 1, TriggerComparisonType::AtLeast);
+                    current.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    ifFalse.Cond_TestReg(regId, (int)value - 1, TriggerComparisonType::AtMost);
+                    ifFalse.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(ifFalse.GetTrigger());
+
+                    ifTrue.Cond_TestReg(regId, value, TriggerComparisonType::Exactly);
+                    m_Triggers.push_back(ifTrue.GetTrigger());
+                    jmpPatchups.insert(std::make_pair(&m_Triggers.back(), instructions[targetIndex].get()));
+                }
+                
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+            }
+            else if (instruction->GetType() == IRInstructionType::JmpIfNotEq)
+            {
+                auto jmp = (IRJmpIfNotEqInstruction*)instruction.get();
+
+                auto value = jmp->GetValue();
+                auto regId = jmp->GetRegisterId();
+
+                if (regId > Reg_StackTop)
+                {
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = m_StackPointer + 1;
+                }
+
+                auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
+                auto retAddress = nextAddress++;
+
+                auto ifTrue = current;
+                auto ifFalse = current;
+
+                if (value == 0)
+                {
+                    current.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                    current.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    ifTrue.Cond_TestReg(regId, 1, TriggerComparisonType::AtLeast);
+                    m_Triggers.push_back(ifTrue.GetTrigger());
+                    auto trigger = &m_Triggers.back();
+                    jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
+                }
+                else
+                {
+                    current.Cond_TestReg(regId, value + 1, TriggerComparisonType::AtLeast);
+                    m_Triggers.push_back(current.GetTrigger());
+                    jmpPatchups.insert(std::make_pair(&m_Triggers.back(), instructions[targetIndex].get()));
+
+                    ifFalse.Cond_TestReg(regId, (int)value - 1, TriggerComparisonType::AtMost);
+                    m_Triggers.push_back(ifFalse.GetTrigger());
+                    jmpPatchups.insert(std::make_pair(&m_Triggers.back(), instructions[targetIndex].get()));
+
+                    ifTrue.Cond_TestReg(regId, value, TriggerComparisonType::Exactly);
+                    ifTrue.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(ifTrue.GetTrigger());
+                }
+
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+            }
+            else if (instruction->GetType() == IRInstructionType::JmpIfGrt)
+            {
+                auto jmp = (IRJmpIfGrtInstruction*)instruction.get();
+                auto value = jmp->GetValue();
+
+                auto regId = jmp->GetRegisterId();
+
+                if (regId > Reg_StackTop)
+                {
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = m_StackPointer + 1;
+                }
+
+                auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
+                auto retAddress = nextAddress++;
+
+                auto ifTrue = current;
+
+                current.Cond_TestReg(regId, value, TriggerComparisonType::AtMost);
                 current.Action_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                ifFalse.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
-                m_Triggers.push_back(ifFalse.GetTrigger());
+                ifTrue.Cond_TestReg(regId, value + 1, TriggerComparisonType::AtLeast);
+                m_Triggers.push_back(ifTrue.GetTrigger());
                 auto trigger = &m_Triggers.back();
                 jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
 
                 current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
             }
-            else if (instruction->GetType() == IRInstructionType::JmpIfNotEqZero)
+            else if (instruction->GetType() == IRInstructionType::JmpIfGrtOrEq)
             {
-                auto jmp = (IRJmpIfNotEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfGrtOrEqualInstruction*)instruction.get();
+                auto value = jmp->GetValue();
 
                 auto regId = jmp->GetRegisterId();
+
                 if (regId > Reg_StackTop)
                 {
                     throw CompilerException("Malformed IR. Testing past top of the stack");
@@ -851,7 +985,7 @@ namespace Langums
 
                 if (regId == Reg_StackTop)
                 {
-                    regId = ++m_StackPointer;
+                    regId = m_StackPointer + 1;
                 }
 
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
@@ -861,14 +995,99 @@ namespace Langums
                 }
 
                 auto retAddress = nextAddress++;
-                auto ifFalse = current;
 
-                current.Cond_TestReg(regId, 0, TriggerComparisonType::Exactly);
+                auto ifTrue = current;
+
+                current.Cond_TestReg(regId, std::max(0, (int)value - 1), TriggerComparisonType::AtMost);
                 current.Action_JumpTo(retAddress);
                 m_Triggers.push_back(current.GetTrigger());
 
-                ifFalse.Cond_TestReg(regId, 1, TriggerComparisonType::AtLeast);
-                m_Triggers.push_back(ifFalse.GetTrigger());
+                ifTrue.Cond_TestReg(regId, value, TriggerComparisonType::AtLeast);
+                m_Triggers.push_back(ifTrue.GetTrigger());
+                auto trigger = &m_Triggers.back();
+                jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
+
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+            }
+            else if (instruction->GetType() == IRInstructionType::JmpIfLess)
+            {
+                auto jmp = (IRJmpIfLessInstruction*)instruction.get();
+                auto value = jmp->GetValue();
+
+                auto regId = jmp->GetRegisterId();
+
+                if (regId > Reg_StackTop)
+                {
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = m_StackPointer + 1;
+                }
+
+                auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
+                auto retAddress = nextAddress++;
+
+                auto ifTrue = current;
+
+                if (value == 0)
+                {
+                    current.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(current.GetTrigger());
+                }
+                else
+                {
+                    current.Cond_TestReg(regId, value, TriggerComparisonType::AtLeast);
+                    current.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(current.GetTrigger());
+
+                    ifTrue.Cond_TestReg(regId, (int)value - 1, TriggerComparisonType::AtMost);
+                    m_Triggers.push_back(ifTrue.GetTrigger());
+                    auto trigger = &m_Triggers.back();
+                    jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
+                }
+
+                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+            }
+            else if (instruction->GetType() == IRInstructionType::JmpIfLessOrEq)
+            {
+                auto jmp = (IRJmpIfLessInstruction*)instruction.get();
+                auto value = jmp->GetValue();
+
+                auto regId = jmp->GetRegisterId();
+
+                if (regId > Reg_StackTop)
+                {
+                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                }
+
+                if (regId == Reg_StackTop)
+                {
+                    regId = m_StackPointer + 1;
+                }
+
+                auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
+                if (targetIndex >= (int)instructions.size())
+                {
+                    targetIndex = (int)instructions.size() - 1;
+                }
+
+                auto retAddress = nextAddress++;
+
+                auto ifTrue = current;
+
+                current.Cond_TestReg(regId, value + 1, TriggerComparisonType::AtLeast);
+                current.Action_JumpTo(retAddress);
+                m_Triggers.push_back(current.GetTrigger());
+
+                ifTrue.Cond_TestReg(regId, (int)value, TriggerComparisonType::AtMost);
+                m_Triggers.push_back(ifTrue.GetTrigger());
                 auto trigger = &m_Triggers.back();
                 jmpPatchups.insert(std::make_pair(trigger, instructions[targetIndex].get()));
 

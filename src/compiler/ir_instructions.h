@@ -23,8 +23,12 @@ namespace Langums
         Div,            // pops two values off the stack, divides the second by the first, pushes the result on the stack
         Rnd256,         // pushes a random value between 0 and 255 on top of the stack
         Jmp,            // jumps to an instruction using a relative or an absolute offset
-        JmpIfEqZero,    // jumps to an instruction if a register is equal to zero, if register == stackTop it will increment the stack pointer
-        JmpIfNotEqZero, // jumps to an instruction if a register is not equal to zero, if register == stackTop it will increment the stack pointer
+        JmpIfEq,        // jumps to an instruction if a register is equal to a constant
+        JmpIfNotEq,     // jumps to an instruction if a register is not equal to a constant
+        JmpIfLess,      // jumps to an instruction if a register is less than a constant
+        JmpIfGrt,       // jumps to an instruction if a register is greater than a constant
+        JmpIfLessOrEq,  // jumps to an instruction if a register is less than or equal to a constant
+        JmpIfGrtOrEq,   // jumps to an instruction if a register is greater than or equal to a constant
         JmpIfSwNotSet,  // jumps to an instruction if a switch is not set
         JmpIfSwSet,     // jumps to an instruction if a switch is set
         SetSw,          // sets a switch
@@ -468,11 +472,11 @@ namespace Langums
         bool m_IsAbsolute = false;
     };
 
-    class IRJmpIfEqZeroInstruction : public IIRInstruction
+    class IRJmpIfEqInstruction : public IIRInstruction
     {
         public:
-        IRJmpIfEqZeroInstruction (unsigned int regId, int offset, bool absolute = false) :
-            m_RegisterId (regId), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfEqZero)
+        IRJmpIfEqInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Offset (offset), m_IsAbsolute (absolute), m_Value(value), IIRInstruction (IRInstructionType::JmpIfEq)
         {}
 
         int GetOffset () const
@@ -490,22 +494,26 @@ namespace Langums
             return m_IsAbsolute;
         }
 
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
         std::string DebugDump () const
         {
             if (m_IsAbsolute)
             {
-                return SafePrintf ("JEZ % %", RegisterIdToString (m_RegisterId), m_Offset);
+                return SafePrintf ("JEQ % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
             }
             else
             {
                 if (m_Offset >= 0)
                 {
-                    return SafePrintf ("JEZ % +%", RegisterIdToString (m_RegisterId), m_Offset);
+                    return SafePrintf ("JEQ % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
                 }
                 else
                 {
-                    return SafePrintf ("JEZ % %", RegisterIdToString (m_RegisterId), m_Offset);
-
+                    return SafePrintf ("JEQ % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
                 }
             }
         }
@@ -514,13 +522,14 @@ namespace Langums
         unsigned int m_RegisterId = 0;
         int m_Offset = 0;
         bool m_IsAbsolute = false;
+        unsigned int m_Value;
     };
 
-    class IRJmpIfNotEqZeroInstruction : public IIRInstruction
+    class IRJmpIfNotEqInstruction : public IIRInstruction
     {
         public:
-        IRJmpIfNotEqZeroInstruction (unsigned int regId, int offset, bool absolute = false) :
-            m_RegisterId (regId), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfNotEqZero)
+        IRJmpIfNotEqInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Value(value), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfNotEq)
         {}
 
         int GetOffset () const
@@ -538,22 +547,26 @@ namespace Langums
             return m_IsAbsolute;
         }
 
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
         std::string DebugDump () const
         {
             if (m_IsAbsolute)
             {
-                return SafePrintf ("JNZ % %", RegisterIdToString (m_RegisterId), m_Offset);
+                return SafePrintf ("JNE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
             }
             else
             {
                 if (m_Offset >= 0)
                 {
-                    return SafePrintf ("JNZ % +%", RegisterIdToString (m_RegisterId), m_Offset);
+                    return SafePrintf ("JNE % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
                 }
                 else
                 {
-                    return SafePrintf ("JNZ % %", RegisterIdToString (m_RegisterId), m_Offset);
-
+                    return SafePrintf ("JNE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
                 }
             }
         }
@@ -562,6 +575,219 @@ namespace Langums
         unsigned int m_RegisterId = 0;
         int m_Offset = 0;
         bool m_IsAbsolute = false;
+        unsigned int m_Value;
+    };
+
+    class IRJmpIfLessInstruction : public IIRInstruction
+    {
+        public:
+        IRJmpIfLessInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Value(value), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfLess)
+        {}
+
+        int GetOffset () const
+        {
+            return m_Offset;
+        }
+
+        unsigned int GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsAbsolute () const
+        {
+            return m_IsAbsolute;
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        std::string DebugDump () const
+        {
+            if (m_IsAbsolute)
+            {
+                return SafePrintf ("JLT % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+            }
+            else
+            {
+                if (m_Offset >= 0)
+                {
+                    return SafePrintf ("JLT % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+                else
+                {
+                    return SafePrintf ("JLT % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+            }
+        }
+
+        private:
+        unsigned int m_RegisterId = 0;
+        int m_Offset = 0;
+        bool m_IsAbsolute = false;
+        unsigned int m_Value;
+    };
+
+    class IRJmpIfGrtInstruction : public IIRInstruction
+    {
+        public:
+        IRJmpIfGrtInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Value(value), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfGrt)
+        {}
+
+        int GetOffset () const
+        {
+            return m_Offset;
+        }
+
+        unsigned int GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsAbsolute () const
+        {
+            return m_IsAbsolute;
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        std::string DebugDump () const
+        {
+            if (m_IsAbsolute)
+            {
+                return SafePrintf ("JGT % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+            }
+            else
+            {
+                if (m_Offset >= 0)
+                {
+                    return SafePrintf ("JGT % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+                else
+                {
+                    return SafePrintf ("JGT % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+            }
+        }
+
+        private:
+        unsigned int m_RegisterId = 0;
+        int m_Offset = 0;
+        bool m_IsAbsolute = false;
+        unsigned int m_Value;
+    };
+
+    class IRJmpIfLessOrEqualInstruction : public IIRInstruction
+    {
+        public:
+        IRJmpIfLessOrEqualInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Value(value), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfLessOrEq)
+        {}
+
+        int GetOffset () const
+        {
+            return m_Offset;
+        }
+
+        unsigned int GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsAbsolute () const
+        {
+            return m_IsAbsolute;
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        std::string DebugDump () const
+        {
+            if (m_IsAbsolute)
+            {
+                return SafePrintf ("JLE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+            }
+            else
+            {
+                if (m_Offset >= 0)
+                {
+                    return SafePrintf ("JLE % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+                else
+                {
+                    return SafePrintf ("JLE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+            }
+        }
+
+        private:
+        unsigned int m_RegisterId = 0;
+        int m_Offset = 0;
+        bool m_IsAbsolute = false;
+        unsigned int m_Value;
+    };
+
+    class IRJmpIfGrtOrEqualInstruction : public IIRInstruction
+    {
+        public:
+        IRJmpIfGrtOrEqualInstruction (unsigned int regId, unsigned int value, int offset, bool absolute = false) :
+            m_RegisterId (regId), m_Value(value), m_Offset (offset), m_IsAbsolute (absolute), IIRInstruction (IRInstructionType::JmpIfGrtOrEq)
+        {}
+
+        int GetOffset () const
+        {
+            return m_Offset;
+        }
+
+        unsigned int GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsAbsolute () const
+        {
+            return m_IsAbsolute;
+        }
+
+        unsigned int GetValue() const
+        {
+            return m_Value;
+        }
+
+        std::string DebugDump () const
+        {
+            if (m_IsAbsolute)
+            {
+                return SafePrintf ("JGE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+            }
+            else
+            {
+                if (m_Offset >= 0)
+                {
+                    return SafePrintf ("JGE % % +%", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+                else
+                {
+                    return SafePrintf ("JGE % % %", RegisterIdToString (m_RegisterId), m_Value, m_Offset);
+                }
+            }
+        }
+
+        private:
+        unsigned int m_RegisterId = 0;
+        int m_Offset = 0;
+        bool m_IsAbsolute = false;
+        unsigned int m_Value;
     };
 
     class IRJmpIfSwNotSetInstruction : public IIRInstruction
@@ -601,7 +827,6 @@ namespace Langums
                 else
                 {
                     return SafePrintf ("JSNS % %", SwitchToString (m_SwitchId), m_Offset);
-
                 }
             }
         }
@@ -649,7 +874,6 @@ namespace Langums
                 else
                 {
                     return SafePrintf ("JSS % %", SwitchToString (m_SwitchId), m_Offset);
-
                 }
             }
         }

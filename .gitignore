@@ -20,3 +20,4 @@ log.txt
 langums/langums.VC.db
 test_processed.scx
 langums_log.txt
+*.tmp

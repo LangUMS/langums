@@ -2,7 +2,7 @@
 
 global allowedSwaps = MAX_SWAPS;
 
-bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2") => {
+bring(AllPlayers, AtLeast, 1, TerranMarine, "TestLocation2") => {
   if (allowedSwaps == 0) {
     print("Sorry, you have no more swaps left.");
     return;
@@ -15,7 +15,7 @@ bring(Player1, AtLeast, 1, TerranMarine, "TestLocation2") => {
   print("Here is your zealot.");
 }
 
-bring(Player1, AtLeast, 1, ProtossZealot, "TestLocation2") => {
+bring(AllPlayers, AtLeast, 1, ProtossZealot, "TestLocation2") => {
   if (allowedSwaps == 0) {
     print("Sorry, you have no more swaps left.");
     return;

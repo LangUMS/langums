@@ -14,6 +14,10 @@ fn main() {
       print("6 < 2");
     }
     
+    if (foo < 12) {
+      print("6 < 12");
+    }
+    
     if (foo <= 7) {
       print("6 <= 7");
     } 
@@ -26,8 +30,8 @@ fn main() {
       print("6 >= 13");
     }
     
-    if (foo >= 7) {
-      print("6 >= 7");
+    if (foo >= 2) {
+      print("6 >= 2");
     }
   }
 }

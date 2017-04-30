@@ -504,9 +504,15 @@ int main(int argc, char* argv[])
 
         LOG_F("Copy batch size: %", copyBatchSize);
 
-        if (copyBatchSize < 1024)
+        if (copyBatchSize <= 64)
         {
-            LOG_F("(!) WARNING! Copy batch size is set to an extremely low value (< 1024). Arithmetic operations with large numbers will be VERY slow to execute.");
+            LOG_F("(!) WARNING! Copy batch size is set to an extremely low value (<= 64). Arithmetic operations will be VERY slow to execute.");
+            LOG_F("(!) Multiplication and division will most likely produce incorrect results.");
+        }
+        else if (copyBatchSize < 1024)
+        {
+            LOG_F("(!) WARNING! Copy batch size is set to a moderately low value (< 1024).");
+            LOG_F("(!) Arithmetic operations with large numbers will be slow to execute and there are certain limitations to multiplication and division.");
         }
 
         compiler.SetCopyBatchSize(copyBatchSize);

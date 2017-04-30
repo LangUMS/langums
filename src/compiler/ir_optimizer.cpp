@@ -70,9 +70,9 @@ namespace Langums
 
                 jmpTargets[offset] = true;
             }
-            else if (instruction->GetType() == IRInstructionType::JmpIfEqZero)
+            else if (instruction->GetType() == IRInstructionType::JmpIfEq)
             {
-                auto jmp = (IRJmpIfEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfEqInstruction*)instruction.get();
                 auto offset = jmp->GetOffset();
 
                 if (!jmp->IsAbsolute())
@@ -87,9 +87,9 @@ namespace Langums
 
                 jmpTargets[offset] = true;
             }
-            else if (instruction->GetType() == IRInstructionType::JmpIfNotEqZero)
+            else if (instruction->GetType() == IRInstructionType::JmpIfNotEq)
             {
-                auto jmp = (IRJmpIfNotEqZeroInstruction*)instruction.get();
+                auto jmp = (IRJmpIfNotEqInstruction*)instruction.get();
                 auto offset = jmp->GetOffset();
 
                 if (!jmp->IsAbsolute())
