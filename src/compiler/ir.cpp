@@ -698,14 +698,14 @@ namespace Langums
         {
             if (!fnCall->HasChildren())
             {
-                throw IRCompilerException("set_invincibility() called without arguments");
+                throw IRCompilerException("run_ai_script() called without arguments");
             }
 
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto scriptName = ParseAIScriptArgument(fnCall->GetArgument(1), fnName, 1);
 
             std::string locationName;
-            if (fnCall->GetChildCount() > 1)
+            if (fnCall->GetChildCount() > 2)
             {
                 locationName = ParseLocationArgument(fnCall->GetArgument(2), fnName, 2);
             }
@@ -2635,7 +2635,7 @@ namespace Langums
     {
         if (node->GetType() != ASTNodeType::StringLiteral && node->GetType() != ASTNodeType::Identifier)
         {
-            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected location name", argIndex, fnName));
+            throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected Minerals or Gas", argIndex, fnName));
         }
 
         std::string name;
