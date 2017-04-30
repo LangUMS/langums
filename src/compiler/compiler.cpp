@@ -2590,6 +2590,11 @@ namespace Langums
             throw CompilerException("Invalid empty location name");
         }
 
+        if (name == "AnyLocation")
+        {
+            return 63;
+        }
+
         auto locationStringId = m_StringsChunk->FindString(name);
         if (locationStringId == -1)
         {

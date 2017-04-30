@@ -6,11 +6,9 @@ fn spawn_next_wave<Loc>(Loc) {
   print("They are coming for the probe, protect it!");
   
   spawn(ZergZergling, Player8, current_wave * 3, Loc);
-  order(ZergZergling, Player8, Attack, Loc, ProbeLocation);
   
   if (current_wave >= 4) {
     spawn(ZergHydralisk, Player8, current_wave, Loc);
-    order(ZergHydralisk, Player8, Attack, Loc, ProbeLocation);
   }
 }
 
@@ -28,6 +26,13 @@ countdown(Exactly, 1) => {
     spawn(ProtossProbe, Player7, 1, HeroesSpawn);
     move_loc(ProtossProbe, Player7, HeroesSpawn, ProbeLocation);
     pick_random_target(HeroesSpawn);
+    
+    if (random() < 127) {
+      spawn_next_wave(EnemySpawn1);
+    } else {
+      spawn_next_wave(EnemySpawn2);
+    }
+    
     probe_spawned = true;
   }
 }
@@ -48,6 +53,11 @@ fn spawn_heroes() {
 }
 
 fn main() {
+  print("The probe will spawn in 10 seconds, prepare...");
+  set_countdown(10);
+  
+  spawn_heroes();
+
   set_alliance(Player1, Player7, Ally);
   set_alliance(Player2, Player7, Ally);
   set_alliance(Player3, Player7, Ally);
@@ -55,11 +65,9 @@ fn main() {
   set_alliance(Player5, Player7, Ally);
   set_alliance(Player6, Player7, Ally);
   
-  spawn_heroes();
-  print("The probe will spawn in 10 seconds, prepare...");
-  set_countdown(10);
-
   while (true) {
+    move_loc(ProtossProbe, Player7, AnyLocation, ProbeLocation);
+    order(AllUnits, Player8, Attack, AnyLocation, ProbeLocation);
     poll_events();
   }
 }
@@ -93,7 +101,8 @@ countdown(Exactly, 0) => {
 
 fn pick_random_target<SrcLoc>(SrcLoc) {
   print("Oh no, the probe is off to somewhere again...");
-
+  set_countdown(60);
+  
   var rnd = random();
   
   if (rnd <= 50) {
@@ -117,7 +126,6 @@ fn pick_random_target<SrcLoc>(SrcLoc) {
   }
   
   order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget5);
-  set_countdown(60);
 }
 
 // end probe random walk

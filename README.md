@@ -250,6 +250,7 @@ Notes:
 * Arguments named `Expression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
 * Text arguments must be passed in `"` quotes e.g. `"This is some text"`.
 * Location arguments can be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
+* The special value `AnyLocation` can be passed to `Location` type arguments.
 
 ### Unit functions
 
