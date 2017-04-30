@@ -22,6 +22,7 @@ namespace Langums
         void Process(const std::unique_ptr<IASTNode>& unit);
 
         private:
+        void ProcessInternal(IASTNode* node);
         void InstantiateTemplates(IASTNode* node);
         void InstantiateTemplateFunction(ASTTemplateFunction* templateFunction, ASTFunctionCall* functionCall);
         void ReplaceIdentifier(IASTNode* node, const std::string& identifier, const std::shared_ptr<IASTNode>& replaceWith);

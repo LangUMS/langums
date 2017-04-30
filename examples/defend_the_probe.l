@@ -5,15 +5,25 @@ fn spawn_next_wave<Loc>(Loc) {
   current_wave++;
   print("They are coming for the probe, protect it!");
   
-  spawn(ZergZergling, Player8, current_wave * 3, Loc);
+  spawn(ZergZergling, Player8, current_wave * 2, Loc);
   
-  if (current_wave >= 4) {
-    spawn(ZergHydralisk, Player8, current_wave, Loc);
+  if (current_wave <= 2) {
+    return;
   }
+
+  spawn(ZergZergling, Player8, current_wave * 2, Loc);  
+  spawn(ZergHydralisk, Player8, current_wave, Loc);
+  
+  if (current_wave <= 5) {
+    return;
+  }
+  
+  spawn(ZergUltralisk, Player8, current_wave / 5, Loc);  
 }
 
-countdown(AtLeast, 20),
-commands(Player8, Exactly, 0, ZergZergling) => {
+countdown(Exactly, 25) => {
+  set_countdown(24);
+
   if (random() < 127) {
     spawn_next_wave(EnemySpawn1);
   } else {
@@ -24,16 +34,8 @@ commands(Player8, Exactly, 0, ZergZergling) => {
 countdown(Exactly, 1) => {
   if (!probe_spawned) {
     spawn(ProtossProbe, Player7, 1, HeroesSpawn);
-    move_loc(ProtossProbe, Player7, HeroesSpawn, ProbeLocation);
-    pick_random_target(HeroesSpawn);
-    
-    if (random() < 127) {
-      spawn_next_wave(EnemySpawn1);
-    } else {
-      spawn_next_wave(EnemySpawn2);
-    }
-    
     probe_spawned = true;
+    pick_random_target(HeroesSpawn);    
   }
 }
 
@@ -41,6 +43,10 @@ fn spawn_if_present<Player, Unit, Loc>(Player, Unit, Loc) {
   if (is_present(Player)) {
     spawn(Unit, Player, 1, Loc);
   }
+}
+
+fn attack_at<Loc>(Loc) { // order all enemies to attack at a location
+  order(AllUnits, Player8, Attack, AnyLocation, Loc);
 }
 
 fn spawn_heroes() {
@@ -66,13 +72,14 @@ fn main() {
   set_alliance(Player6, Player7, Ally);
   
   while (true) {
-    move_loc(ProtossProbe, Player7, AnyLocation, ProbeLocation);
-    order(AllUnits, Player8, Attack, AnyLocation, ProbeLocation);
+    move_loc(ProtossProbe, Player7, AnyLocation, ProbeLocation); // center ProbeLocation on the probe
     poll_events();
   }
 }
 
 // probe random walk
+
+global probe_has_target = false;
 
 bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget1),
 countdown(Exactly, 0) => {
@@ -101,31 +108,36 @@ countdown(Exactly, 0) => {
 
 fn pick_random_target<SrcLoc>(SrcLoc) {
   print("Oh no, the probe is off to somewhere again...");
-  set_countdown(60);
+  set_countdown(30);
   
   var rnd = random();
   
   if (rnd <= 50) {
     order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget1);
+    attack_at(ProbeTarget1);
     return;
   }
   
   if (rnd <= 100) {
     order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget2);
+    attack_at(ProbeTarget2);
     return;
   }
   
   if (rnd <= 150) {
     order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget3);
+    attack_at(ProbeTarget3);
     return;
   }
   
   if (rnd <= 200) {
     order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget4);
+    attack_at(ProbeTarget4);
     return;
   }
   
   order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget5);
+  attack_at(ProbeTarget5);
 }
 
 // end probe random walk

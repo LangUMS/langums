@@ -15,7 +15,12 @@ namespace Langums
             throw TemplateInstantiatorException("Internal error. Invalid AST node type, expected Unit");
         }
 
-        auto& statements = unit->GetChildren();
+        ProcessInternal(unit.get());
+    }
+
+    void TemplateInstantiator::ProcessInternal(IASTNode* node)
+    {
+        auto& statements = node->GetChildren();
 
         for (auto& statement : statements)
         {
@@ -33,9 +38,8 @@ namespace Langums
             }
         }
 
-        auto st = statements;
-        
-        for (auto& statement : st)
+        auto statementsCopy = statements;
+        for (auto& statement : statementsCopy)
         {
             if (statement->GetType() != ASTNodeType::TemplateFunction)
             {
@@ -141,6 +145,8 @@ namespace Langums
         auto instantiatedFn = new ASTFunctionDeclaration(genFnName, finalArgNames);
 
         instantiatedFn->AddChild(std::move(body));
+        InstantiateTemplates(instantiatedFn);
+
         m_Unit->AddChild(std::unique_ptr<IASTNode>(instantiatedFn));
 
         m_InstantiatedTemplates.insert(std::make_pair(genFnName, instantiatedFn));
