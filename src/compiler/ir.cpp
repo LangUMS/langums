@@ -295,6 +295,19 @@ namespace Langums
                 std::vector<std::unique_ptr<IIRInstruction>> bodyInstructions;
                 EmitBlockStatement((ASTBlockStatement*)body.get(), bodyInstructions, m_GlobalAliases);
 
+                for (auto i = 0u; i < bodyInstructions.size(); i++)
+                {
+                    auto& instruction = bodyInstructions[i];
+                    if (instruction->GetType() == IRInstructionType::Jmp)
+                    {
+                        auto jmp = (IRJmpInstruction*)instruction.get();
+                        if (jmp->GetOffset() == JMP_TO_END_OFFSET_CONSTANT)
+                        {
+                            jmp->SetOffset(bodyInstructions.size() - i);
+                        }
+                    }
+                }
+
                 auto switchId = nextSwitchId++;
                 EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 2), m_PollEventsInstructions);
 
@@ -2231,7 +2244,7 @@ namespace Langums
                     }
                 }
 
-                EmitInstruction(new IRJmpInstruction(JMP_TO_END_OFFSET_CONSTANT, true), instructions);
+                EmitInstruction(new IRJmpInstruction(JMP_TO_END_OFFSET_CONSTANT), instructions);
             }
             else
             {
@@ -2275,8 +2288,6 @@ namespace Langums
         auto instructionsStart = instructions.size();
         EmitBlockStatement(blockStatement, instructions, aliases);
 
-        auto endOffset = instructions.size();
-
         for (auto i = instructionsStart; i < instructions.size(); i++)
         {
             auto& instruction = instructions[i];
@@ -2285,7 +2296,7 @@ namespace Langums
                 auto jmp = (IRJmpInstruction*)instruction.get();
                 if (jmp->GetOffset() == JMP_TO_END_OFFSET_CONSTANT)
                 {
-                    jmp->SetOffset(endOffset + 1);
+                    jmp->SetOffset(instructions.size() - i);
                 }
             }
         }

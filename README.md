@@ -477,7 +477,7 @@ The template argument is gone and all instances of it have been replaced with it
 
 ## Examples
 
-[Look at the test/ folder here for examples.](https://github.com/AlexanderDzhoganov/langums/tree/master/test)
+[Look at the examples/ folder here for examples.](https://github.com/AlexanderDzhoganov/langums/tree/master/examples)
 Feel free to contribute your own.
 
 ## FAQ
