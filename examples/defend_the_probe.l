@@ -1,24 +1,36 @@
+#define DEBUG true
+
 global current_wave = 1;
 global probe_spawned = false;
+
+fn calculate_wave_size() {
+  var activePlayers = is_present();
+  return current_wave * activePlayers * 2;
+}
 
 fn spawn_next_wave<Loc>(Loc) {
   current_wave++;
   print("They are coming for the probe, protect it!");
   
-  spawn(ZergZergling, Player8, current_wave * 2, Loc);
+  var waveSize = calculate_wave_size();
+  if (DEBUG && waveSize > 0) {
+    print("debug: spawning at least one ling");
+  }
   
-  if (current_wave <= 2) {
+  spawn(ZergZergling, Player8, waveSize, Loc);
+  
+  if (current_wave <= 3) {
     return;
   }
 
-  spawn(ZergZergling, Player8, current_wave * 2, Loc);  
-  spawn(ZergHydralisk, Player8, current_wave, Loc);
+  spawn(ZergZergling, Player8, waveSize, Loc);
+  spawn(ZergHydralisk, Player8, waveSize, Loc);
   
   if (current_wave <= 5) {
     return;
   }
   
-  spawn(ZergUltralisk, Player8, current_wave / 5, Loc);  
+  spawn(ZergUltralisk, Player8, waveSize / 5, Loc);  
 }
 
 countdown(Exactly, 25) => {
@@ -34,8 +46,14 @@ countdown(Exactly, 25) => {
 countdown(Exactly, 1) => {
   if (!probe_spawned) {
     spawn(ProtossProbe, Player7, 1, HeroesSpawn);
+    center_view(AllPlayers, HeroesSpawn);
+    ping(AllPlayers, HeroesSpawn);
+    
+    print("The probe has spawned, protect it with your life!");
+    sleep(2000);
+    
     probe_spawned = true;
-    pick_random_target(HeroesSpawn);    
+    pick_random_target(HeroesSpawn);
   }
 }
 
@@ -56,6 +74,7 @@ fn spawn_heroes() {
   spawn_if_present(Player4, HeroJimRaynorMarine, HeroesSpawn);
   spawn_if_present(Player5, HeroJimRaynorMarine, HeroesSpawn);
   spawn_if_present(Player6, HeroJimRaynorMarine, HeroesSpawn);
+  center_view(AllPlayers, HeroesSpawn);
 }
 
 fn main() {

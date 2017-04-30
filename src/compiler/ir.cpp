@@ -1697,6 +1697,118 @@ namespace Langums
                 EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
             }
         }
+        else if (op == OperatorType::And)
+        {
+            if (lhs->GetType() == ASTNodeType::NumberLiteral || rhs->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto numberLiteral = (ASTNumberLiteral*)(lhs->GetType() == ASTNodeType::NumberLiteral ? lhs.get() : rhs.get());
+                auto value = numberLiteral->GetValue();
+
+                if (value == 0)
+                {
+                    EmitInstruction(new IRPushInstruction(0, true), instructions);
+                }
+                else
+                {
+                    auto other = lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get();
+                    auto regId = (int)Reg_StackTop;
+
+                    if (other->GetType() == ASTNodeType::Identifier)
+                    {
+                        auto identifier = (ASTIdentifier*)other;
+                        regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
+                    }
+                    else if (other->GetType() == ASTNodeType::ArrayExpression)
+                    {
+                        auto arrayExpression = (ASTArrayExpression*)other;
+                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    }
+
+                    if (regId == Reg_StackTop)
+                    {
+                        EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
+                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+                        EmitInstruction(new IRJmpInstruction(2), instructions);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+                    }
+                    else
+                    {
+                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions);
+                        EmitInstruction(new IRPushInstruction(1, true), instructions);
+                        EmitInstruction(new IRJmpInstruction(3), instructions);
+                        EmitInstruction(new IRPopInstruction(), instructions);
+                        EmitInstruction(new IRPushInstruction(0, true), instructions);
+                    }
+                }
+            }
+            else
+            {
+                EmitExpression(lhs.get(), instructions, aliases);
+                EmitExpression(rhs.get(), instructions, aliases);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 4), instructions);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop + 1, 0, 3), instructions);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+                EmitInstruction(new IRJmpInstruction(2), instructions);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+            }
+        }
+        else if (op == OperatorType::Or)
+        {
+            if (lhs->GetType() == ASTNodeType::NumberLiteral || rhs->GetType() == ASTNodeType::NumberLiteral)
+            {
+                auto numberLiteral = (ASTNumberLiteral*)(lhs->GetType() == ASTNodeType::NumberLiteral ? lhs.get() : rhs.get());
+                auto value = numberLiteral->GetValue();
+
+                if (value == 1)
+                {
+                    EmitInstruction(new IRPushInstruction(1, true), instructions);
+                }
+                else
+                {
+                    auto other = lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get();
+                    auto regId = (int)Reg_StackTop;
+
+                    if (other->GetType() == ASTNodeType::Identifier)
+                    {
+                        auto identifier = (ASTIdentifier*)other;
+                        regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
+                    }
+                    else if (other->GetType() == ASTNodeType::ArrayExpression)
+                    {
+                        auto arrayExpression = (ASTArrayExpression*)other;
+                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    }
+
+                    if (regId == Reg_StackTop)
+                    {
+                        EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
+                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+                        EmitInstruction(new IRJmpInstruction(2), instructions);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+                    }
+                    else
+                    {
+                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions);
+                        EmitInstruction(new IRPushInstruction(1, true), instructions);
+                        EmitInstruction(new IRJmpInstruction(3), instructions);
+                        EmitInstruction(new IRPopInstruction(), instructions);
+                        EmitInstruction(new IRPushInstruction(0, true), instructions);
+                    }
+                }
+            }
+            else
+            {
+                EmitExpression(lhs.get(), instructions, aliases);
+                EmitExpression(rhs.get(), instructions, aliases);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop + 1, 0, 3), instructions);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
+                EmitInstruction(new IRJmpInstruction(2), instructions);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
+            }
+        }
         else
         {
             throw IRCompilerException("Unsupported operator");

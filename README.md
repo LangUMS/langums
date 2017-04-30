@@ -70,6 +70,7 @@ There is [a wonderful extension for VS Code](https://marketplace.visualstudio.co
 - Postfix increment and decrement operators - `x++`, `y--`
 - Arithmetic operators - `+`, `-`, `/`, `*`
 - Comparison operators - `<`, `<=`, `==`, `!=`, `>=`, `>`
+- Boolean operators - `&&`, `||`
 - `if` and `if/else` statements
 - `while` loop
 - Event handlers

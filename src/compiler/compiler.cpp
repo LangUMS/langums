@@ -1653,23 +1653,45 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::Ping)
             {
                 auto ping = (IRPingInstruction*)instruction.get();
-                auto playerMask = ping->GetPlayerId();
 
                 auto locationId = GetLocationIdByName(ping->GetLocationName());
+                auto playerId = ping->GetPlayerId();
 
-                auto address = nextAddress++;
-                current.Action_JumpTo(address);
-                m_Triggers.push_back(current.GetTrigger());
+                if (playerId + 1 == m_TriggersOwner)
+                {
+                    current.Action_Ping(locationId + 1);
+                }
+                else
+                {
+                    auto address = nextAddress++;
+                    current.Action_JumpTo(address);
+                    m_Triggers.push_back(current.GetTrigger());
 
-                auto pingTrigger = TriggerBuilder(address, instruction.get(), playerMask + 1);
+                    auto retAddress = nextAddress++;
+                    auto waitTrigger = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                    waitTrigger.Action_Wait(0);
+                    waitTrigger.Action_JumpTo(retAddress);
+                    m_Triggers.push_back(waitTrigger.GetTrigger());
 
-                pingTrigger.Action_Ping(locationId + 1);
+                    auto all = false;
+                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    {
+                        all = true;
+                        playerId = m_TriggersOwner;
+                    }
 
-                auto retAddress = nextAddress++;
-                pingTrigger.Action_JumpTo(retAddress);
-                m_Triggers.push_back(pingTrigger.GetTrigger());
+                    auto pingTrigger = TriggerBuilder(address, instruction.get(), playerId);
+                    pingTrigger.Action_Ping(locationId + 1);
 
-                current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                    if (all)
+                    {
+                        pingTrigger.SetExecuteForAllPlayers();
+                    }
+
+                    m_Triggers.push_back(pingTrigger.GetTrigger());
+
+                    current = TriggerBuilder(retAddress, instruction.get(), m_TriggersOwner);
+                }
             }
             else if (instruction->GetType() == IRInstructionType::SetResource)
             {
