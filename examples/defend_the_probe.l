@@ -1,126 +1,167 @@
-#define DEBUG true
-#define TEN_SECONDS 8000
+// Defend the Probe
+// map file: defend_the_probe.scx
+
+#define DEBUG false
+#define FOUR_SECONDS 4000
+
+// globals
+global current_wave = 1;
+global probe_target = 0;
+//
 
 fn main() {
-  print("Our heroes enter the arena.");
+  setup_alliances();
+
+  center_view(AllPlayers, HeroesSpawn);
   spawn_heroes();
-  print("The probe will spawn in 10 seconds, prepare...");
-  
-  if (!DEBUG) {
-    sleep(TEN_SECONDS);
+
+  set_mission_objectives("""- Don't let the probe die.'
+- You can buy marines and zerglings from the beacons
+  """);
+
+  if (!DEBUG)
+  {
+    print("The probe will spawn in 15 seconds, prepare...");
+    sleep(FOUR_SECONDS);
+    print("Buy units from the beacons.");
+    sleep(FOUR_SECONDS);
+    ping(AllPlayers, Upgrades);
+    center_view(AllPlayers, Upgrades);
+    print("Buy upgrades from here.");
+    sleep(FOUR_SECONDS);
   }
-  
-  set_alliance(AllPlayers, Player7, Ally);
-  set_alliance(Player7, AllPlayers, Ally);
-  
-  set_alliance(Player7, Player8, Enemy);
-  set_alliance(Player8, Player7, Enemy);
- 
-  spawn(ProtossProbe, Player7, 1, HeroesSpawn);
- 
+
   center_view(AllPlayers, HeroesSpawn);
   ping(AllPlayers, HeroesSpawn);
-    
+  spawn(ProtossProbe, Player7, 1, HeroesSpawn);
   print("The probe has spawned, protect it with your life!");
   sleep(2000);
   
-  pick_random_target();
+  add_resource(AllPlayers, Minerals, 10);
   
+  set_countdown(35);
+  clear_buffered_events();
+
   while (true) {
     move_loc(ProtossProbe, Player7, AnyLocation, ProbeLocation); // center ProbeLocation on the probe
-    
-    if (probe_reached_target) {
+    run_heal_stations();
+
+    if (!probe_target) {
       pick_random_target();
-      probe_reached_target = false;
     }
-    
     poll_events();
   }
 }
 
-// globals
-global current_wave = 1;
-global probe_reached_target = false;
-//
+// heal stations
+
+fn run_heal_stations() {
+  modify(AllUnits, AllPlayers, 10, Health, 100, "HealStation");
+}
+
+// end heal stations
+
+// lose conditions
+
+commands(Player7, Exactly, 0, ProtossProbe) => {
+  if (probe_target == 0) {
+    return;
+  }
+
+  print("The probe is dead. You are losers.");
+  sleep(2000);
+  end(Player1, Defeat);
+  end(Player2, Defeat);
+  end(Player3, Defeat);
+  end(Player4, Defeat);
+  end(Player5, Defeat);
+  end(Player6, Defeat);
+}
+
+for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+  commands(Player7, Exactly, 0, ProtossProbe) => {
+    if (probe_target == 0) {
+      return;
+    }
+
+    print("You have died a glorious death. o7");
+    end(PlayerId, Defeat);
+  }
+}
+
+// end lose conditions
 
 // shop logic
 
-global marine_shop_lock[8];
-global zergling_shop_lock[8];
-
-bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
-  print("hello world");
-}
-
-accumulate(Player1, AtLeast, 10, Minerals),
-bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
-  if (marine_shop_lock[0]) {
-    return;
+for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+  accumulate(PlayerId, AtLeast, 10, Minerals),
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines) => {
+    take_resource(PlayerId, Minerals, 10);
+    spawn(TerranMarine, PlayerId, 1, ShopSpawn);
   }
 
-  take_resource(Player1, Minerals, 10);
-  spawn(TerranMarine, Player1, 1, BuyMarines);
-  print("You purchased a marine, take good care of it.");
-  marine_shop_lock[0] = true;
-}
-
-bring(Player1, Exactly, 0, AllUnits, BuyMarines) => {
-  marine_shop_lock[0] = false;
-}
-
-accumulate(Player1, AtLeast, 10, Minerals),
-bring(Player1, AtLeast, 1, AllUnits, BuyZerglings) => {
-  if (zergling_shop_lock[0]) {
-    return;
+  accumulate(PlayerId, AtLeast, 5, Minerals),
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyZerglings) => {
+    take_resource(PlayerId, Minerals, 5);
+    spawn(ZergZergling, PlayerId, 1, ShopSpawn);
   }
 
-  take_resource(Player1, Minerals, 10);
-  spawn(ZergZergling, Player1, 1, BuyZerglings);
-
-  print("Your purchased a zergling, send that beast to the slaughter.");
-  zergling_shop_lock[0] = true;
-}
-
-bring(Player1, Exactly, 0, AllUnits, BuyZerglings) => {
-  zergling_shop_lock[0] = false;
+  accumulate(PlayerId, AtLeast, 25, Minerals),
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyZealots) => {
+    take_resource(PlayerId, Minerals, 25);
+    spawn(ProtossZealot, PlayerId, 1, ShopSpawn);
+  }
 }
 
 // end shop logic
 
-fn spawn_next_wave<Loc>(Loc) {
-  current_wave++;
-  print("They are coming for the probe, protect it!");
-  
-  spawn(ZergZergling, Player8, current_wave * 3, Loc);
+// reward logic
+
+deaths(Player8, AtLeast, 1, ZergZergling) => {
+  remove_deaths(Player8, ZergZergling, 1);
+  add_resource(AllPlayers, Minerals, 1);
+}
+
+deaths(Player8, AtLeast, 1, ZergHydralisk) => {
+  remove_deaths(Player8, ZergZergling, 1);
+  add_resource(AllPlayers, Minerals, 1);
+}
+
+deaths(Player8, AtLeast, 1, ZergUltralisk) => {
+  remove_deaths(Player8, ZergZergling, 1);
+  add_resource(AllPlayers, Minerals, 3);
+}
+
+// end reward logic
+
+fn spawn_next_wave() {
+  var x = current_wave * 2;
+
+  spawn(ZergZergling, Player8, x, EnemySpawn1);
+  spawn(ZergZergling, Player8, x, EnemySpawn2);
   
   if (current_wave <= 3) {
     return;
   }
 
-  spawn(ZergZergling, Player8, current_wave * 2, Loc);
-  spawn(ZergHydralisk, Player8, current_wave, Loc);
+  spawn(ZergZergling, Player8, x, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, x, EnemySpawn1);
   
-  if (current_wave <= 5) {
+  if (current_wave <= 6) {
     return;
   }
   
-  spawn(ZergUltralisk, Player8, current_wave / 5, Loc);  
+  spawn(ZergZergling, Player8, x, EnemySpawn2);
+  spawn(ZergUltralisk, Player8, x, EnemySpawn2);
 }
 
-countdown(Exactly, 40) => {
-  set_countdown(39);
+countdown(Exactly, 34) => {
+  set_countdown(33);
 
-  if (random() < 127) {
-    spawn_next_wave(EnemySpawn1);
-  } else {
-    spawn_next_wave(EnemySpawn2);
-  }
+  current_wave++;
+  print("They are coming for the probe, protect it!");
+  spawn_next_wave(EnemySpawn1);
   
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 35) => {
-  set_countdown(34);
   attack_at(ProbeLocation);
 }
 
@@ -154,16 +195,35 @@ countdown(Exactly, 5) => {
   attack_at(ProbeLocation);
 }
 
+countdown(Exactly, 1) => {
+  set_countdown(35);
+}
+
 fn spawn_if_present<Player, Unit, Loc>(Player, Unit, Loc) {
   if (is_present(Player)) {
     spawn(Unit, Player, 1, Loc);
-    add_resource(Player, Minerals, 10);
-    run_ai_script(Player, TurnOnSharedVisionOfPlayer7WithCurrentPlayer);
   }
 }
 
 fn attack_at<Loc>(Loc) { // order all enemies to attack at a location
   order(AllUnits, Player8, Attack, AnyLocation, Loc);
+}
+
+// initialization stuff
+
+fn setup_alliances() {
+  set_alliance(AllPlayers, Player7, Ally);
+  set_alliance(Player7, AllPlayers, Ally);
+  
+  set_alliance(Player7, Player8, Enemy);
+  set_alliance(Player8, Player7, Enemy);
+
+  set_vision(Player1, Player7, true);
+  set_vision(Player2, Player7, true);
+  set_vision(Player3, Player7, true);
+  set_vision(Player4, Player7, true);
+  set_vision(Player5, Player7, true);
+  set_vision(Player6, Player7, true);
 }
 
 fn spawn_heroes() {
@@ -177,65 +237,94 @@ fn spawn_heroes() {
   center_view(AllPlayers, HeroesSpawn);
 }
 
+// end initialization stuff
+
 // probe random walk
 
-countdown(Exactly, 0),
 bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget1) => {
-  probe_reached_target = true;
-}
-
-countdown(Exactly, 0),
-bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget2) => {
-  probe_reached_target = true;
-}
-
-countdown(Exactly, 0),
-bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget3) => {
-  probe_reached_target = true;
-}
-
-countdown(Exactly, 0),
-bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget4) => {
-  probe_reached_target = true;
-}
-
-countdown(Exactly, 0),
-bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget5) => {
-  probe_reached_target = true;
-}
-
-fn pick_random_target() {
-  if (probe_reached_target) {
+  if (probe_target != 1) {
     return;
   }
 
-  print("Oh no, the probe is off to somewhere again...");
-  set_countdown(45);
+  probe_target = 0;
+  if (DEBUG) {
+    print("debug: probe reached target 1");
+  }
+}
+
+bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget2) => {
+  if (probe_target != 2) {
+    return;
+  }
+
+  probe_target = 0;
+  if (DEBUG) {
+    print("debug: probe reached target 2");
+  }
+}
+
+bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget3) => {
+  if (probe_target != 3) {
+    return;
+  }
   
+  probe_target = 0;
+  if (DEBUG) {
+    print("debug: probe reached target 3");
+  }
+}
+
+bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget4) => {
+  if (probe_target != 4) {
+    return;
+  }
+
+  probe_target = 0;
+  if (DEBUG) {
+    print("debug: probe reached target 4");
+  }
+}
+
+bring(Player7, Exactly, 1, ProtossProbe, ProbeTarget5) => {
+  if (probe_target != 5) {
+    return;
+  }
+
+  probe_target = 0;
+  if (DEBUG) {
+    print("debug: probe reached target 5");
+  }
+}
+
+fn pick_random_target() {
   var rnd = random();
   
   if (rnd <= 50) {
     order(ProtossProbe, Player7, Move, AnyLocation, ProbeTarget1);
+    probe_target = 1;
     return;
   }
   
   if (rnd <= 100) {
     order(ProtossProbe, Player7, Move, AnyLocation, ProbeTarget2);
+    probe_target = 2;
     return;
   }
   
   if (rnd <= 150) {
     order(ProtossProbe, Player7, Move, AnyLocation, ProbeTarget3);
+    probe_target = 3;
     return;
   }
   
   if (rnd <= 200) {
     order(ProtossProbe, Player7, Move, AnyLocation, ProbeTarget4);
+    probe_target = 4;
     return;
   }
   
   order(ProtossProbe, Player7, Move, AnyLocation, ProbeTarget5);
-  attack_at(ProbeTarget5);
+  probe_target = 5;
 }
 
 // end probe random walk

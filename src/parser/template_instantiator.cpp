@@ -15,6 +15,15 @@ namespace Langums
             throw TemplateInstantiatorException("Internal error. Invalid AST node type, expected Unit");
         }
 
+        auto statementsCopy = m_Unit->GetChildren();
+        for (auto& statement : statementsCopy)
+        {
+            if (statement->GetType() == ASTNodeType::EventTemplateBlock)
+            {
+                InstantiateEventTemplateBlock((ASTEventTemplateBlock*)statement.get());
+            }
+        }
+
         ProcessInternal(unit.get());
     }
 
@@ -150,6 +159,44 @@ namespace Langums
         m_Unit->AddChild(std::unique_ptr<IASTNode>(instantiatedFn));
 
         m_InstantiatedTemplates.insert(std::make_pair(genFnName, instantiatedFn));
+    }
+
+    void TemplateInstantiator::InstantiateEventTemplateBlock(ASTEventTemplateBlock* eventBlock)
+    {
+        auto& iterator = eventBlock->GetIteratorName();
+        auto& list = eventBlock->GetList();
+
+        for (auto& item : list)
+        {
+            auto& eventDeclarations = eventBlock->GetChildren();
+            for (auto& declaration : eventDeclarations)
+            {
+                auto newDeclaration = CloneNode(declaration.get());
+                InstantiateEventTemplate(newDeclaration.get(), iterator, item);
+
+                m_Unit->AddChild(std::move(newDeclaration));
+            }
+        }
+    }
+
+    void TemplateInstantiator::InstantiateEventTemplate(IASTNode* node, const std::string& token, const std::string& replacement)
+    {
+        if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node;
+            if (identifier->GetName() == token)
+            {
+                identifier->SetName(replacement);
+            }
+        }
+        else
+        {
+            auto& children = node->GetChildren();
+            for (auto& child : children)
+            {
+                InstantiateEventTemplate(child.get(), token, replacement);
+            }
+        }
     }
 
     void TemplateInstantiator::ReplaceIdentifier(IASTNode* node, const std::string& identifierName, const std::shared_ptr<IASTNode>& replaceWith)

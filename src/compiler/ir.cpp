@@ -275,7 +275,7 @@ namespace Langums
         }
 
         nextSwitchId = (int)Switch_ReservedEnd;
-        m_HasEvents = false;
+        m_EventCount = 0;
 
         m_PollEventsInstructions.clear();
         EmitInstruction(new IRChkPlayers(), m_PollEventsInstructions);
@@ -284,7 +284,7 @@ namespace Langums
         {
             if (node->GetType() == ASTNodeType::EventDeclaration)
             {
-                m_HasEvents = true;
+                m_EventCount++;
                 auto eventDeclaration = (ASTEventDeclaration*)node.get();
                 auto body = eventDeclaration->GetBody();
                 if (body->GetType() != ASTNodeType::BlockStatement)
@@ -339,19 +339,30 @@ namespace Langums
 
         if (fnName == "poll_events")
         {
-            if (m_HasEvents)
+            if (m_EventCount > 0)
             {
                 if (m_PollEventsInstructions.size() == 0)
                 {
                     throw IRCompilerException("poll_events() can only be called from a single place");
                 }
 
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions);
+
                 for (auto& instruction : m_PollEventsInstructions)
                 {
                     instructions.push_back(std::move(instruction));
                 }
              
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions);
+
                 m_PollEventsInstructions.clear();
+            }
+        }
+        else if (fnName == "clear_buffered_events")
+        {
+            for (auto i = 0u; i < m_EventCount; i++)
+            {
+                EmitInstruction(new IRSetSwInstruction((int)Reg_ReservedEnd + i, false), instructions);
             }
         }
         else if (fnName == "is_present")
@@ -384,6 +395,37 @@ namespace Langums
             {
                 EmitInstruction(new IRRnd256Instruction(), instructions);
             }
+        }
+        else if (fnName == "set_vision")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("set_vision() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 3)
+            {
+                throw IRCompilerException("set_vision() takes exactly three arguments");
+            }
+
+            auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
+            auto targetPlayerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
+            auto state = ParseQuantityArgument(fnCall->GetArgument(2), fnName, 2);
+
+            std::string scriptName;
+            if (state == 0)
+            {
+                scriptName = SafePrintf("-Vi%", (int)targetPlayerId);
+            }
+            else
+            {
+                scriptName = SafePrintf("+Vi%", (int)targetPlayerId);
+            }
+
+            unsigned int scriptId;
+            memcpy(&scriptId, scriptName.data(), 4);
+
+            EmitInstruction(new IRAIScriptInstruction(playerId, scriptId, "AnyLocation"), instructions);
         }
         else if (fnName == "end")
         {
@@ -1743,9 +1785,10 @@ namespace Langums
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 6), instructions);
+                EmitInstruction(new IRPopInstruction(), instructions);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 4), instructions);
-                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop + 1, 0, 3), instructions);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions);
                 EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions);
                 EmitInstruction(new IRJmpInstruction(2), instructions);
                 EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions);
@@ -2448,6 +2491,11 @@ namespace Langums
         {
             auto& argName = args[i];
             aliases.Deallocate(argName);
+        }
+
+        if (instructions.size() == 0)
+        {
+            throw IRCompilerException(SafePrintf("Function \"%\" has an empty body", fn->GetName()));
         }
 
         if (fn->GetName() == "main")

@@ -183,6 +183,7 @@ namespace Langums
                 }
 
                 TriggerBuilder eventTrigger(-1, nullptr, m_TriggersOwner);
+                eventTrigger.Cond_TestSwitch(Switch_EventsMutex, false);
 
                 auto switchId = evnt->GetSwitchId();
                 eventTrigger.Action_SetSwitch(switchId, TriggerActionState::SetSwitch);
@@ -264,6 +265,7 @@ namespace Langums
                     else if (condition->GetType() == IRInstructionType::CmdCond)
                     {
                         auto cmd = (IRCmdCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(cmd->GetPlayerId() + 1);
                         eventTrigger.Cond_Commands(cmd->GetPlayerId(), (TriggerComparisonType)cmd->GetComparison(), cmd->GetUnitId(), cmd->GetQuantity());
                     }
                     else if (condition->GetType() == IRInstructionType::CmdLeastCond)
@@ -1584,13 +1586,13 @@ namespace Langums
                 auto endGame = (IREndGameInstruction*)instruction.get();
 
                 auto type = endGame->GetEndGameType();
-                auto playerMask = endGame->GetPlayerMask();
+                auto playerId = endGame->GetPlayerId();
 
                 auto address = nextAddress++;
                 current.Action_JumpTo(address);
                 m_Triggers.push_back(current.GetTrigger());
 
-                auto endGameTrigger = TriggerBuilder(address, instruction.get(), playerMask);
+                auto endGameTrigger = TriggerBuilder(address, instruction.get(), playerId);
 
                 if (type == EndGameType::Victory)
                 {

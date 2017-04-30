@@ -16,6 +16,7 @@ Table of Contents
   * [Spawning units with properties](#spawning-units-with-properties)
   * [Preprocessor](#preprocessor)
   * [Template functions](#template-functions)
+  * [Template event declarations](#template-event-declarations)
   * [Examples](#examples)
   * [FAQ](#faq)
   * [Limitations](#limitations)
@@ -275,6 +276,7 @@ Notes:
 | center_view([Player](#player), Location)                               | Centers the view on a location for a player.              |
 | ping([Player](#player), Location)                                      | Triggers a minimap ping on a location for a player.       |
 | talking_portrait([Player](#player), [Unit](#unit), Quantity)           | Shows the unit talking portrait for an amount of seconds. |
+| set_vision([SrcPlayer](#player), [DstPlayer](#player), true/ false)    | Sets whether DstPlayer will share vision with SrcPlayer.  |
 
 ### Resource functions
 
@@ -297,6 +299,7 @@ Notes:
 | unpause_game()                                | Unpauses the game (singleplayer only)                                                                                                                 |
 | set_next_scenario(Text)                       | Sets the next map to run (singleplayer only)                                                                                                          |
 | play_sound(Text, optional: [Player](#player)) | Plays a sound from a .wav file. Defaults to all players. [See here for more info](#how-do-you-use-play_sound).                                        |
+| clear_buffered_events()                       | Clears all buffered events from the event queue (if there are any).                                                                                   |
 
 ### Score functions
 
@@ -476,6 +479,50 @@ fn spawn_units(qty) {
 ````
 
 The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type can and should be passed as a template argument.
+
+## Template event declarations
+
+Sometimes you wish to create an event handler for all players but still know exactly which player triggered it. You can of course copy & paste the same event several times and change the player in each one but that would be pretty ugly and unmaintainable. For example say you have a shop in your map and want every human player to be able to use it. You could do it like this:
+
+```
+accumulate(Player1, AtLeast, 10, Minerals),
+bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
+  take_resource(Player1, Minerals, 10);
+  spawn(TerranMarine, Player1, 1, BuyMarines);
+  print("You purchased a marine, take good care of it.");
+}
+
+accumulate(Player2, AtLeast, 10, Minerals),
+bring(Player2, AtLeast, 1, AllUnits, BuyMarines) => {
+  take_resource(Player2, Minerals, 10);
+  spawn(TerranMarine, Player2, 1, BuyMarines);
+  print("You purchased a marine, take good care of it.");
+}
+
+accumulate(Player3, AtLeast, 10, Minerals),
+bring(Player3, AtLeast, 1, AllUnits, BuyMarines) => {
+  take_resource(Player3, Minerals, 10);
+  spawn(TerranMarine, Player3, 1, BuyMarines);
+  print("You purchased a marine, take good care of it.");
+}
+
+... etc for all human players in your map ...
+```
+
+Or you could use a template event declarations like the example below.
+
+```
+for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+  accumulate(PlayerId, AtLeast, 10, Minerals),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines) => {
+    take_resource(PlayerId, Minerals, 10);
+    spawn(TerranMarine, PlayerId, 1, BuyMarines);
+    print("You purchased a marine, take good care of it.");
+  }
+```
+
+The result is the same but it helps to not repeat the same code. You can use almost anything as an event template list like players, locations, units, resource types, etc.
+At the moment nested template event declarations are not supported but it's a planned feature for the near future.
 
 ## Examples
 

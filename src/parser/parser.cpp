@@ -145,6 +145,10 @@ namespace Langums
             {
                 unit->AddChild(UnitProperties());
             }
+            else if (PeekKeyword("for"))
+            {
+                unit->AddChild(EventTemplateBlock());
+            }
             else
             {
                 unit->AddChild(EventDeclaration());
@@ -1004,6 +1008,60 @@ namespace Langums
         return std::unique_ptr<IASTNode>(eventDeclaration);
     }
 
+    std::unique_ptr<IASTNode> Parser::EventTemplateBlock()
+    {
+        Keyword("for");
+        Whitespace();
+        Symbol('<');
+        Whitespace();
+
+        auto iteratorName = Identifier();
+
+        Whitespace();
+        Symbol('>');
+        Whitespace();
+
+        Keyword("in");
+        Whitespace();
+
+        Symbol('(');
+        Whitespace();
+
+        std::vector<std::string> list;
+        list.push_back(Identifier());
+        Whitespace();
+
+        auto c = Peek();
+        while (c == ',')
+        {
+            Next();
+            Whitespace();
+            list.push_back(Identifier());
+            Whitespace();
+            c = Peek();
+        }
+
+        auto eventTemplateBlock = new ASTEventTemplateBlock(iteratorName, list);
+
+        Symbol(')');
+        Whitespace();
+
+        Symbol('{');
+        Whitespace();
+
+        c = Peek();
+        while (c != '}')
+        {
+            eventTemplateBlock->AddChild(EventDeclaration());
+            Whitespace();
+            c = Peek();
+        }
+
+        Symbol('}');
+        Whitespace();
+        return std::unique_ptr<IASTNode>(eventTemplateBlock);
+    }
+
     std::unique_ptr<IASTNode> Parser::UnitProperties()
     {
         Keyword("unit");
@@ -1080,7 +1138,7 @@ namespace Langums
 
         if (identifier.length() == 0)
         {
-            throw ParserException(m_CurrentChar, "Zero length indentifier");
+            throw ParserException(m_CurrentChar, "Syntax error");
         }
 
         if (std::isdigit(identifier[0]))

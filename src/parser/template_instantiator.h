@@ -25,6 +25,10 @@ namespace Langums
         void ProcessInternal(IASTNode* node);
         void InstantiateTemplates(IASTNode* node);
         void InstantiateTemplateFunction(ASTTemplateFunction* templateFunction, ASTFunctionCall* functionCall);
+
+        void InstantiateEventTemplateBlock(ASTEventTemplateBlock* eventBlock);
+        void InstantiateEventTemplate(IASTNode* node, const std::string& token, const std::string& replacement);
+
         void ReplaceIdentifier(IASTNode* node, const std::string& identifier, const std::shared_ptr<IASTNode>& replaceWith);
         
         std::unique_ptr<IASTNode> CloneNode(IASTNode* node);

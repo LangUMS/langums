@@ -18,11 +18,8 @@ namespace Langums
         for (std::string line; std::getline(iss, line); )
         {
             line = ProcessLine(line);
-            if (line.length() > 0)
-            {
-                output.append(line);
-                output.append("\n");
-            }
+            output.append(line);
+            output.append("\n");
         }
 
         return output;

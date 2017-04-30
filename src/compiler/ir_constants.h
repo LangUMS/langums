@@ -22,6 +22,7 @@ namespace Langums
     enum ReservedSwitches
     {
         Switch_InstructionCounterMutex,
+        Switch_EventsMutex,
         Switch_ArithmeticUnderflow,
         Switch_Random0,
         Switch_Random1,

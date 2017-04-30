@@ -98,6 +98,11 @@ namespace Langums
 
         const CHK::Trigger& GetTrigger()
         {
+            if (m_NextAction >= 64)
+            {
+                throw IRCompilerException("Trigger actions list overflow");
+            }
+
             return m_Trigger;
         }
 

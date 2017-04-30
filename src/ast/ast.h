@@ -46,6 +46,7 @@ namespace Langums
         VariableDeclaration,
         EventCondition,
         EventDeclaration,
+        EventTemplateBlock,
         UnitProperties,
         UnitProperty
     };
@@ -151,6 +152,11 @@ namespace Langums
         const std::string& GetName() const
         {
             return m_Name;
+        }
+
+        void SetName(const std::string& name)
+        {
+            m_Name = name;
         }
 
         private:
@@ -452,6 +458,28 @@ namespace Langums
         {
             return GetChild(GetChildCount() - 1);
         }
+    };
+
+    class ASTEventTemplateBlock : public IASTNode
+    {
+        public:
+        ASTEventTemplateBlock(const std::string& iteratorName, const std::vector<std::string>& list) :
+            m_IteratorName(iteratorName), m_List(list), IASTNode(ASTNodeType::EventTemplateBlock)
+        {}
+
+        const std::string& GetIteratorName() const
+        {
+            return m_IteratorName;
+        }
+
+        const std::vector<std::string>& GetList() const
+        {
+            return m_List;
+        }
+
+        private:
+        std::string m_IteratorName;
+        std::vector<std::string> m_List;
     };
 
     class ASTUnitProperties : public IASTNode

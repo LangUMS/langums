@@ -1436,8 +1436,8 @@ namespace Langums
     class IREndGameInstruction : public IIRInstruction
     {
         public:
-        IREndGameInstruction (uint8_t playerMask, EndGameType type) :
-            m_PlayerMask (playerMask), m_EndGameType (type), IIRInstruction (IRInstructionType::EndGame)
+        IREndGameInstruction (uint8_t playerId, EndGameType type) :
+            m_PlayerId (playerId), m_EndGameType (type), IIRInstruction (IRInstructionType::EndGame)
         {}
 
         std::string DebugDump () const
@@ -1456,12 +1456,12 @@ namespace Langums
                 break;
             }
 
-            return SafePrintf ("END % %", PlayersByName[m_PlayerMask], condition);
+            return SafePrintf ("END % %", CHK::PlayersByName[m_PlayerId], condition);
         }
 
-        uint8_t GetPlayerMask () const
+        uint8_t GetPlayerId () const
         {
-            return m_PlayerMask;
+            return m_PlayerId;
         }
 
         EndGameType GetEndGameType () const
@@ -1470,7 +1470,7 @@ namespace Langums
         }
 
         private:
-        uint8_t m_PlayerMask;
+        uint8_t m_PlayerId;
         EndGameType m_EndGameType;
     };
 

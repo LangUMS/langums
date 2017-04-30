@@ -213,7 +213,7 @@ namespace Langums
 
         std::vector<std::unique_ptr<IIRInstruction>> m_PollEventsInstructions;
 
-        bool m_HasEvents = false;
+        unsigned int m_EventCount = 0;
         std::set<std::string> m_WavFilenames;
     };
 
