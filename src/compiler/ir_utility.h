@@ -40,10 +40,6 @@ namespace Langums
         {
             return "[UNDERFLOW]";
         }
-        else if (switchId == Switch_EventsMutex)
-        {
-            return "[EVNT MUTEX]";
-        }
 
         return SafePrintf("[SWITCH %]", switchId);
     }

@@ -1,5 +1,5 @@
 #define DEBUG true
-#define TEN_SECONDS 10000
+#define TEN_SECONDS 8000
 
 fn main() {
   print("Our heroes enter the arena.");
@@ -10,24 +10,14 @@ fn main() {
     sleep(TEN_SECONDS);
   }
   
-  spawn(ProtossProbe, Player7, 1, HeroesSpawn);
-  
-  set_alliance(Player1, Player7, Ally);
-  set_alliance(Player2, Player7, Ally);
-  set_alliance(Player3, Player7, Ally);
-  set_alliance(Player4, Player7, Ally);
-  set_alliance(Player5, Player7, Ally);
-  set_alliance(Player6, Player7, Ally);
-  set_alliance(Player7, Player1, Ally);
-  set_alliance(Player7, Player2, Ally);
-  set_alliance(Player7, Player3, Ally);
-  set_alliance(Player7, Player4, Ally);
-  set_alliance(Player7, Player5, Ally);
-  set_alliance(Player7, Player6, Ally);
+  set_alliance(AllPlayers, Player7, Ally);
+  set_alliance(Player7, AllPlayers, Ally);
   
   set_alliance(Player7, Player8, Enemy);
   set_alliance(Player8, Player7, Enemy);
-  
+ 
+  spawn(ProtossProbe, Player7, 1, HeroesSpawn);
+ 
   center_view(AllPlayers, HeroesSpawn);
   ping(AllPlayers, HeroesSpawn);
     
@@ -52,6 +42,50 @@ fn main() {
 global current_wave = 1;
 global probe_reached_target = false;
 //
+
+// shop logic
+
+global marine_shop_lock[8];
+global zergling_shop_lock[8];
+
+bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
+  print("hello world");
+}
+
+accumulate(Player1, AtLeast, 10, Minerals),
+bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
+  if (marine_shop_lock[0]) {
+    return;
+  }
+
+  take_resource(Player1, Minerals, 10);
+  spawn(TerranMarine, Player1, 1, BuyMarines);
+  print("You purchased a marine, take good care of it.");
+  marine_shop_lock[0] = true;
+}
+
+bring(Player1, Exactly, 0, AllUnits, BuyMarines) => {
+  marine_shop_lock[0] = false;
+}
+
+accumulate(Player1, AtLeast, 10, Minerals),
+bring(Player1, AtLeast, 1, AllUnits, BuyZerglings) => {
+  if (zergling_shop_lock[0]) {
+    return;
+  }
+
+  take_resource(Player1, Minerals, 10);
+  spawn(ZergZergling, Player1, 1, BuyZerglings);
+
+  print("Your purchased a zergling, send that beast to the slaughter.");
+  zergling_shop_lock[0] = true;
+}
+
+bring(Player1, Exactly, 0, AllUnits, BuyZerglings) => {
+  zergling_shop_lock[0] = false;
+}
+
+// end shop logic
 
 fn spawn_next_wave<Loc>(Loc) {
   current_wave++;
@@ -124,7 +158,7 @@ fn spawn_if_present<Player, Unit, Loc>(Player, Unit, Loc) {
   if (is_present(Player)) {
     spawn(Unit, Player, 1, Loc);
     add_resource(Player, Minerals, 10);
-    run_ai_script(Player7, TurnOnSharedVisionOfPlayer1WithCurrentPlayer);
+    run_ai_script(Player, TurnOnSharedVisionOfPlayer7WithCurrentPlayer);
   }
 }
 

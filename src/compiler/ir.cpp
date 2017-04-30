@@ -309,7 +309,7 @@ namespace Langums
                 }
 
                 auto switchId = nextSwitchId++;
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 2), m_PollEventsInstructions);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), m_PollEventsInstructions);
 
                 for (auto& instruction : bodyInstructions)
                 {
@@ -319,8 +319,6 @@ namespace Langums
                 EmitInstruction(new IRSetSwInstruction(switchId, 0), m_PollEventsInstructions);
             }
         }
-
-        EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), m_PollEventsInstructions);
 
         EmitInstruction(new IRChkPlayers(), m_Instructions);
 
@@ -347,8 +345,6 @@ namespace Langums
                 {
                     throw IRCompilerException("poll_events() can only be called from a single place");
                 }
-
-                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions);
 
                 for (auto& instruction : m_PollEventsInstructions)
                 {
@@ -1172,7 +1168,9 @@ namespace Langums
             }
 
             EmitFunction(declaration, instructions, aliases);
-            if (ignoreReturnValue)
+
+            auto hasReturnValue = instructions.back()->GetType() == IRInstructionType::Push;
+            if (hasReturnValue && ignoreReturnValue)
             {
                 EmitInstruction(new IRPopInstruction(), instructions);
             }
@@ -2156,6 +2154,39 @@ namespace Langums
                         instructions.push_back(std::move(instruction));
                     }
                 }
+                else if (expression->GetType() == ASTNodeType::ArrayExpression)
+                {
+                    auto arrayExpression = (ASTArrayExpression*)expression.get();
+
+                    if (bodyInstructions.size() == 0)
+                    {
+                        throw IRCompilerException("Disallowed if statement with empty body");
+                    }
+
+                    auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto offset = 1;
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        offset = 2;
+                    }
+
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions);
+
+                    for (auto& instruction : bodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+
+                    if (elseBodyInstructions.size() > 0)
+                    {
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions);
+                    }
+
+                    for (auto& instruction : elseBodyInstructions)
+                    {
+                        instructions.push_back(std::move(instruction));
+                    }
+                }
                 else if (expression->GetType() == ASTNodeType::BinaryExpression)
                 {
                     auto binaryExpression = (ASTBinaryExpression*)expression.get();
@@ -2428,7 +2459,7 @@ namespace Langums
         }
         else if (instructions.back()->GetType() != IRInstructionType::Push)
         {
-            EmitInstruction(new IRPushInstruction(0, true), instructions);
+            //EmitInstruction(new IRPushInstruction(0, true), instructions);
         }
 
         return startIndex;

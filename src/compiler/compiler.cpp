@@ -183,7 +183,6 @@ namespace Langums
                 }
 
                 TriggerBuilder eventTrigger(-1, nullptr, m_TriggersOwner);
-                eventTrigger.Cond_TestSwitch(Switch_EventsMutex, false);
 
                 auto switchId = evnt->GetSwitchId();
                 eventTrigger.Action_SetSwitch(switchId, TriggerActionState::SetSwitch);
@@ -198,6 +197,8 @@ namespace Langums
                         auto bring = (IRBringCondInstruction*)condition.get();
                         auto locationId = GetLocationIdByName(bring->GetLocationName());
 
+                        eventTrigger.SetOwner(bring->GetPlayerId() + 1);
+
                         eventTrigger.Cond_Bring(
                             bring->GetPlayerId(),
                             (TriggerComparisonType)bring->GetComparison(),
@@ -209,6 +210,8 @@ namespace Langums
                     else if (condition->GetType() == IRInstructionType::AccumCond)
                     {
                         auto accum = (IRAccumCondInstruction*)condition.get();
+
+                        eventTrigger.SetOwner(accum->GetPlayerId() + 1);
 
                         eventTrigger.Cond_Accumulate(
                             accum->GetPlayerId(),
@@ -323,6 +326,7 @@ namespace Langums
                     else if (condition->GetType() == IRInstructionType::OpponentsCond)
                     {
                         auto opponents = (IROpponentsCondInstruction*)condition.get();
+                        eventTrigger.SetOwner(opponents->GetPlayerId() + 1);
                         eventTrigger.Cond_Opponents(opponents->GetPlayerId(), (TriggerComparisonType)opponents->GetComparison(), opponents->GetQuantity());
                     }
                 }
