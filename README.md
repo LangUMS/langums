@@ -324,6 +324,8 @@ Notes:
 | set_mission_objectives(Text, optional: [Player](#player))                                   | Sets the mission objectives, defaults to all players.        |
 | move_loc([Unit](#unit), [Player](#player), SrcLocation, DstLocation)                        | Centers DstLocation on a unit at SrcLocation.                |
 | set_countdown(Expression)                                                                   | Sets the countdown timer.                                    |
+| add_countdown(Expression)                                                                   | Adds to the countdown timer.                                 |
+| sub_countdown(Expression)                                                                   | Subtracts from the countdown timer.                          |
 | pause_countdown()                                                                           | Pauses the countdown timer.                                  |
 | unpause_countdown()                                                                         | Unpauses the countdown timer.                                |
 | mute_unit_speech()                                                                          | Mutes unit speech.                                           |

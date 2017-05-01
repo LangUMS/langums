@@ -3,25 +3,24 @@
 
 #define DEBUG false
 #define FOUR_SECONDS 4000
-#define INVALID_TARGET 7
-
-#define PROBE_COUNT 8
 
 // prices
-#define ZERGLING_COST 25
 #define MARINE_COST 50
-#define ZEALOT_COST 100
+#define MEDIC_COST 75
+#define VULTURE_COST 100
+#define TANK_COST 250
+#define SCV_COST 30
 //
 
 // globals
-global current_wave = 2;
+global current_wave = 0;
 global probe_spawned = false;
 //
 
 fn main() {
   setup_alliances();
 
-  center_view(AllPlayers, HeroesSpawn);
+  center_view(AllPlayers, MapCenter);
   spawn_heroes();
 
   set_mission_objectives("""- Don't let the probes die.'
@@ -33,7 +32,7 @@ fn main() {
   {
     sleep(FOUR_SECONDS);
     print("Buy units from the beacons.");
-    ping(AllPlayers, BuyMarines);
+    ping(AllPlayers, BuyVultures);
     sleep(FOUR_SECONDS);
     ping(AllPlayers, Upgrades);
     center_view(AllPlayers, Upgrades);
@@ -41,36 +40,24 @@ fn main() {
     sleep(FOUR_SECONDS);
   }
 
-  center_view(AllPlayers, HeroesSpawn);
-  ping(AllPlayers, HeroesSpawn);
-  spawn(ProtossProbe, Player7, PROBE_COUNT, MapCenter);
-  print("The probes have spawned, protect them with your life!");
-  sleep(2000);
+  center_view(AllPlayers, MapCenter);
+  ping(AllPlayers, MapCenter);
+  print("Stop the probes from getting killed before reaching the beacons to earn gas.");
   
   add_resource(AllPlayers, Minerals, 10);
   
-  set_countdown(35);
+  set_countdown(10);
   clear_buffered_events();
   probe_spawned = true;
-  order(ProtossProbe, Player7, Move, AnyLocation, MapCenter);
 
   while (true) {
-    move_loc(ProtossProbe, Player7, AnyLocation, ProbeLocation); // center ProbeLocation on any probe
-    modify(AllUnits, Force1, 10, Health, 100, "HealStation");
+    modify(AllUnits, Force1, 10, Health, 100, HealStation);
+    move(TerranEngineeringBay, AllPlayers, 1, AnyLocation, Upgrades);
     poll_events();
   }
 }
 
 // lose conditions
-
-commands(Player7, Exactly, 0, ProtossProbe) => {
-  if (!probe_spawned) {
-    return;
-  }
-
-  print("The probe is dead. You are losers.");
-  end(AllPlayers, Defeat);
-}
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
   commands(PlayerId, Exactly, 0, HeroJimRaynorMarine) => {
@@ -78,7 +65,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
       return;
     }
 
-    print("You have died a glorious death. o7");
+    print("You have died a glorious death. o7", PlayerId);
     end(PlayerId, Defeat);
   }
 }
@@ -88,22 +75,34 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 // shop logic
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
-  accumulate(PlayerId, AtLeast, MARINE_COST, Minerals),
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines) => {
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
+  accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
     take_resource(PlayerId, Minerals, MARINE_COST);
     spawn(TerranMarine, PlayerId, 1, MapCenter);
   }
 
-  accumulate(PlayerId, AtLeast, ZERGLING_COST, Minerals),
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyZerglings) => {
-    take_resource(PlayerId, Minerals, ZERGLING_COST);
-    spawn(ZergZergling, PlayerId, 1, MapCenter);
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
+  accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
+    take_resource(PlayerId, Minerals, MEDIC_COST);
+    spawn(TerranMedic, PlayerId, 1, MapCenter);
   }
 
-  accumulate(PlayerId, AtLeast, ZEALOT_COST, Minerals),
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyZealots) => {
-    take_resource(PlayerId, Minerals, ZEALOT_COST);
-    spawn(ProtossZealot, PlayerId, 1, MapCenter);
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyVultures),
+  accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
+    take_resource(PlayerId, Minerals, VULTURE_COST);
+    spawn(TerranVulture, PlayerId, 1, MapCenter);
+  }
+
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySiegeTanks),
+  accumulate(PlayerId, AtLeast, TANK_COST, Minerals) => {
+    take_resource(PlayerId, Minerals, TANK_COST);
+    spawn(TerranSiegeTankTankMode, PlayerId, 1, MapCenter);
+  }
+
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySCV),
+  accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
+    take_resource(PlayerId, Minerals, SCV_COST);
+    spawn(TerranSCV, PlayerId, 1, MapCenter);
   }
 }
 
@@ -111,104 +110,88 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 // reward logic
 
-deaths(Player8, AtLeast, 1, ZergZergling) => {
+deaths(Player8, AtLeast, 3, ZergZergling) => {
   remove_deaths(Player8, ZergZergling, 1);
   add_resource(AllPlayers, Minerals, 1);
 }
 
-deaths(Player8, AtLeast, 1, ZergHydralisk) => {
+deaths(Player8, AtLeast, 2, ZergHydralisk) => {
   remove_deaths(Player8, ZergHydralisk, 1);
   add_resource(AllPlayers, Minerals, 1);
 }
 
 deaths(Player8, AtLeast, 1, ZergUltralisk) => {
   remove_deaths(Player8, ZergUltralisk, 1);
-  add_resource(AllPlayers, Minerals, 3);
+  add_resource(AllPlayers, Minerals, 1);
 }
 
-deaths(Player8, AtLeast, 1, ZergInfestedTerran) => {
-  remove_deaths(Player8, ZergInfestedTerran, 1);
-  add_resource(AllPlayers, Minerals, 3);
+deaths(Player8, AtLeast, 4, ZergInfestedTerran) => {
+  remove_deaths(Player8, ZergInfestedTerran, 2);
+  add_resource(AllPlayers, Minerals, 1);
 }
 
 // end reward logic
 
 fn spawn_next_wave() {
-  var x = current_wave + current_wave;
-  add_resource(AllPlayers, Gas, x);
+  var x = current_wave;
 
-  spawn(ZergZergling, Player8, x, EnemySpawn1);
-  spawn(ZergZergling, Player8, x, EnemySpawn2);
-  
-  if (current_wave <= 4) {
+  spawn(ZergZergling, Player8, current_wave, EnemySpawn1);
+  spawn(ZergZergling, Player8, current_wave, EnemySpawn2);
+
+  if (current_wave <= 8) {
     return;
   }
 
+  x = current_wave - 4;
   spawn(ZergHydralisk, Player8, x, EnemySpawn1);
-  
-  if (current_wave <= 9) {
-    return;
-  }
-
-  spawn(ZergUltralisk, Player8, x - 8, EnemySpawn2);
 
   if (current_wave <= 15) {
     return;
   }
+
+  x = current_wave - 6;
+  spawn(ZergUltralisk, Player8, x, EnemySpawn2);
+
+  if (current_wave <= 25) {
+    return;
+  }
   
-  spawn(ZergInfestedTerran, Player8, x, EnemySpawn2);
-}
+  spawn(ZergInfestedTerran, Player8, current_wave, EnemySpawn2);
 
-fn attack_at<Loc>(Loc) { // order all enemies to attack at a location
-  order(AllUnits, Player8, Attack, AnyLocation, Loc);
-}
-
-countdown(Exactly, 34) => {
-  set_countdown(33);
-
-  current_wave++;
-  spawn_next_wave();
-  
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 30) => {
-  set_countdown(29);
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 25) => {
-  set_countdown(24);
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 20) => {
-  set_countdown(19);
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 15) => {
-  set_countdown(14);
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 10) => {
-  set_countdown(9);
-  attack_at(ProbeLocation);
-}
-
-countdown(Exactly, 5) => {
-  set_countdown(4);
-  attack_at(ProbeLocation);
+  if (current_wave >= 27) {
+    current_wave = 26;
+  }
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(40);
+  set_countdown(20);
+  add_countdown(current_wave * 2);
+
+  current_wave++;
+  spawn_next_wave();
+  spawn_probes();
+
+  var rnd = random();
+
+  if (rnd < 100) {
+    order(AllUnits, Player8, Patrol, EnemySpawn1, ProbeTarget3);
+    order(AllUnits, Player8, Patrol, EnemySpawn2, ProbeTarget4);
+    return;
+  }
+
+  if (rnd < 200) {
+    order(AllUnits, Player8, Patrol, EnemySpawn1, ProbeTarget1);
+    order(AllUnits, Player8, Patrol, EnemySpawn2, ProbeTarget2);
+    return;
+  }
+
+  order(AllUnits, Player8, Patrol, AnyLocation, MapCenter);
 }
 
-fn spawn_if_present<Player, Unit, Loc>(Player, Unit, Loc) {
-  if (is_present(Player)) {
-    spawn(Unit, Player, 1, Loc);
+fn spawn_if_present<PlayerId, Unit, Loc>(PlayerId, Unit, Loc) {
+  if (is_present(PlayerId)) {
+    spawn(Unit, PlayerId, 1, Loc);
+    set_doodad(PlayerId, AllUnits, Disable, DisableClick);
   }
 }
 
@@ -230,68 +213,83 @@ fn setup_alliances() {
 }
 
 fn spawn_heroes() {
-  spawn_if_present(Player1, HeroJimRaynorMarine, HeroesSpawn);
-  spawn_if_present(Player2, HeroJimRaynorMarine, HeroesSpawn);
-  spawn_if_present(Player3, HeroJimRaynorMarine, HeroesSpawn);
-  spawn_if_present(Player4, HeroJimRaynorMarine, HeroesSpawn);
-  spawn_if_present(Player5, HeroJimRaynorMarine, HeroesSpawn);
-  spawn_if_present(Player6, HeroJimRaynorMarine, HeroesSpawn);
+  spawn_if_present(Player1, HeroJimRaynorMarine, MapCenter);
+  spawn_if_present(Player2, HeroJimRaynorMarine, MapCenter);
+  spawn_if_present(Player3, HeroJimRaynorMarine, MapCenter);
+  spawn_if_present(Player4, HeroJimRaynorMarine, MapCenter);
+  spawn_if_present(Player5, HeroJimRaynorMarine, MapCenter);
+  spawn_if_present(Player6, HeroJimRaynorMarine, MapCenter);
   
-  center_view(AllPlayers, HeroesSpawn);
+  center_view(AllPlayers, MapCenter);
 }
 
 // end initialization stuff
 
-// probe random walk
-
-bring(Player7, AtLeast, 1, ProtossProbe, MapCenter) => {
-  pick_random_target(MapCenter);
+bring(Player8, AtLeast, 1, AllUnits, ProbeTarget1) => {
+  order(AllUnits, Player8, Patrol, ProbeTarget1, MapCenter);
 }
 
+bring(Player8, AtLeast, 1, AllUnits, ProbeTarget2) => {
+  order(AllUnits, Player8, Patrol, ProbeTarget2, MapCenter);
+}
+
+bring(Player8, AtLeast, 1, AllUnits, ProbeTarget3) => {
+  order(AllUnits, Player8, Patrol, ProbeTarget3, MapCenter);
+}
+
+bring(Player8, AtLeast, 1, AllUnits, ProbeTarget4) => {
+  order(AllUnits, Player8, Patrol, ProbeTarget4, MapCenter);
+}
+
+// probe random walk
+
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget1) => {
-  pick_random_target(ProbeTarget1);
+  add_resource(AllPlayers, Gas, 2);
+  remove(ProtossProbe, Player7, 1, ProbeTarget1);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget2) => {
-  pick_random_target(ProbeTarget2);
+  add_resource(AllPlayers, Gas, 2);
+  remove(ProtossProbe, Player7, 1, ProbeTarget2);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget3) => {
-  pick_random_target(ProbeTarget3);
+  add_resource(AllPlayers, Gas, 2);
+  remove(ProtossProbe, Player7, 1, ProbeTarget3);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget4) => {
-  pick_random_target(ProbeTarget4);
+  add_resource(AllPlayers, Gas, 2);
+  remove(ProtossProbe, Player7, 1, ProbeTarget4);
 }
 
-bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget5) => {
-  pick_random_target(ProbeTarget5);
-}
+fn spawn_probes() {
+  spawn(ProtossProbe, Player7, 6, MapCenter);
+  sleep(250);
+  spawn(ProtossProbe, Player7, 6, MapCenter);
 
-fn pick_random_target<SrcLoc>(SrcLoc) {
   var rnd = random();
   
-  if (rnd <= 50) {
-    order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget1);
+  if (rnd <= 65) {
+    ping(AllPlayers, ProbeTarget1);
+    order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget1);
     return;
   }
   
-  if (rnd <= 100) {
-    order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget2);
+  if (rnd <= 130) {
+    ping(AllPlayers, ProbeTarget2);
+    order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget2);
     return;
   }
   
-  if (rnd <= 150) {
-    order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget3);
+  if (rnd <= 195) {
+    ping(AllPlayers, ProbeTarget3);
+    order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget3);
     return;
   }
-  
-  if (rnd <= 200) {
-    order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget4);
-    return;
-  }
-  
-  order(ProtossProbe, Player7, Move, SrcLoc, ProbeTarget5);
+
+  ping(AllPlayers, ProbeTarget4);
+  order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget4);
 }
 
 // end probe random walk

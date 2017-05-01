@@ -601,6 +601,40 @@ namespace Langums
 
             EmitInstruction(new IRSetCountdownInstruction(regId, isLiteral), instructions);
         }
+        else if (fnName == "add_countdown")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("add_countdown() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 1)
+            {
+                throw IRCompilerException("add_countdown() takes exactly one argument");
+            }
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRAddCountdownInstruction(regId, isLiteral), instructions);
+        }
+        else if (fnName == "sub_countdown")
+        {
+            if (!fnCall->HasChildren())
+            {
+                throw IRCompilerException("sub_countdown() called without arguments");
+            }
+
+            if (fnCall->GetChildCount() != 1)
+            {
+                throw IRCompilerException("sub_countdown() takes exactly one argument");
+            }
+
+            bool isLiteral = false;
+            auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
+
+            EmitInstruction(new IRSubCountdownInstruction(regId, isLiteral), instructions);
+        }
         else if (fnName == "pause_countdown()")
         {
             EmitInstruction(new IRPauseCountdownInstruction(false), instructions);
@@ -2021,6 +2055,7 @@ namespace Langums
                     throw IRCompilerException(SafePrintf("Array declarations cannot have initializers, see declaration of \"%\"", variableDeclaration->GetName()));
                 }
 
+                aliases.Allocate(variableDeclaration->GetName(), 1);
                 auto regId = RegisterNameToIndex(variableDeclaration->GetName(), 0, aliases);
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
                 {
@@ -2359,7 +2394,7 @@ namespace Langums
                         throw IRCompilerException("Disallowed while statement with empty body");
                     }
 
-                    auto loopStart = instructions.size();
+                    auto loopStart = (int)instructions.size();
                     auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases);
                     EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions);
 
@@ -2369,7 +2404,7 @@ namespace Langums
                         instructions.push_back(std::move(instruction));
                     }
 
-                    EmitInstruction(new IRJmpInstruction(loopStart, true), instructions);
+                    EmitInstruction(new IRJmpInstruction(loopStart - (int)instructions.size()), instructions);
                 }
                 else if (expression->GetType() == ASTNodeType::BinaryExpression)
                 {

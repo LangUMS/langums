@@ -1108,7 +1108,7 @@ namespace Langums
             auto& action = trigger.m_Actions[actionId];
             action.m_ActionType = TriggerActionType::SetDoodadState;
             action.m_Arg1 = unitId;
-            action.m_Group = playerId + 1;
+            action.m_Group = playerId;
             action.m_Source = locationId + 1;
             action.m_Modifier = (uint8_t)state;
             m_HasChanges = true;

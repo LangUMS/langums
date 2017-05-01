@@ -55,6 +55,8 @@ namespace Langums
         IncScore,       // increments the score for a player
         DecScore,       // decrements the score for a player
         SetCountdown,   // sets the countdown timer,
+        AddCountdown,   // adds to the countdown timer,
+        SubCountdown,   // subtracts from the countdown timer,
         PauseCountdown, // pauses/ unpauses the countdown timer
         MuteUnitSpeech, // mutes/ unmutes unit speech
         SetDeaths,      // sets the death count for a given unit
@@ -1851,6 +1853,74 @@ namespace Langums
             else
             {
                 return SafePrintf ("SETCNDWN %", RegisterIdToString (m_RegisterId));
+            }
+        }
+
+        uint32_t GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral () const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint32_t m_RegisterId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRAddCountdownInstruction : public IIRInstruction
+    {
+        public:
+        IRAddCountdownInstruction (uint32_t regId, bool isLiteralValue) :
+            m_RegisterId (regId), m_IsValueLiteral (isLiteralValue), IIRInstruction (IRInstructionType::AddCountdown)
+        {}
+
+        std::string DebugDump () const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf ("ADDCNDWN %", m_RegisterId);
+            }
+            else
+            {
+                return SafePrintf ("ADDCNDWN %", RegisterIdToString (m_RegisterId));
+            }
+        }
+
+        uint32_t GetRegisterId () const
+        {
+            return m_RegisterId;
+        }
+
+        bool IsValueLiteral () const
+        {
+            return m_IsValueLiteral;
+        }
+
+        private:
+        uint32_t m_RegisterId;
+        bool m_IsValueLiteral;
+    };
+
+    class IRSubCountdownInstruction : public IIRInstruction
+    {
+        public:
+        IRSubCountdownInstruction (uint32_t regId, bool isLiteralValue) :
+            m_RegisterId (regId), m_IsValueLiteral (isLiteralValue), IIRInstruction (IRInstructionType::SubCountdown)
+        {}
+
+        std::string DebugDump () const
+        {
+            if (m_IsValueLiteral)
+            {
+                return SafePrintf ("SUBCNDWN %", m_RegisterId);
+            }
+            else
+            {
+                return SafePrintf ("SUBCNDWN %", RegisterIdToString (m_RegisterId));
             }
         }
 
