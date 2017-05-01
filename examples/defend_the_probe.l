@@ -38,7 +38,10 @@ fn main() {
     center_view(AllPlayers, Upgrades);
     print("Buy upgrades from here.");
     sleep(FOUR_SECONDS);
-  }
+  } 
+
+  add_resource(AllPlayers, Minerals, 50);
+  add_resource(AllPlayers, Gas, 50);
 
   center_view(AllPlayers, MapCenter);
   ping(AllPlayers, MapCenter);
@@ -81,7 +84,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     spawn(TerranMarine, PlayerId, 1, MapCenter);
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMedics),
   accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
     take_resource(PlayerId, Minerals, MEDIC_COST);
     spawn(TerranMedic, PlayerId, 1, MapCenter);
@@ -133,30 +136,29 @@ deaths(Player8, AtLeast, 4, ZergInfestedTerran) => {
 // end reward logic
 
 fn spawn_next_wave() {
-  var x = current_wave;
-
-  spawn(ZergZergling, Player8, current_wave, EnemySpawn1);
-  spawn(ZergZergling, Player8, current_wave, EnemySpawn2);
+  spawn(ZergZergling, Player8, 6, EnemySpawn1);
+  spawn(ZergZergling, Player8, 6, EnemySpawn2);
 
   if (current_wave <= 8) {
     return;
   }
 
-  x = current_wave - 4;
-  spawn(ZergHydralisk, Player8, x, EnemySpawn1);
+  spawn(ZergZergling, Player8, 6, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, 3, EnemySpawn1);
 
   if (current_wave <= 15) {
     return;
   }
 
-  x = current_wave - 6;
-  spawn(ZergUltralisk, Player8, x, EnemySpawn2);
+  spawn(ZergZergling, Player8, 6, EnemySpawn2);
+  spawn(ZergUltralisk, Player8, 2, EnemySpawn2);
 
   if (current_wave <= 25) {
     return;
   }
   
-  spawn(ZergInfestedTerran, Player8, current_wave, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, 3, EnemySpawn1);
+  spawn(ZergInfestedTerran, Player8, 4, EnemySpawn2);
 
   if (current_wave >= 27) {
     current_wave = 26;
@@ -164,11 +166,11 @@ fn spawn_next_wave() {
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(20);
-  add_countdown(current_wave * 2);
+  set_countdown(30);
 
   current_wave++;
   spawn_next_wave();
+
   spawn_probes();
 
   var rnd = random();
@@ -241,8 +243,6 @@ bring(Player8, AtLeast, 1, AllUnits, ProbeTarget4) => {
   order(AllUnits, Player8, Patrol, ProbeTarget4, MapCenter);
 }
 
-// probe random walk
-
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget1) => {
   add_resource(AllPlayers, Gas, 2);
   remove(ProtossProbe, Player7, 1, ProbeTarget1);
@@ -264,8 +264,6 @@ bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget4) => {
 }
 
 fn spawn_probes() {
-  spawn(ProtossProbe, Player7, 6, MapCenter);
-  sleep(250);
   spawn(ProtossProbe, Player7, 6, MapCenter);
 
   var rnd = random();
@@ -292,4 +290,3 @@ fn spawn_probes() {
   order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget4);
 }
 
-// end probe random walk

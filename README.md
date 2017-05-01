@@ -486,7 +486,7 @@ The template argument is gone and all instances of it have been replaced with it
 
 Sometimes you wish to create an event handler for all players but still know exactly which player triggered it. You can of course copy & paste the same event several times and change the player in each one but that would be pretty ugly and unmaintainable. For example say you have a shop in your map and want every human player to be able to use it. You could do it like this:
 
-```
+```c
 accumulate(Player1, AtLeast, 10, Minerals),
 bring(Player1, AtLeast, 1, AllUnits, BuyMarines) => {
   take_resource(Player1, Minerals, 10);
@@ -513,7 +513,7 @@ bring(Player3, AtLeast, 1, AllUnits, BuyMarines) => {
 
 Or you could use a template event declarations like the example below.
 
-```
+```c
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
   accumulate(PlayerId, AtLeast, 10, Minerals),
   bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines) => {

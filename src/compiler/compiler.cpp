@@ -64,11 +64,11 @@ namespace Langums
 
         m_StackPointer = g_RegisterMap.size() - 1;
 
-        for (auto i = 0u; i < instructions.size(); i++) // emit event triggers first
+        for (auto i = 0u; i < instructions.size(); i++)
         {
             auto& instruction = instructions[i];
             auto type = instruction->GetType();
-            
+
             if (type == IRInstructionType::Unit)
             {
                 auto unit = (IRUnitInstruction*)instruction.get();
@@ -174,7 +174,13 @@ namespace Langums
                     i++;
                 }
             }
-            else if (type == IRInstructionType::Event)
+        }
+
+        for (auto i = 0u; i < instructions.size(); i++)
+        {
+            auto& instruction = instructions[i];
+            auto type = instruction->GetType();
+            if (type == IRInstructionType::Event)
             {
                 auto evnt = (IREventInstruction*)instruction.get();
                 auto conditionsCount = evnt->GetConditionsCount();
@@ -335,10 +341,6 @@ namespace Langums
                 }
 
                 PushTriggers(eventTrigger.GetTriggers());
-            }
-            else
-            {
-                break;
             }
         }
 
