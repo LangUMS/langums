@@ -96,14 +96,14 @@ namespace Langums
         void Action_Transmission(unsigned int stringId, unsigned int unitId, unsigned int locationId,
             unsigned int time, CHK::TriggerActionState modifier, unsigned int wavStringId, unsigned int wavTime);
 
-        const CHK::Trigger& GetTrigger()
+        const std::vector<CHK::Trigger>& GetTriggers()
         {
             if (m_NextAction >= 64)
             {
-                throw IRCompilerException("Trigger actions list overflow");
+                throw IRCompilerException("Internal error. Trigger actions list overflow");
             }
 
-            return m_Trigger;
+            return m_Triggers;
         }
 
         const unsigned int GetAddress() const
@@ -116,12 +116,27 @@ namespace Langums
             return m_HasChanges;
         }
 
+        bool IsMultiple() const
+        {
+            return m_Triggers.size() > 1;
+        }
+
+        void AddSecondary(const TriggerBuilder& builder)
+        {
+            for (auto& trigger : builder.m_Triggers)
+            {
+                m_Triggers.push_back(trigger);
+            }
+        }
+
         private:
         bool m_HasChanges = false;
         unsigned int m_Address = 0;
         unsigned int m_NextCondition = 0;
         unsigned int m_NextAction = 0;
-        CHK::Trigger m_Trigger;
+        
+        std::vector<CHK::Trigger> m_Triggers;
+
         IIRInstruction* m_Instruction = nullptr;
         uint8_t m_PlayerMask = 7;
     };

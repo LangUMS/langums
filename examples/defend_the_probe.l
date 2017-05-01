@@ -25,14 +25,15 @@ fn main() {
   spawn_heroes();
 
   set_mission_objectives("""- Don't let the probes die.'
-- You can buy marines and zerglings from the beacons
+- You can buy units at the beacons.
+- Upgrades are in the top right corner.
   """);
 
   if (!DEBUG)
   {
-    print("The probes will spawn in 15 seconds, prepare...");
     sleep(FOUR_SECONDS);
     print("Buy units from the beacons.");
+    ping(AllPlayers, BuyMarines);
     sleep(FOUR_SECONDS);
     ping(AllPlayers, Upgrades);
     center_view(AllPlayers, Upgrades);
@@ -133,12 +134,11 @@ deaths(Player8, AtLeast, 1, ZergInfestedTerran) => {
 // end reward logic
 
 fn spawn_next_wave() {
-  add_resource(AllPlayers, Gas, 5);
+  var x = current_wave + current_wave;
+  add_resource(AllPlayers, Gas, x);
 
-  var x = current_wave;
-
-  spawn(ZergZergling, Player8, x + x, EnemySpawn1);
-  spawn(ZergZergling, Player8, x + x, EnemySpawn2);
+  spawn(ZergZergling, Player8, x, EnemySpawn1);
+  spawn(ZergZergling, Player8, x, EnemySpawn2);
   
   if (current_wave <= 4) {
     return;
@@ -147,13 +147,6 @@ fn spawn_next_wave() {
   spawn(ZergHydralisk, Player8, x, EnemySpawn1);
   
   if (current_wave <= 9) {
-    return;
-  }
-  
-  spawn(ZergZergling, Player8, x + x, EnemySpawn1);
-  spawn(ZergZergling, Player8, x + x, EnemySpawn2);
-
-  if (current_wave <= 13) {
     return;
   }
 

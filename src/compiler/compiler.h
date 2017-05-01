@@ -58,6 +58,27 @@ namespace Langums
         unsigned int GetLocationIdByName(const std::string& name);
 
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
+
+        void PushTriggers(const std::vector<CHK::Trigger>& triggers, IIRInstruction* jmpTarget = nullptr)
+        {
+            m_Triggers.reserve(m_Triggers.size() + triggers.size());
+
+            for (auto& trigger : triggers)
+            {
+                m_Triggers.push_back(trigger);
+                if (jmpTarget != nullptr)
+                {
+                    auto ptr = &m_Triggers.back();
+                    m_JmpPatchups.insert(std::make_pair(ptr, jmpTarget));
+                }
+            }
+        }
+
+        std::vector<CHK::Trigger> m_Triggers;
+        std::unordered_map<Trigger*, IIRInstruction*> m_JmpPatchups;
+        std::set<IIRInstruction*> m_JumpTargets;
+        std::unordered_map<IIRInstruction*, unsigned int> m_JumpAddresses;
+
         uint32_t m_CopyBatchSize = 8192u;
         uint32_t m_HyperTriggerCount = 5;
         uint8_t m_TriggersOwner = 1;
@@ -68,14 +89,8 @@ namespace Langums
         CHK::CHKCuwpChunk* m_CuwpChunk = nullptr;
         CHK::CHKCuwpUsedChunk* m_CuwpUsedChunk = nullptr;
 
-        std::vector<CHK::Trigger> m_Triggers;
-        std::set<IIRInstruction*> m_JumpTargets;
-        std::unordered_map<IIRInstruction*, unsigned int> m_JumpAddresses;
-
         unsigned int m_StackPointer;
         unsigned int m_MultiplyAddress;
-
-        bool m_DebugTrace = true;
 
         std::vector<RegisterDef> m_RegisterMap;
     };
