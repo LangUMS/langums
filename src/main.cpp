@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers (default: 65536).", cxxopts::value<unsigned int>())
         ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1).", cxxopts::value<unsigned int>())
         ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues).", cxxopts::value<bool>())
+        ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes, but you can open the map in StarEdit.", cxxopts::value<bool>())
         ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
         ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
         ;
@@ -582,7 +583,14 @@ int main(int argc, char* argv[])
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);
 
-    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, MPQ_FILE_REPLACEEXISTING | MPQ_FILE_COMPRESS, &scenarioFile))
+    auto fileFlags = MPQ_FILE_REPLACEEXISTING | MPQ_FILE_COMPRESS;
+    if (opts.count("disable-compression") > 0)
+    {
+        fileFlags = MPQ_FILE_REPLACEEXISTING;
+        LOG_F("(!) Warning! Compression is disabled. Resulting file size will be much larger tha usual.");
+    }
+
+    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, fileFlags, &scenarioFile))
     {
         LOG_EXITERR("Failed to open scenario.chk for writing.");
         return 1;

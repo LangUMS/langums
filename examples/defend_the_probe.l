@@ -8,8 +8,9 @@
 #define MARINE_COST 50
 #define MEDIC_COST 75
 #define VULTURE_COST 100
+#define FIREBAT_COST 150
 #define TANK_COST 250
-#define SCV_COST 30
+#define SCV_COST 35
 //
 
 // globals
@@ -23,17 +24,23 @@ fn main() {
   center_view(AllPlayers, MapCenter);
   spawn_heroes();
 
-  set_mission_objectives("""- Don't let the probes die.'
+  set_mission_objectives("""- Don't let the probes die until they deliver the cargo.'
 - You can buy units at the beacons.
-- Upgrade your units with gas.
+- Upgrade your units with gas you get from deliveries.
   """);
 
-  show_leaderboard_goal("Probes left to save", Points, 100, Custom);  
+  show_leaderboard_goal("deliveries left to make", Points, 32, Custom);  
+  leaderboard_show_cpu(Disable);
 
   if (!DEBUG)
   {
     sleep(FOUR_SECONDS);
     print("Buy units from the beacons.");
+    ping(AllPlayers, BuyMarines);
+    ping(AllPlayers, BuySCV);
+    ping(AllPlayers, BuyMedics);
+    ping(AllPlayers, BuyFirebats);
+    ping(AllPlayers, BuySiegeTanks);
     ping(AllPlayers, BuyVultures);
     sleep(FOUR_SECONDS);
     ping(AllPlayers, Upgrades);
@@ -42,14 +49,26 @@ fn main() {
     sleep(FOUR_SECONDS);
   }
 
+  center_view(AllPlayers, MapCenter);
+  ping(AllPlayers, MapCenter);
+  print("Stop the probes from getting killed before making a delivery to earn gas.");
+  sleep(3000);
+
+  print("Probes take cargo from these four beacons...");
+  ping(AllPlayers, ProbeTarget1);
+  ping(AllPlayers, ProbeTarget2);
+  ping(AllPlayers, ProbeTarget3);
+  ping(AllPlayers, ProbeTarget4);
+  sleep(2000);
+
+  ping(AllPlayers, Delivery);
+  print("...and deliver it here.");
+  sleep(1000);
+
   add_resource(AllPlayers, Minerals, 100);
   add_resource(AllPlayers, Gas, 50);
 
-  center_view(AllPlayers, MapCenter);
-  ping(AllPlayers, MapCenter);
-  print("Stop the probes from getting killed before reaching the beacons to earn gas.");
-  
-  set_countdown(10);
+  set_countdown(20);
   clear_buffered_events();
   probe_spawned = true;
 
@@ -61,9 +80,17 @@ fn main() {
   }
 }
 
+// spawn objective pickups
+
+for <TargetLoc> in (ProbeTarget1, ProbeTarget2, ProbeTarget3, ProbeTarget4) {
+  bring(Player7, Exactly, 0, PowerupDataDisk, TargetLoc) => {
+    spawn(PowerupDataDisk, Player7, 1, TargetLoc);
+  }
+}
+
 // win/ lose conditions
 
-score(Player7, Custom, AtLeast, 100) => {
+score(Player7, Custom, AtLeast, 32) => {
   end(AllPlayers, Victory);
 }
 
@@ -82,72 +109,49 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 // shop logic
 
-global shop_locks[6];
-
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
-
-  bring(PlayerId, Exactly, 0, AllUnits, BuyMarines),
-  bring(PlayerId, Exactly, 0, AllUnits, BuyVultures),  
-  bring(PlayerId, Exactly, 0, AllUnits, BuySiegeTanks),
-  bring(PlayerId, Exactly, 0, AllUnits, BuySCV),    
-  bring(PlayerId, Exactly, 0, AllUnits, BuyMedics) => {
-    shop_locks[PlayerId] = false;
-  }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
-    if (shop_locks[PlayerId]) {
-      return;
-    }
-
     take_resource(PlayerId, Minerals, MARINE_COST);
     spawn(TerranMarine, PlayerId, 1, MapCenter);
-    shop_locks[PlayerId] = true;
+    move(AllUnits, PlayerId, 100, BuyMarines, BuyMarinesReturn);
   }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuyMedics),
   accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
-    if (shop_locks[PlayerId]) {
-      return;
-    }
-
     take_resource(PlayerId, Minerals, MEDIC_COST);
     spawn(TerranMedic, PlayerId, 1, MapCenter);
-    shop_locks[PlayerId] = true;
+    move(AllUnits, PlayerId, 100, BuyMedics, BuyMedicsReturn);
   }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuyVultures),
   accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
-    if (shop_locks[PlayerId]) {
-      return;
-    }
-
     take_resource(PlayerId, Minerals, VULTURE_COST);
     spawn(TerranVulture, PlayerId, 1, MapCenter);
-    shop_locks[PlayerId] = true;
+    move(AllUnits, PlayerId, 100, BuyVultures, BuyVulturesReturn);
+  }
+
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyFirebats),
+  accumulate(PlayerId, AtLeast, FIREBAT_COST, Minerals) => {
+    take_resource(PlayerId, Minerals, FIREBAT_COST);
+    spawn(TerranFirebat, PlayerId, 1, MapCenter);
+    move(AllUnits, PlayerId, 100, BuyFirebats, BuyFirebatsReturn);
   }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuySiegeTanks),
   accumulate(PlayerId, AtLeast, TANK_COST, Minerals) => {
-    if (shop_locks[PlayerId]) {
-      return;
-    }
-
     take_resource(PlayerId, Minerals, TANK_COST);
     spawn(TerranSiegeTankTankMode, PlayerId, 1, MapCenter);
-    shop_locks[PlayerId] = true;
+    move(AllUnits, PlayerId, 100, BuySiegeTanks, BuySiegeTanksReturn);
   }
 
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuySCV),
   accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
-    if (shop_locks[PlayerId]) {
-      return;
-    }
-
     take_resource(PlayerId, Minerals, SCV_COST);
     spawn(TerranSCV, PlayerId, 1, MapCenter);
-    shop_locks[PlayerId] = true;
+    move(AllUnits, PlayerId, 100, BuySCV, BuySCVReturn);
   }
 
 }
@@ -174,6 +178,11 @@ deaths(Player8, AtLeast, 1, ZergUltralisk) => {
 deaths(Player8, AtLeast, 3, ZergInfestedTerran) => {
   remove_deaths(Player8, ZergInfestedTerran, 2);
   add_resource(AllPlayers, Minerals, 1);
+}
+
+deaths(Player12, AtLeast, 1, CritterUrsadon) => {
+  remove_deaths(Player12, CritterUrsadon, 1);
+  add_resource(AllPlayers, Gas, 3);
 }
 
 // end reward logic
@@ -217,12 +226,12 @@ fn spawn_next_wave() {
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(27);
+  set_countdown(25);
 
   current_wave++;
   spawn_next_wave();
 
-  spawn_probes();
+  spawn_probe();
 
   var rnd = random();
 
@@ -278,48 +287,31 @@ fn spawn_heroes() {
 
 // end initialization stuff
 
-bring(Player8, AtLeast, 1, AllUnits, ProbeTarget1) => {
-  order(AllUnits, Player8, Patrol, ProbeTarget1, MapCenter);
+for <TargetLoc> in (ProbeTarget1, ProbeTarget2, ProbeTarget3, ProbeTarget4) {
+  bring(Player8, AtLeast, 1, AllUnits, TargetLoc) => {
+    order(AllUnits, Player8, Patrol, TargetLoc, MapCenter);
+  }
+
+  bring(Player7, AtLeast, 1, ProtossProbe, TargetLoc) => {
+    order(AllUnits, Player7, Move, TargetLoc, Delivery);
+  }
 }
 
-bring(Player8, AtLeast, 1, AllUnits, ProbeTarget2) => {
-  order(AllUnits, Player8, Patrol, ProbeTarget2, MapCenter);
+bring(Player7, AtLeast, 1, ProtossProbe, Delivery) => {
+  kill(ProtossProbe, Player7, 1, Delivery);
 }
 
-bring(Player8, AtLeast, 1, AllUnits, ProbeTarget3) => {
-  order(AllUnits, Player8, Patrol, ProbeTarget3, MapCenter);
-}
-
-bring(Player8, AtLeast, 1, AllUnits, ProbeTarget4) => {
-  order(AllUnits, Player8, Patrol, ProbeTarget4, MapCenter);
-}
-
-bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget1) => {
-  add_resource(AllPlayers, Gas, 2);
-  remove(ProtossProbe, Player7, 1, ProbeTarget1);
+bring(Player7, AtLeast, 1, PowerupDataDisk, Delivery) => {
+  kill(PowerupDataDisk, Player7, 1, Delivery);
   add_score(AllPlayers, Custom, 1);
+  add_resource(AllPlayers, Gas, 8);
 }
 
-bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget2) => {
-  add_resource(AllPlayers, Gas, 2);
-  remove(ProtossProbe, Player7, 1, ProbeTarget2);
-  add_score(AllPlayers, Custom, 1);
-}
-
-bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget3) => {
-  add_resource(AllPlayers, Gas, 2);
-  remove(ProtossProbe, Player7, 1, ProbeTarget3);
-  add_score(AllPlayers, Custom, 1);
-}
-
-bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget4) => {
-  add_resource(AllPlayers, Gas, 2);
-  remove(ProtossProbe, Player7, 1, ProbeTarget4);
-  add_score(AllPlayers, Custom, 1);
-}
-
-fn spawn_probes() {
-  spawn(ProtossProbe, Player7, 6, MapCenter);
+fn spawn_probe() {
+  spawn(ProtossProbe, Player7, 1, MapCenter);
+  ping(AllPlayers, MapCenter);
+  print("A probe has spawned in the center and is heading for a cargo beacon, protect it!");
+  sleep(500);
 
   var rnd = random();
   
