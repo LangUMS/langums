@@ -28,6 +28,8 @@ fn main() {
 - Upgrades are in the top right corner.
   """);
 
+  show_leaderboard_goal("Probes left to save", Points, 100, Custom);  
+
   if (!DEBUG)
   {
     sleep(FOUR_SECONDS);
@@ -38,9 +40,9 @@ fn main() {
     center_view(AllPlayers, Upgrades);
     print("Buy upgrades from here.");
     sleep(FOUR_SECONDS);
-  } 
+  }
 
-  add_resource(AllPlayers, Minerals, 50);
+  add_resource(AllPlayers, Minerals, 100);
   add_resource(AllPlayers, Gas, 50);
 
   center_view(AllPlayers, MapCenter);
@@ -55,12 +57,17 @@ fn main() {
 
   while (true) {
     modify(AllUnits, Force1, 10, Health, 100, HealStation);
+    modify(AllUnits, Force1, 10, Energy, 100, HealStation);
     move(TerranEngineeringBay, AllPlayers, 1, AnyLocation, Upgrades);
     poll_events();
   }
 }
 
-// lose conditions
+// win/ lose conditions
+
+score(Player7, Custom, AtLeast, 100) => {
+  end(AllPlayers, Victory);
+}
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
   commands(PlayerId, Exactly, 0, HeroJimRaynorMarine) => {
@@ -73,36 +80,36 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
   }
 }
 
-// end lose conditions
+// end win/ lose conditions
 
 // shop logic
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
     take_resource(PlayerId, Minerals, MARINE_COST);
     spawn(TerranMarine, PlayerId, 1, MapCenter);
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMedics),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyMedics),
   accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
     take_resource(PlayerId, Minerals, MEDIC_COST);
     spawn(TerranMedic, PlayerId, 1, MapCenter);
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyVultures),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyVultures),
   accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
     take_resource(PlayerId, Minerals, VULTURE_COST);
     spawn(TerranVulture, PlayerId, 1, MapCenter);
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySiegeTanks),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuySiegeTanks),
   accumulate(PlayerId, AtLeast, TANK_COST, Minerals) => {
     take_resource(PlayerId, Minerals, TANK_COST);
     spawn(TerranSiegeTankTankMode, PlayerId, 1, MapCenter);
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySCV),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuySCV),
   accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
     take_resource(PlayerId, Minerals, SCV_COST);
     spawn(TerranSCV, PlayerId, 1, MapCenter);
@@ -113,22 +120,22 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 // reward logic
 
-deaths(Player8, AtLeast, 3, ZergZergling) => {
+deaths(Player8, AtLeast, 4, ZergZergling) => {
   remove_deaths(Player8, ZergZergling, 1);
   add_resource(AllPlayers, Minerals, 1);
 }
 
-deaths(Player8, AtLeast, 2, ZergHydralisk) => {
+deaths(Player8, AtLeast, 3, ZergHydralisk) => {
   remove_deaths(Player8, ZergHydralisk, 1);
   add_resource(AllPlayers, Minerals, 1);
 }
 
 deaths(Player8, AtLeast, 1, ZergUltralisk) => {
   remove_deaths(Player8, ZergUltralisk, 1);
-  add_resource(AllPlayers, Minerals, 1);
+  add_resource(AllPlayers, Minerals, 2);
 }
 
-deaths(Player8, AtLeast, 4, ZergInfestedTerran) => {
+deaths(Player8, AtLeast, 3, ZergInfestedTerran) => {
   remove_deaths(Player8, ZergInfestedTerran, 2);
   add_resource(AllPlayers, Minerals, 1);
 }
@@ -136,21 +143,22 @@ deaths(Player8, AtLeast, 4, ZergInfestedTerran) => {
 // end reward logic
 
 fn spawn_next_wave() {
-  spawn(ZergZergling, Player8, 6, EnemySpawn1);
-  spawn(ZergZergling, Player8, 6, EnemySpawn2);
+  spawn(ZergZergling, Player8, 12, EnemySpawn1);
+  spawn(ZergZergling, Player8, 12, EnemySpawn2);
 
   if (current_wave <= 8) {
     return;
   }
 
-  spawn(ZergZergling, Player8, 6, EnemySpawn2);
-  spawn(ZergHydralisk, Player8, 3, EnemySpawn1);
+  spawn(ZergZergling, Player8, 12, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, 4, EnemySpawn1);
 
   if (current_wave <= 15) {
     return;
   }
 
   spawn(ZergZergling, Player8, 6, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, 3, EnemySpawn2);
   spawn(ZergUltralisk, Player8, 2, EnemySpawn2);
 
   if (current_wave <= 25) {
@@ -166,7 +174,7 @@ fn spawn_next_wave() {
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(30);
+  set_countdown(28);
 
   current_wave++;
   spawn_next_wave();
@@ -246,21 +254,25 @@ bring(Player8, AtLeast, 1, AllUnits, ProbeTarget4) => {
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget1) => {
   add_resource(AllPlayers, Gas, 2);
   remove(ProtossProbe, Player7, 1, ProbeTarget1);
+  add_score(AllPlayers, Custom, 1);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget2) => {
   add_resource(AllPlayers, Gas, 2);
   remove(ProtossProbe, Player7, 1, ProbeTarget2);
+  add_score(AllPlayers, Custom, 1);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget3) => {
   add_resource(AllPlayers, Gas, 2);
   remove(ProtossProbe, Player7, 1, ProbeTarget3);
+  add_score(AllPlayers, Custom, 1);
 }
 
 bring(Player7, AtLeast, 1, ProtossProbe, ProbeTarget4) => {
   add_resource(AllPlayers, Gas, 2);
   remove(ProtossProbe, Player7, 1, ProbeTarget4);
+  add_score(AllPlayers, Custom, 1);
 }
 
 fn spawn_probes() {

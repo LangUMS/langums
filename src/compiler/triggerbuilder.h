@@ -91,6 +91,11 @@ namespace Langums
         void Action_LeaderboardKills(unsigned int stringId, unsigned int unitId);
         void Action_LeaderboardPoints(unsigned int stringId, CHK::ScoreType scoreType);
         void Action_LeaderboardGreed(unsigned int stringId);
+        void Action_LeaderboardGoalControl(unsigned int stringId, unsigned int unitId, unsigned int quantity);
+        void Action_LeaderboardGoalControlAtLocation(unsigned int stringId, unsigned int unitId, unsigned int locationId, unsigned int quantity);
+        void Action_LeaderboardGoalResources(unsigned int stringId, CHK::ResourceType resourceType, unsigned int quantity);
+        void Action_LeaderboardGoalKills(unsigned int stringId, unsigned int unitId, unsigned int quantity);
+        void Action_LeaderboardGoalPoints(unsigned int stringId, CHK::ScoreType scoreType, unsigned int quantity);
         void Action_LeaderboardShowComputerPlayers(CHK::TriggerActionState state);
         void Action_PlayWAV(unsigned int wavStringId, unsigned int wavTime);
         void Action_Transmission(unsigned int stringId, unsigned int unitId, unsigned int locationId,

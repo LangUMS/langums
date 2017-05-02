@@ -1262,6 +1262,87 @@ namespace Langums
         }
     }
 
+    void TriggerBuilder::Action_LeaderboardGoalControl(unsigned int stringId, unsigned int unitId, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto actionId = m_NextAction++;
+
+        for (auto& trigger : m_Triggers)
+        {
+            auto& action = trigger.m_Actions[actionId];
+            action.m_ActionType = TriggerActionType::LeaderboardGoalControl;
+            action.m_TriggerText = stringId + 1;
+            action.m_Arg1 = unitId;
+            action.m_Arg0 = quantity;
+            m_HasChanges = true;
+        }
+    }
+
+    void TriggerBuilder::Action_LeaderboardGoalControlAtLocation(unsigned int stringId, unsigned int unitId, unsigned int locationId, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto actionId = m_NextAction++;
+
+        for (auto& trigger : m_Triggers)
+        {
+            auto& action = trigger.m_Actions[actionId];
+            action.m_ActionType = TriggerActionType::LeaderboardGoalControlAtLocation;
+            action.m_TriggerText = stringId + 1;
+            action.m_Arg1 = unitId;
+            action.m_Source = locationId + 1;
+            action.m_Arg0 = quantity;
+            m_HasChanges = true;
+        }
+    }
+
+    void TriggerBuilder::Action_LeaderboardGoalResources(unsigned int stringId, CHK::ResourceType resourceType, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto actionId = m_NextAction++;
+
+        for (auto& trigger : m_Triggers)
+        {
+            auto& action = trigger.m_Actions[actionId];
+            action.m_ActionType = TriggerActionType::LeaderboardGoalResources;
+            action.m_TriggerText = stringId + 1;
+            action.m_Arg1 = (uint16_t)resourceType;
+            action.m_Arg0 = quantity;
+            m_HasChanges = true;
+        }
+    }
+
+    void TriggerBuilder::Action_LeaderboardGoalKills(unsigned int stringId, unsigned int unitId, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto actionId = m_NextAction++;
+
+        for (auto& trigger : m_Triggers)
+        {
+            auto& action = trigger.m_Actions[actionId];
+            action.m_ActionType = TriggerActionType::LeaderboardGoalKills;
+            action.m_TriggerText = stringId + 1;
+            action.m_Arg1 = unitId;
+            action.m_Arg0 = quantity;
+            m_HasChanges = true;
+        }
+    }
+
+    void TriggerBuilder::Action_LeaderboardGoalPoints(unsigned int stringId, CHK::ScoreType scoreType, unsigned int quantity)
+    {
+        using namespace CHK;
+        auto actionId = m_NextAction++;
+
+        for (auto& trigger : m_Triggers)
+        {
+            auto& action = trigger.m_Actions[actionId];
+            action.m_ActionType = TriggerActionType::LeaderboardGoalPoints;
+            action.m_TriggerText = stringId + 1;
+            action.m_Arg1 = (uint16_t)scoreType;
+            action.m_Arg0 = quantity;
+            m_HasChanges = true;
+        }
+    }
+
     void TriggerBuilder::Action_LeaderboardShowComputerPlayers(CHK::TriggerActionState state)
     {
         using namespace CHK;

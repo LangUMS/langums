@@ -2259,16 +2259,32 @@ namespace Langums
             {
                 auto leaderboard = (IRLeaderboardInstruction*)instruction.get();
                 auto stringId = m_StringsChunk->InsertString(leaderboard->GetText());
+                auto quantity = leaderboard->GetGoalQuantity();
 
                 auto type = leaderboard->GetLeaderboardType();
                 if (type == LeaderboardType::Control)
                 {
-                    current.Action_LeaderboardControl(stringId, leaderboard->GetUnitId());
+                    if (quantity > 0)
+                    {
+                        current.Action_LeaderboardGoalControl(stringId, leaderboard->GetUnitId(), quantity);
+                    }
+                    else
+                    {
+                        current.Action_LeaderboardControl(stringId, leaderboard->GetUnitId());
+                    }
                 }
                 else if (type == LeaderboardType::ControlAtLocation)
                 {
                     auto locationId = GetLocationIdByName(leaderboard->GetLocationName());
-                    current.Action_LeaderboardControlAtLocation(stringId, leaderboard->GetUnitId(), locationId);
+
+                    if (quantity > 0)
+                    {
+                        current.Action_LeaderboardGoalControlAtLocation(stringId, leaderboard->GetUnitId(), locationId, quantity);
+                    }
+                    else
+                    {
+                        current.Action_LeaderboardControlAtLocation(stringId, leaderboard->GetUnitId(), locationId);
+                    }
                 }
                 else if (type == LeaderboardType::Greed)
                 {
@@ -2276,15 +2292,36 @@ namespace Langums
                 }
                 else if (type == LeaderboardType::Kills)
                 {
-                    current.Action_LeaderboardKills(stringId, leaderboard->GetUnitId());
+                    if (quantity > 0)
+                    {
+                        current.Action_LeaderboardGoalKills(stringId, leaderboard->GetUnitId(), quantity);
+                    }
+                    else
+                    {
+                        current.Action_LeaderboardKills(stringId, leaderboard->GetUnitId());
+                    }
                 }
                 else if (type == LeaderboardType::Points)
                 {
-                    current.Action_LeaderboardPoints(stringId, leaderboard->GetScoreType());
+                    if (quantity > 0)
+                    {
+                        current.Action_LeaderboardGoalPoints(stringId, leaderboard->GetScoreType(), quantity);
+                    }
+                    else
+                    {
+                        current.Action_LeaderboardPoints(stringId, leaderboard->GetScoreType());
+                    }
                 }
                 else if (type == LeaderboardType::Resources)
                 {
-                    current.Action_LeaderboardResources(stringId, leaderboard->GetResourceType());
+                    if (quantity > 0)
+                    {
+                        current.Action_LeaderboardGoalResources(stringId, leaderboard->GetResourceType(), quantity);
+                    }
+                    else
+                    {
+                        current.Action_LeaderboardResources(stringId, leaderboard->GetResourceType());
+                    }
                 }
             }
             else if (instruction->GetType() == IRInstructionType::LeaderboardCpu)
