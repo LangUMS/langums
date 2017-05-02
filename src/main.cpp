@@ -582,13 +582,13 @@ int main(int argc, char* argv[])
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);
 
-    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, MPQ_FILE_REPLACEEXISTING, &scenarioFile))
+    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, MPQ_FILE_REPLACEEXISTING | MPQ_FILE_COMPRESS, &scenarioFile))
     {
         LOG_EXITERR("Failed to open scenario.chk for writing.");
         return 1;
     }
 
-    if (!SFileWriteFile(scenarioFile, chkBytes.data(), chkBytes.size(), MPQ_COMPRESSION_ZLIB))
+    if (!SFileWriteFile(scenarioFile, chkBytes.data(), chkBytes.size(), MPQ_COMPRESSION_PKWARE))
     {
         LOG_EXITERR("Failed to write out scenario.chk to MPQ archive.");
         return 1;

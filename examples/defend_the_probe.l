@@ -25,7 +25,7 @@ fn main() {
 
   set_mission_objectives("""- Don't let the probes die.'
 - You can buy units at the beacons.
-- Upgrades are in the top right corner.
+- Upgrade your units with gas.
   """);
 
   show_leaderboard_goal("Probes left to save", Points, 100, Custom);  
