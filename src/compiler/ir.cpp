@@ -2228,7 +2228,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions);
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2263,7 +2263,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions);
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions);
 
                     for (auto& instruction : bodyInstructions)
                     {

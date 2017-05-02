@@ -85,6 +85,15 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 global shop_locks[6];
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMarines),
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyVultures),  
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySiegeTanks),
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySCV),    
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMedics) => {
+    shop_locks[PlayerId] = false;
+  }
+
   bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
@@ -94,10 +103,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     take_resource(PlayerId, Minerals, MARINE_COST);
     spawn(TerranMarine, PlayerId, 1, MapCenter);
     shop_locks[PlayerId] = true;
-  }
-
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMarines) => {
-    shop_locks[PlayerId] = false;
   }
 
   bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMedics),
@@ -111,10 +116,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMedics) => {
-    shop_locks[PlayerId] = false;
-  }
-
   bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyVultures),
   accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
@@ -124,10 +125,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     take_resource(PlayerId, Minerals, VULTURE_COST);
     spawn(TerranVulture, PlayerId, 1, MapCenter);
     shop_locks[PlayerId] = true;
-  }
-
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyVultures) => {
-    shop_locks[PlayerId] = false;
   }
 
   bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySiegeTanks),
@@ -141,9 +138,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySiegeTanks) => {
-    shop_locks[PlayerId] = false;
-  }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuySCV),
   accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
@@ -156,9 +150,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySCV) => {
-    shop_locks[PlayerId] = false;
-  }
 }
 
 // end shop logic
