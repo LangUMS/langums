@@ -52,7 +52,7 @@ namespace Langums
             return token;
         }
 
-        if (std::isdigit(c) || (c == '-' && std::isdigit(Peek(1))))
+        if (std::isdigit(c) || (c == '-' && std::isdigit(Peek(1))) || PeekKeyword("0x"))
         {
             ExpressionToken token;
             token.m_Type = TokenType::NumberLiteral;
@@ -1189,10 +1189,23 @@ namespace Langums
     {
         std::string s;
 
+        auto isHex = false;
+        if (PeekKeyword("0x"))
+        {
+            Keyword("0x");
+            isHex = true;
+        }
+
         while (true)
         {
             auto c = Peek();
-            if (!std::isdigit(c) && c != '-')
+
+            if (isHex)
+            {
+                c = std::tolower(c);
+            }
+
+            if ((!isHex && (!std::isdigit(c) && c != '-')) || (isHex && !std::isxdigit(c)))
             {
                 break;
             }
@@ -1205,7 +1218,18 @@ namespace Langums
             s.push_back(Next());
         }
 
-        return std::atoi(s.c_str());
+        if (!isHex)
+        {
+            return std::atoi(s.c_str());
+        }
+        else
+        {
+            std::stringstream toHex;
+            toHex << std::hex << s;
+            unsigned int value;
+            toHex >> value;
+            return value;
+        }
     }
 
     std::string Parser::StringLiteral()

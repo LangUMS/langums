@@ -150,10 +150,10 @@ You can also have static arrays. At the moment arrays can only be indexed with c
 global my_array[8];
 
 fn main() {
-  my_array[0] = 42;
-  my_array[1] = 15;
+  my_array[Player1] = 42;
+  my_array[Player2] = 0x07;
   
-  if (my_array[1] == 15) {
+  if (my_array[Player2] == 15) {
     print("foo");
   }
   
@@ -162,6 +162,11 @@ fn main() {
   foo[1] = 13 * 2;
 }
 ```
+
+Notes:
+
+* Number literals can be entered as hexadecimals by preceding them with `0x` e.g. `0xB4DF00D`.
+* You can index arrays with the [Player](#player) constants.
 
 ## Event handlers
 
@@ -668,7 +673,7 @@ will set the death counter for Player5's marines to the value of variable `foo`.
 
 ### Compiling the code
 
-A Visual Studio 2015 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
+A Visual Studio 2017 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
 
 ### Parts of LangUMS
 

@@ -86,15 +86,15 @@ global shop_locks[6];
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMarines),
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyVultures),  
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySiegeTanks),
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySCV),    
-  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMedics) => {
+  bring(PlayerId, Exactly, 0, AllUnits, BuyMarines),
+  bring(PlayerId, Exactly, 0, AllUnits, BuyVultures),  
+  bring(PlayerId, Exactly, 0, AllUnits, BuySiegeTanks),
+  bring(PlayerId, Exactly, 0, AllUnits, BuySCV),    
+  bring(PlayerId, Exactly, 0, AllUnits, BuyMedics) => {
     shop_locks[PlayerId] = false;
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
       return;
@@ -105,7 +105,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMedics),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyMedics),
   accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
       return;
@@ -116,7 +116,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyVultures),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuyVultures),
   accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
       return;
@@ -127,7 +127,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySiegeTanks),
+  bring(PlayerId, AtLeast, 1, AllUnits, BuySiegeTanks),
   accumulate(PlayerId, AtLeast, TANK_COST, Minerals) => {
     if (shop_locks[PlayerId]) {
       return;
@@ -186,8 +186,8 @@ fn spawn_next_wave() {
     return;
   }
 
-  spawn(ZergZergling, Player8, 12, EnemySpawn2);
-  spawn(ZergHydralisk, Player8, 4, EnemySpawn1);
+  spawn(ZergZergling, Player8, 8, EnemySpawn2);
+  spawn(ZergHydralisk, Player8, 6, EnemySpawn1);
 
   if (current_wave <= 15) {
     return;
@@ -195,22 +195,29 @@ fn spawn_next_wave() {
 
   spawn(ZergZergling, Player8, 6, EnemySpawn2);
   spawn(ZergHydralisk, Player8, 3, EnemySpawn2);
-  spawn(ZergUltralisk, Player8, 2, EnemySpawn2);
+  spawn(ZergUltralisk, Player8, 3, EnemySpawn2);
 
   if (current_wave <= 25) {
     return;
   }
   
   spawn(ZergHydralisk, Player8, 3, EnemySpawn1);
-  spawn(ZergInfestedTerran, Player8, 4, EnemySpawn2);
+  spawn(ZergInfestedTerran, Player8, 8, EnemySpawn2);
 
-  if (current_wave >= 27) {
-    current_wave = 26;
+  if (current_wave <= 30) {
+    return;
+  }
+
+  spawn(ZergDefiler, Player8, 2, EnemySpawn1);
+  spawn(ZergDefiler, Player8, 2, EnemySpawn2);
+
+  if (current_wave >= 35) {
+    current_wave = 34;
   }
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(28);
+  set_countdown(27);
 
   current_wave++;
   spawn_next_wave();
