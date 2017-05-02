@@ -207,8 +207,8 @@ namespace Langums
     class ASTArrayExpression : public IASTNode
     {
         public:
-        ASTArrayExpression(const std::string& identifier, unsigned int index) :
-            m_Identifier(identifier), m_Index(index), IASTNode(ASTNodeType::ArrayExpression)
+        ASTArrayExpression(const std::string& identifier) :
+            m_Identifier(identifier), IASTNode(ASTNodeType::ArrayExpression)
         {}
 
         const std::string& GetIdentifier() const
@@ -216,14 +216,13 @@ namespace Langums
             return m_Identifier;
         }
 
-        unsigned int GetIndex() const
+        const std::shared_ptr<IASTNode>& GetIndex() const
         {
-            return m_Index;
+            return GetChild(0);
         }
 
         private:
         std::string m_Identifier;
-        unsigned int m_Index;
     };
 
     class ASTUnaryExpression : public IASTNode

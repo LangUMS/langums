@@ -134,6 +134,16 @@ namespace Langums
             }
         }
 
+        unsigned int GetConditionCount() const
+        {
+            return m_NextCondition;
+        }
+
+        unsigned int GetActionCount() const
+        {
+            return m_NextAction;
+        }
+
         private:
         bool m_HasChanges = false;
         unsigned int m_Address = 0;

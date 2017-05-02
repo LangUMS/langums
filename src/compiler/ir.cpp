@@ -1355,7 +1355,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1405,7 +1406,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1455,7 +1457,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1491,7 +1494,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1539,7 +1543,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1575,7 +1580,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1625,7 +1631,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1661,7 +1668,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1711,7 +1719,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1747,7 +1756,8 @@ namespace Langums
                 else if (other->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)other;
-                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
 
                 if (regId == Reg_StackTop)
@@ -1802,7 +1812,8 @@ namespace Langums
                     else if (other->GetType() == ASTNodeType::ArrayExpression)
                     {
                         auto arrayExpression = (ASTArrayExpression*)other;
-                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                        auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                     }
 
                     if (regId == Reg_StackTop)
@@ -1859,7 +1870,8 @@ namespace Langums
                     else if (other->GetType() == ASTNodeType::ArrayExpression)
                     {
                         auto arrayExpression = (ASTArrayExpression*)other;
-                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                        auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                        regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                     }
 
                     if (regId == Reg_StackTop)
@@ -1928,11 +1940,8 @@ namespace Langums
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
                 auto arrayExpression = (ASTArrayExpression*)lhs.get();
-                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
-                if (regId == -1)
-                {
-                    throw IRCompilerException(SafePrintf("Invalid name \"%[%]\"", arrayExpression->GetIdentifier(), arrayExpression->GetIndex()));
-                }
+                auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
 
                 EmitInstruction(new IRPushInstruction(regId), instructions);
                 EmitInstruction(new IRIncRegInstruction(regId, 1), instructions);
@@ -1959,11 +1968,8 @@ namespace Langums
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
                 auto arrayExpression = (ASTArrayExpression*)lhs.get();
-                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
-                if (regId == -1)
-                {
-                    throw IRCompilerException(SafePrintf("Invalid name \"%[%]\"", arrayExpression->GetIdentifier(), arrayExpression->GetIndex()));
-                }
+                auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
 
                 EmitInstruction(new IRPushInstruction(regId), instructions);
                 EmitInstruction(new IRDecRegInstruction(regId, 1), instructions);
@@ -2003,7 +2009,8 @@ namespace Langums
         else if (expression->GetType() == ASTNodeType::ArrayExpression)
         {
             auto arrayExpression = (ASTArrayExpression*)expression;
-            auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+            auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+            auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
             EmitInstruction(new IRPushInstruction(regId), instructions);
         }
         else if (expression->GetType() == ASTNodeType::FunctionCall)
@@ -2097,7 +2104,8 @@ namespace Langums
                         throw IRCompilerException("Assignment expression has invalid register on the left side");
                     }
 
-                    lhsRegIndex = RegisterNameToIndex(name, arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    lhsRegIndex = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                 }
                 else
                 {
@@ -2131,11 +2139,8 @@ namespace Langums
                 else if (rhs->GetType() == ASTNodeType::ArrayExpression)
                 {
                     auto arrayExpression = (ASTArrayExpression*)rhs.get();
-                    auto rhsRegIndex = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
-                    if (rhsRegIndex == -1)
-                    {
-                        throw IRCompilerException("Invalid value on right side of assignment expression");
-                    }
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+                    auto rhsRegIndex = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
 
                     EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions);
                 }
@@ -2249,7 +2254,9 @@ namespace Langums
                         throw IRCompilerException("Disallowed if statement with empty body");
                     }
 
-                    auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayExpression->GetIndex(), aliases);
+                    auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
+
+                    auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases);
                     auto offset = 1;
                     if (elseBodyInstructions.size() > 0)
                     {
@@ -2622,6 +2629,30 @@ namespace Langums
         }
 
         return -1;
+    }
+
+    unsigned int IRCompiler::ParseArrayExpression(const std::shared_ptr<IASTNode>& indexExpression)
+    {
+        if (indexExpression->GetType() == ASTNodeType::NumberLiteral)
+        {
+            auto index = (ASTNumberLiteral*)indexExpression.get();
+            return index->GetValue();
+        }
+        else if (indexExpression->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)indexExpression.get();
+            auto playerId = PlayerNameToId(identifier->GetName());
+            if (playerId == -1)
+            {
+                throw IRCompilerException(SafePrintf("Invalid value \"%\" used in array expression", identifier->GetName()));
+            }
+
+            return playerId;
+        }
+        else
+        {
+            throw IRCompilerException("Invalid type used in array expression");
+        }
     }
 
     uint8_t IRCompiler::ParsePlayerIdArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)

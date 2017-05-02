@@ -35,6 +35,7 @@ namespace Langums
         int m_NumberValue = 0;
         TokenType m_Type;
         OperatorType m_OperatorType;
+        std::string m_ArrayIdentifier;
     };
 
     class ParserException : public std::exception

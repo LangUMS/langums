@@ -184,6 +184,7 @@ namespace Langums
         int UnitNameToId(const std::string& name) const;
         int PlayerNameToId(const std::string& name) const;
 
+        unsigned int ParseArrayExpression(const std::shared_ptr<IASTNode>& expression);
         uint8_t ParsePlayerIdArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         ConditionComparison ParseComparisonArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         int ParseQuantityArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);

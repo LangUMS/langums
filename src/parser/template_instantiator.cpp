@@ -284,6 +284,11 @@ namespace Langums
         case ASTNodeType::EventDeclaration:
             newNode = new ASTEventDeclaration(*(ASTEventDeclaration*)node);
             break;
+        case ASTNodeType::ArrayExpression:
+            newNode = new ASTArrayExpression(*(ASTArrayExpression*)node);
+            break;
+        default:
+            throw TemplateInstantiatorException("Unsupported AST node type");
         }
 
         newNode->RemoveChildren();

@@ -375,14 +375,23 @@ namespace Langums
                 auto identifier = output.back();
                 output.pop_back();
 
-                auto arrayIndex = NumberLiteral();
-                if (arrayIndex < 0)
+                if (std::isdigit(Peek()))
                 {
-                    throw ParserException(m_CurrentChar, SafePrintf("Invalid array index %", arrayIndex));
+                    auto arrayIndex = NumberLiteral();
+                    if (arrayIndex < 0)
+                    {
+                        throw ParserException(m_CurrentChar, SafePrintf("Invalid array index %", arrayIndex));
+                    }
+
+                    token.m_NumberValue = arrayIndex;
+                }
+                else
+                {
+                    token.m_NumberValue = -1;
+                    token.m_Value = Identifier();
                 }
 
-                token.m_Value = identifier.m_Value;
-                token.m_NumberValue = arrayIndex;
+                token.m_ArrayIdentifier = identifier.m_Value;
                 token.m_Type = TokenType::ArrayOperator;
                 output.push_back(token);
 
@@ -493,7 +502,18 @@ namespace Langums
         }
         else if (token.m_Type == TokenType::ArrayOperator)
         {
-            node = std::unique_ptr<IASTNode>(new ASTArrayExpression(token.m_Value, token.m_NumberValue));
+            if (token.m_NumberValue != -1)
+            {
+                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier);
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue)));
+                node = std::unique_ptr<IASTNode>(arrayExpression);
+            }
+            else
+            {
+                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier);
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value)));
+                node = std::unique_ptr<IASTNode>(arrayExpression);
+            }
         }
         else
         {
@@ -510,12 +530,14 @@ namespace Langums
         auto identifier = Identifier();
         Whitespace();
 
-        auto arrayIndex = 0;
+        std::unique_ptr<IASTNode> arrayIndex = nullptr;
         if (Peek() == '[')
         {
             Symbol('[');
             Whitespace();
-            arrayIndex = NumberLiteral();
+
+            arrayIndex = Expression();
+
             Whitespace();
             Symbol(']');
             Whitespace();
@@ -542,13 +564,15 @@ namespace Langums
 
         auto unaryExpression = new ASTUnaryExpression(op);
 
-        if (arrayIndex == 0)
+        if (arrayIndex == nullptr)
         {
             unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier)));
         }
         else
         {
-            unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTArrayExpression(identifier, arrayIndex)));
+            auto arrayExpression = new ASTArrayExpression(identifier);
+            arrayExpression->AddChild(std::move(arrayIndex));
+            unaryExpression->AddChild(std::shared_ptr<IASTNode>(arrayExpression));
         }
 
         return std::unique_ptr<IASTNode>(unaryExpression);
@@ -572,11 +596,23 @@ namespace Langums
             auto identifier = Identifier();
             Whitespace();
             Symbol('[');
-            auto arrayIndex = NumberLiteral();
+            Whitespace();
+
+            auto arrayExpression = new ASTArrayExpression(identifier);
+
+            if (std::isdigit(Peek()))
+            {
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral())));
+            }
+            else
+            {
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+            }
+
             Whitespace();
             Symbol(']');
 
-            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTArrayExpression(identifier, arrayIndex)));
+            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(arrayExpression));
         }
         else
         {

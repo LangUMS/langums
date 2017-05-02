@@ -459,6 +459,14 @@ namespace Langums
                 }
             }
 
+            if (current.GetActionCount() >= 62)
+            {
+                auto address = nextAddress++;
+                current.Action_JumpTo(address);
+                PushTriggers(current.GetTriggers());
+                current = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+            }
+
             if (instruction->GetType() == IRInstructionType::Push)
             {
                 auto push = (IRPushInstruction*)instruction.get();

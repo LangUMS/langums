@@ -49,8 +49,6 @@ fn main() {
   ping(AllPlayers, MapCenter);
   print("Stop the probes from getting killed before reaching the beacons to earn gas.");
   
-  add_resource(AllPlayers, Minerals, 10);
-  
   set_countdown(10);
   clear_buffered_events();
   probe_spawned = true;
@@ -84,35 +82,82 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 // shop logic
 
+global shop_locks[6];
+
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
-  bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines),
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
+    if (shop_locks[PlayerId]) {
+      return;
+    }
+
     take_resource(PlayerId, Minerals, MARINE_COST);
     spawn(TerranMarine, PlayerId, 1, MapCenter);
+    shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, AllUnits, BuyMedics),
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMarines) => {
+    shop_locks[PlayerId] = false;
+  }
+
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyMedics),
   accumulate(PlayerId, AtLeast, MEDIC_COST, Minerals) => {
+    if (shop_locks[PlayerId]) {
+      return;
+    }
+
     take_resource(PlayerId, Minerals, MEDIC_COST);
     spawn(TerranMedic, PlayerId, 1, MapCenter);
+    shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, AllUnits, BuyVultures),
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyMedics) => {
+    shop_locks[PlayerId] = false;
+  }
+
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuyVultures),
   accumulate(PlayerId, AtLeast, VULTURE_COST, Minerals) => {
+    if (shop_locks[PlayerId]) {
+      return;
+    }
+
     take_resource(PlayerId, Minerals, VULTURE_COST);
     spawn(TerranVulture, PlayerId, 1, MapCenter);
+    shop_locks[PlayerId] = true;
   }
 
-  bring(PlayerId, AtLeast, 1, AllUnits, BuySiegeTanks),
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuyVultures) => {
+    shop_locks[PlayerId] = false;
+  }
+
+  bring(PlayerId, AtLeast, 1, HeroJimRaynorMarine, BuySiegeTanks),
   accumulate(PlayerId, AtLeast, TANK_COST, Minerals) => {
+    if (shop_locks[PlayerId]) {
+      return;
+    }
+
     take_resource(PlayerId, Minerals, TANK_COST);
     spawn(TerranSiegeTankTankMode, PlayerId, 1, MapCenter);
+    shop_locks[PlayerId] = true;
+  }
+
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySiegeTanks) => {
+    shop_locks[PlayerId] = false;
   }
 
   bring(PlayerId, AtLeast, 1, AllUnits, BuySCV),
   accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
+    if (shop_locks[PlayerId]) {
+      return;
+    }
+
     take_resource(PlayerId, Minerals, SCV_COST);
     spawn(TerranSCV, PlayerId, 1, MapCenter);
+    shop_locks[PlayerId] = true;
+  }
+
+  bring(PlayerId, Exactly, 0, HeroJimRaynorMarine, BuySCV) => {
+    shop_locks[PlayerId] = false;
   }
 }
 
