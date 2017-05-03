@@ -1104,5 +1104,8 @@
     <ClInclude Include="..\src\debugger\debugger.h">
       <Filter>debugger</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\debugger\memwatch.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

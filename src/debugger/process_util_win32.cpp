@@ -12,6 +12,12 @@
 
 #pragma comment(lib, "psapi.lib")
 
+typedef LONG (NTAPI *NtSuspendProcess)(IN HANDLE ProcessHandle);
+typedef LONG (NTAPI *NtResumeProcess)(IN HANDLE ProcessHandle);
+
+auto g_SuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
+auto g_ResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
+
 namespace Langums
 {
 
@@ -32,7 +38,7 @@ namespace Langums
             {
                 if (_stricmp(processEntry.szExeFile, processName.c_str()) == 0)
                 {
-                    handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processEntry.th32ProcessID);
+                    handle = OpenProcess(PROCESS_ALL_ACCESS, false, processEntry.th32ProcessID);
                     break;
                 }
             }
@@ -94,6 +100,27 @@ namespace Langums
 
         retBytesWritten = bytesWritten;
         return true;
+    }
+
+    void Process::Suspend(ProcessHandle process)
+    {
+        g_SuspendProcess(process);
+    }
+
+    void Process::Resume(ProcessHandle process)
+    {
+        g_ResumeProcess(process);
+    }
+
+    bool Process::IsRunning(ProcessHandle process)
+    {
+        DWORD exitCode;
+        if (!GetExitCodeProcess(process, &exitCode))
+        {
+            return false;
+        }
+
+        return exitCode != STILL_ACTIVE;
     }
 
 }

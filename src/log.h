@@ -45,6 +45,11 @@ namespace Log
 
         void LogMessage(const std::string& message);
 
+        void SetQuiet(bool quiet)
+        {
+            m_Quiet = quiet;
+        }
+
         private:
         void LogThread();
         std::atomic_char m_ShutdownThread;
@@ -56,7 +61,7 @@ namespace Log
         std::vector<std::string> m_Messages;
 
         std::unique_ptr<std::ofstream> m_LogFile;
-
+        bool m_Quiet = false; // if true will print only to the log file but not to stdout
     };
 
 }

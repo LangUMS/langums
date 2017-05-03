@@ -62,7 +62,10 @@ namespace Log
 
             for (auto& message : m_Messages)
             {
-                std::cout << message << std::endl;
+                if (!m_Quiet)
+                {
+                    std::cout << message << std::endl;
+                }
 
                 if (m_LogFile != nullptr)
                 {

@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
     {
         LOG_F("\n----------- IR DUMP -----------");
         LOG_F("%", ir.DumpInstructions(true));
-        LOG_F("-------------------------------\n");
+        LOG_F("-------------------------------");
     }
 
     LOG_F("\nEmitted % instructions.\n", instructions.size());
@@ -561,7 +561,7 @@ int main(int argc, char* argv[])
     auto compress = opts.count("disable-compression") == 0;
     if (!compress)
     {
-        LOG_F("(!) Warning! Compression is disabled. Resulting file size will be much larger tha usual.");
+        LOG_F("(!) Warning! Compression is disabled. Resulting file size will be much larger than usual.");
     }
 
     try
@@ -590,14 +590,26 @@ int main(int argc, char* argv[])
 
     if (opts.count("debug") > 0)
     {
+        LOG_F("\nStarting a debug session.");
+
         std::string processName = DEFAULT_PROCESS_NAME;
         if (opts.count("debug-process") > 0)
         {
             processName = opts["debug-process"].as<std::string>();
         }
 
-        Debugger debugger;
-        debugger.Attach(processName);
+        Debugger debugger(instructions, source);
+        if (!debugger.Attach(processName))
+        {
+            LOG_F("\n(!) Failed to attach to process.");
+            return 1;
+        }
+
+        while (true)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
         return 0;
     }
 

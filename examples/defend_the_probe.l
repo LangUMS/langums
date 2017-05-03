@@ -180,11 +180,6 @@ deaths(Player8, AtLeast, 3, ZergInfestedTerran) => {
   add_resource(AllPlayers, Minerals, 1);
 }
 
-deaths(Player12, AtLeast, 1, CritterUrsadon) => {
-  remove_deaths(Player12, CritterUrsadon, 1);
-  add_resource(AllPlayers, Gas, 3);
-}
-
 // end reward logic
 
 fn spawn_next_wave() {

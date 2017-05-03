@@ -12,7 +12,10 @@ namespace Langums
     {
         using namespace CHK;
 
-        g_AddressToInstructionMap[address].insert(instruction);
+        if (instruction != nullptr)
+        {
+            g_AddressToInstructionMap[address].insert(instruction);
+        }
 
         m_Triggers.emplace_back();
         auto& trigger = m_Triggers.back();

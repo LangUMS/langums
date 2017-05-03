@@ -405,6 +405,7 @@
     <ClInclude Include="..\src\cxxopts.h" />
     <ClInclude Include="..\src\debugger\debugger.h" />
     <ClInclude Include="..\src\debugger\memsearch.h" />
+    <ClInclude Include="..\src\debugger\memwatch.h" />
     <ClInclude Include="..\src\debugger\process_util.h" />
     <ClInclude Include="..\src\debugger\reg_table.h" />
     <ClInclude Include="..\src\libchk\chk.h" />

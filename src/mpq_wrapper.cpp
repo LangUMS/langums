@@ -61,7 +61,7 @@ namespace Langums
             throw MPQWrapperException(SafePrintf("Failed to open \"%\" for writing.", filename));
         }
 
-        if (!SFileWriteFile(file, bytes.data(), bytes.size(), compress ? MPQ_COMPRESSION_BZIP2 : 0))
+        if (!SFileWriteFile(file, bytes.data(), bytes.size(), compress ? MPQ_COMPRESSION_PKWARE : 0))
         {
             throw MPQWrapperException(SafePrintf("Failed to write out \"%\" to MPQ archive.", filename));
         }
