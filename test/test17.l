@@ -1,8 +1,3 @@
 fn main() {
-    print("hello world");
-    var x = 5;
-    print("foo bar");
-    x = 12;
-    x = 3 + 1;
-    print("1234");
+    print("<07>test <03>- <06>foo bar <05>1234");
 }

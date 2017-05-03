@@ -1271,8 +1271,48 @@ namespace Langums
 
             Next();
         }
-     
-        return value;
+
+        std::string processed;
+
+        auto inHexValue = false;
+        std::string hexValue;
+
+        for (auto i = 0u; i < value.length(); i++)
+        {
+            auto c = value[i];
+            if (c == '<')
+            {
+                inHexValue = true;
+            }
+            else if (inHexValue && c == '>')
+            {
+                unsigned int x;
+                std::stringstream ss;
+                ss << std::hex << hexValue;
+                ss >> x;
+
+                if (x == 0)
+                {
+                    throw ParserException(m_CurrentChar, SafePrintf("Invalid hexadecimal value \"%\" in string \"%\"", hexValue, value));
+                }
+                else
+                {
+                    processed.push_back((char)x);
+                }
+
+                inHexValue = false;
+            }
+            else if (inHexValue)
+            {
+                hexValue.push_back(c);
+            }
+            else
+            {
+                processed.push_back(c);
+            }
+        }
+
+        return processed;
     }
 
 }

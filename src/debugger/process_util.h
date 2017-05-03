@@ -15,6 +15,7 @@ namespace Langums
         ProcessHandle OpenByName(const std::string& processName, void*& baseAddress);
         bool Close(ProcessHandle process);
         bool ReadMemory(ProcessHandle process, void* address, size_t size, void* dstBuffer, size_t& retBytesRead);
+        bool WriteMemory(ProcessHandle process, void* address, size_t size, void* srcBuffer, size_t& retBytesWritten);
 
     }
     

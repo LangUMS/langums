@@ -6,6 +6,8 @@
 #define PLAYER_COUNT 12
 #define UNIT_COUNT 228 
 
+#define DATA_OFFSET 0x8B80B0
+#define UNIT_TABLE_OFFSET 0x8BB2E4
 #define DEATH_TABLE_OFFSET 0x8C3324
 
 namespace Langums

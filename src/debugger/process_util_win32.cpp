@@ -83,6 +83,18 @@ namespace Langums
         retBytesRead = bytesRead;
         return true;
     }
+    
+    bool Process::WriteMemory(ProcessHandle process, void* address, size_t size, void* srcBuffer, size_t& retBytesWritten)
+    {
+        SIZE_T bytesWritten;
+        if (!WriteProcessMemory(process, address, srcBuffer, size, &bytesWritten))
+        {
+            return false;
+        }
+
+        retBytesWritten = bytesWritten;
+        return true;
+    }
 
 }
 

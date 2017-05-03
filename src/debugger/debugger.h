@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 
+#include "process_util.h"
 #include "reg_table.h"
 
 namespace Langums
@@ -14,8 +15,12 @@ namespace Langums
         public:
         bool Attach(const std::string& processName);
 
+        bool PauseGame(bool state);
+
         private:
         std::unique_ptr<RegTable> m_Registers;
+        Process::ProcessHandle m_Process;
+        void* m_BaseAddress = nullptr;
     };
 
 }

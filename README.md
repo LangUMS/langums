@@ -614,6 +614,10 @@ var playerCount = is_present();
 
 Yes. Make sure to save your code source file as UTF-8 and non-ASCII characters should display properly in the game. It is currently unknown if this applies to patches before 1.18 which added unicode support to the game.
 
+#### How do you make colored text?
+
+Use the same syntax as SCMDraft. You put the hex color name in `<>` e.g. `<07>This text is green`.
+
 #### Do you plan to rewrite this in Rust?
 
 No, but thanks for asking.
