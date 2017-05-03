@@ -5,11 +5,14 @@ namespace Langums
 {
     unsigned int g_RegistersOwnerPlayer = 7;
     std::vector<RegisterDef> g_RegisterMap;
+    std::unordered_map<unsigned int, std::set<IIRInstruction*>> g_AddressToInstructionMap;
 
     TriggerBuilder::TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerId)
         : m_Address(address), m_Instruction(instruction), m_PlayerMask(playerId)
     {
         using namespace CHK;
+
+        g_AddressToInstructionMap[address].insert(instruction);
 
         m_Triggers.emplace_back();
         auto& trigger = m_Triggers.back();
@@ -26,7 +29,6 @@ namespace Langums
         }
 
         // actions
-
         Action_PreserveTrigger();
         m_HasChanges = false;
     }
@@ -74,7 +76,7 @@ namespace Langums
 
             if (regId >= g_RegisterMap.size())
             {
-                throw CompilerException("Fatal error. Out of registers.");
+                throw CompilerException("Fatal error. Out of registers.", nullptr);
             }
 
             auto& regDef = g_RegisterMap[regId];
@@ -433,7 +435,7 @@ namespace Langums
 
             if (regId >= g_RegisterMap.size())
             {
-                throw CompilerException("Fatal error. Out of registers.");
+                throw CompilerException("Fatal error. Out of registers.", nullptr);
             }
 
             auto& regDef = g_RegisterMap[regId];
@@ -459,7 +461,7 @@ namespace Langums
 
             if (regId >= g_RegisterMap.size())
             {
-                throw CompilerException("Fatal error. Out of registers.");
+                throw CompilerException("Fatal error. Out of registers.", nullptr);
             }
 
             auto& regDef = g_RegisterMap[regId];
@@ -485,7 +487,7 @@ namespace Langums
 
             if (regId >= g_RegisterMap.size())
             {
-                throw CompilerException("Fatal error. Out of registers.");
+                throw CompilerException("Fatal error. Out of registers.", nullptr);
             }
 
             auto& regDef = g_RegisterMap[regId];

@@ -37,7 +37,7 @@ namespace Langums
                 auto lhsNumber = (ASTNumberLiteral*)lhs.get();
                 auto rhsNumber = (ASTNumberLiteral*)rhs.get();
                 auto result = CalculateConstantBinaryExpression(lhsNumber->GetValue(), rhsNumber->GetValue(), expression->GetOperator());
-                return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result));
+                return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result, node->GetCharIndex()));
             }
 
             /*if (expression->GetOperator() == OperatorType::Multiply &&
@@ -81,7 +81,7 @@ namespace Langums
             {
                 auto valueNumber = (ASTNumberLiteral*)value.get();
                 auto result = valueNumber->GetValue() > 0 ? 0 : 1;
-                return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result));
+                return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result, node->GetCharIndex()));
             }
         }
 

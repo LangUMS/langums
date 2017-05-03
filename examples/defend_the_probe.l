@@ -90,10 +90,6 @@ for <TargetLoc> in (ProbeTarget1, ProbeTarget2, ProbeTarget3, ProbeTarget4) {
 
 // win/ lose conditions
 
-score(Player7, Custom, AtLeast, 32) => {
-  end(AllPlayers, Victory);
-}
-
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
   commands(PlayerId, Exactly, 0, HeroJimRaynorMarine) => {
     if (!probe_spawned) {
@@ -102,6 +98,10 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
     print("You have died a glorious death. o7", PlayerId);
     end(PlayerId, Defeat);
+  }
+
+  score(Player7, Custom, AtLeast, 32) => {
+    end(PlayerId, Victory);
   }
 }
 
@@ -226,7 +226,7 @@ fn spawn_next_wave() {
 }
 
 countdown(Exactly, 1) => {
-  set_countdown(25);
+  set_countdown(26);
 
   current_wave++;
   spawn_next_wave();
@@ -250,13 +250,6 @@ countdown(Exactly, 1) => {
   order(AllUnits, Player8, Patrol, AnyLocation, MapCenter);
 }
 
-fn spawn_if_present<PlayerId, Unit, Loc>(PlayerId, Unit, Loc) {
-  if (is_present(PlayerId)) {
-    spawn(Unit, PlayerId, 1, Loc);
-    set_doodad(PlayerId, AllUnits, Disable, DisableClick);
-  }
-}
-
 // initialization stuff
 
 fn setup_alliances() {
@@ -272,6 +265,13 @@ fn setup_alliances() {
   set_vision(Player4, Player7, true);
   set_vision(Player5, Player7, true);
   set_vision(Player6, Player7, true);
+}
+
+fn spawn_if_present<PlayerId, Unit, Loc>(PlayerId, Unit, Loc) {
+  if (is_present(PlayerId)) {
+    spawn(Unit, PlayerId, 1, Loc);
+    set_doodad(PlayerId, AllUnits, Disable, DisableClick);
+  }
 }
 
 fn spawn_heroes() {
@@ -336,4 +336,3 @@ fn spawn_probe() {
   ping(AllPlayers, ProbeTarget4);
   order(ProtossProbe, Player7, Move, MapCenter, ProbeTarget4);
 }
-

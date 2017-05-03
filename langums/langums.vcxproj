@@ -405,6 +405,7 @@
     <ClInclude Include="..\src\libchk\enums.h" />
     <ClInclude Include="..\src\libchk\ichunk.h" />
     <ClInclude Include="..\src\libchk\iownchunk.h" />
+    <ClInclude Include="..\src\libchk\langumschunk.h" />
     <ClInclude Include="..\src\libchk\locationschunk.h" />
     <ClInclude Include="..\src\libchk\ownrchunk.h" />
     <ClInclude Include="..\src\libchk\stringschunk.h" />
@@ -417,6 +418,7 @@
     <ClInclude Include="..\src\parser\parser.h" />
     <ClInclude Include="..\src\parser\preprocessor.h" />
     <ClInclude Include="..\src\parser\template_instantiator.h" />
+    <ClInclude Include="..\src\pretty_errors.h" />
     <ClInclude Include="..\src\serialization.h" />
     <ClInclude Include="..\src\stormlib\adpcm\adpcm.h" />
     <ClInclude Include="..\src\stormlib\bzip2\bzlib.h" />

@@ -12,8 +12,17 @@ namespace Langums
     class TemplateInstantiatorException : public std::exception
     {
         public:
-        TemplateInstantiatorException(const char* error) : std::exception(error) {}
-        TemplateInstantiatorException(const std::string& error) : std::exception(error.c_str()) {}
+        TemplateInstantiatorException(const char* error, IASTNode* node) : m_Node(node), std::exception(error) {}
+        TemplateInstantiatorException(const std::string& error, IASTNode* node) : m_Node(node), std::exception(error.c_str()) {}
+
+
+        IASTNode* GetASTNode() const
+        {
+            return m_Node;
+        }
+
+        private:
+        IASTNode* m_Node = nullptr;
     };
 
     class TemplateInstantiator

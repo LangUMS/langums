@@ -17,8 +17,16 @@ namespace Langums
     class CompilerException : public std::exception
     {
         public:
-        CompilerException(const char* error) : std::exception(error) {}
-        CompilerException(const std::string& error) : std::exception(error.c_str()) {}
+        CompilerException(const char* error, IIRInstruction* instruction) : m_Instruction(instruction), std::exception(error) {}
+        CompilerException(const std::string& error, IIRInstruction* instruction) : m_Instruction(instruction), std::exception(error.c_str()) {}
+
+        IIRInstruction* GetInstruction() const
+        {
+            return m_Instruction;
+        }
+
+        private:
+        IIRInstruction* m_Instruction = nullptr;
     };
 
     class Compiler
@@ -55,7 +63,7 @@ namespace Langums
         void EmitIndirectJumpCode(unsigned int& nextAddress);
         void EmitMulInstructionCode(unsigned int& nextAddress);
 
-        unsigned int GetLocationIdByName(const std::string& name);
+        unsigned int GetLocationIdByName(const std::string& name, IIRInstruction* instruction);
 
         int GetLastTriggerActionId(const CHK::Trigger& trigger);
 

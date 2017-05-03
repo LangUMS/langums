@@ -24,8 +24,16 @@ namespace Langums
     class IRCompilerException : public std::exception
     {
         public:
-        IRCompilerException(const char* error) : std::exception(error) {}
-        IRCompilerException(const std::string& error) : std::exception(error.c_str()) {}
+        IRCompilerException(const char* error, IASTNode* node) : m_Node(node), std::exception(error) {}
+        IRCompilerException(const std::string& error, IASTNode* node) : m_Node(node), std::exception(error.c_str()) {}
+
+        IASTNode* GetASTNode() const
+        {
+            return m_Node;
+        }
+
+        private:
+        IASTNode* m_Node;
     };
 
     class RegisterAliases
@@ -57,12 +65,12 @@ namespace Langums
             return true;
         }
 
-        int GetAlias(const std::string& name, unsigned int index) const
+        int GetAlias(const std::string& name, unsigned int index, IASTNode* node) const
         {
             auto it = m_Aliases.find(name);
             if (it == m_Aliases.end())
             {
-                throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name));
+                throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), node);
             }
 
             auto& registers = (*it).second;
@@ -70,11 +78,11 @@ namespace Langums
             {
                 if (registers.size() == 1)
                 {
-                    throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name));
+                    throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), node);
                 }
                 else
                 {
-                    throw IRCompilerException(SafePrintf("Array access out of bounds for \"%[%]\"", name, index));
+                    throw IRCompilerException(SafePrintf("Array access out of bounds for \"%[%]\"", name, index), node);
                 }
             }
 
@@ -166,8 +174,9 @@ namespace Langums
         }
 
         private:
-        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions)
+        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node)
         {
+            instruction->SetASTNode(node);
             instructions.push_back(std::unique_ptr<IIRInstruction>(instruction));
         }
 
@@ -178,8 +187,8 @@ namespace Langums
         unsigned int EmitBlockStatement(ASTBlockStatement* blockStatement, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
 
-        bool IsRegisterName(const std::string& name, RegisterAliases& aliases) const;
-        int RegisterNameToIndex(const std::string& name, unsigned int arrayIndex, RegisterAliases& aliases) const;
+        bool IsRegisterName(const std::string& name, RegisterAliases& aliases, IASTNode* node) const;
+        int RegisterNameToIndex(const std::string& name, unsigned int arrayIndex, RegisterAliases& aliases, IASTNode* node) const;
 
         int UnitNameToId(const std::string& name) const;
         int PlayerNameToId(const std::string& name) const;
@@ -199,7 +208,7 @@ namespace Langums
         CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         CHK::TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         ModifyType ParseModifyType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
-        UnitPropType ParseUnitPropType(const std::string& propName);
+        UnitPropType ParseUnitPropType(const std::string& propName, IASTNode* node);
 
         int ParseQuantityExpression(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex,
             std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral);

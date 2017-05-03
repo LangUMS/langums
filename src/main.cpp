@@ -14,6 +14,7 @@
 #include "compiler/compiler.h"
 #include "compiler/registermap_parser.h"
 #include "wavinfo.h"
+#include "pretty_errors.h"
 
 #undef min
 #undef max
@@ -34,16 +35,17 @@ int main(int argc, char* argv[])
         ("h,help", "Prints this help message", cxxopts::value<bool>())
         ("s,src", "Source .scx map file", cxxopts::value<std::string>())
         ("d,dst", "Destination .scx map file", cxxopts::value<std::string>())
-        ("l,lang", "Source .l script file", cxxopts::value<std::string>())
+        ("l,lang", "Source .l source file", cxxopts::value<std::string>())
         ("r,reg", "Available registers map file", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
         ("preserve-triggers", "Preserves already existing triggers in the map (use with caution!).", cxxopts::value<bool>())
-        ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be power of 2. Higher values will increase the amount of emitted triggers (default: 65536).", cxxopts::value<unsigned int>())
+        ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be a power of 2. Higher values will increase the amount of emitted triggers (default: 8192).", cxxopts::value<unsigned int>())
         ("triggers-owner", "The index of the player which holds the main logic triggers (default: 1).", cxxopts::value<unsigned int>())
         ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues).", cxxopts::value<bool>())
-        ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes, but you can open the map in StarEdit.", cxxopts::value<bool>())
+        ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes but you can open the map in StarEdit.", cxxopts::value<bool>())
         ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
         ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
+        ("debug", "Inserts LangUMS debug information to the map so it can be used in the debugger.", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
 
@@ -179,8 +181,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto& versionChunk = chk.GetFirstChunk<CHKVerChunk>(ChunkType::VerChunk);
-    auto version = versionChunk.GetVersion();
+    auto versionChunk = chk.GetFirstChunk<CHKVerChunk>(ChunkType::VerChunk);
+    auto version = versionChunk->GetVersion();
     if (version != CHK_LATEST_MAP_VERSION)
     {
         LOG_EXITERR("\n(!) Fatal error! LangUMS is not compatible with older maps. Map version is %, expected %.", version, CHK_LATEST_MAP_VERSION);
@@ -190,7 +192,7 @@ int main(int argc, char* argv[])
     if (!chk.HasChunk(ChunkType::TriggersChunk))
     {
         std::vector<char> bytes;
-        chk.AddChunk("TRIG", std::unique_ptr<IChunk>(new CHKTriggersChunk(bytes, "TRIG")));
+        chk.AddChunk(std::unique_ptr<IChunk>(new CHKTriggersChunk(bytes, "TRIG")));
     }
 
     if (!chk.HasChunk(ChunkType::DimChunk))
@@ -198,63 +200,69 @@ int main(int argc, char* argv[])
         LOG_EXITERR("\n(!) DIM chunk not found in scenario.chk. Map file is corrupted.");
         return 1;
     }
+    
+    if (!chk.HasChunk(ChunkType::LangumsChunk))
+    {
+        chk.AddChunk(std::unique_ptr<IChunk>(new CHKLangChunk(LangChunkData(), "LANG")));
+    }
 
-    auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
+    auto triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
 
-    auto& stringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
+    auto stringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
 
     if (!chk.HasChunk(ChunkType::WavChunk))
     {
         std::vector<char> data;
         data.resize(512 * sizeof(uint32_t));
 
-        chk.AddChunk("WAV ", std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
+        chk.AddChunk(std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
     }
 
-    auto& wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
+    auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
 
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
-    LOG_F("Existing trigger count: % (%)", triggersChunk.GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
+    LOG_F("Existing trigger count: % (%)", triggersChunk->GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
 
-    auto& dimChunk = chk.GetFirstChunk<CHKDimChunk>(ChunkType::DimChunk);
-    LOG_F("Map size: %x%", dimChunk.GetWidth(), dimChunk.GetHeight());
+    auto dimChunk = chk.GetFirstChunk<CHKDimChunk>(ChunkType::DimChunk);
+    LOG_F("Map size: %x%", dimChunk->GetWidth(), dimChunk->GetHeight());
     
-    auto& tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>(ChunkType::TilesetsChunk);
-    LOG_F("Tileset: %", tilesetChunk.GetTilesetTypeString());
+    auto tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>(ChunkType::TilesetsChunk);
+    LOG_F("Tileset: %", tilesetChunk->GetTilesetTypeString());
 
-    auto& ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>(ChunkType::OwnrChunk);
+    auto ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>(ChunkType::OwnrChunk);
 
     LOG_F("");
 
-    LOG_F("Compiling script \"%\"", langPath.generic_u8string());
+    LOG_F("Compiling source \"%\"", langPath.generic_u8string());
 
-    std::ifstream scriptFile(langPath.generic_u8string());
-    if (!scriptFile.is_open())
+    std::ifstream sourceFile(langPath.generic_u8string());
+    if (!sourceFile.is_open())
     {
         LOG_EXITERR("\n(!) Failed to open \"%\" for reading.", langPath.generic_u8string());
         return 1;
     }
 
     std::string str;
-    std::string script;
-    while (std::getline(scriptFile, str))
+    std::string source;
+    while (std::getline(sourceFile, str))
     {
-        script += str;
-        script.push_back('\n');
+        source += str;
+        source.push_back('\n');
     }
 
-    script.push_back('\n');
+    source.push_back('\n');
     
     Preprocessor preprocessor(langPath.relative_path().remove_filename().generic_u8string());
 
     try
     {
-        script = preprocessor.Process(script);
+        source = preprocessor.Process(source);
     }
     catch (const PreprocessorException& ex)
     {
-        LOG_EXITERR("Preprocessor error: %", ex.what());
+        PrintPreprocessorException(source, ex);
+        LOG_EXITERR("");
         return 1;
     } 
 
@@ -267,7 +275,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        ast = std::shared_ptr<IASTNode>(parser.Parse(script));
+        ast = std::shared_ptr<IASTNode>(parser.Parse(source));
 
         if (!disableOptimization)
         {
@@ -276,54 +284,18 @@ int main(int argc, char* argv[])
     }
     catch (const TemplateInstantiatorException& ex)
     {
-        LOG_EXITERR("Template instantation error - %", ex.what());
+        PrintTemplateInstantiatorException(parser.GetSourceBuffer(), ex);
+        LOG_EXITERR("");
         return -1;
     }
     catch (const ParserException& ex)
     {
-        auto charPos = ex.GetCharPosition();
-        auto& src = parser.GetSourceBuffer();
-
-        auto context = src.substr(std::max(charPos - 16, 0), 32);
-
-        auto newLines = 0;
-        for (auto i = 0; i < std::min((int)src.length(), charPos); i++)
-        {
-            if (src[i] == '\n')
-            {
-                newLines++;
-            }
-        }
-
-        std::istringstream iss(src);
-        std::string output;
-
-        std::vector<std::string> lines;
-
-        for (std::string line; std::getline(iss, line); )
-        {
-            auto ln = trim(line);
-            if (ln.length() > 0)
-            {
-                lines.push_back(ln);
-            }
-        }
-
-        auto sub = src.substr(charPos);
-        auto l = sub.find_first_of('\n');
-
-        sub = sub.substr(0, l);
-        LOG_F("\n(!) Parser error: % on line %", ex.what(), newLines + 2);
-        LOG_F("Near code \"%\"\n", sub);
-        
-        for (auto i = std::max(0, newLines - 1); i < std::min((int)lines.size(), newLines + 2); i++)
-        {
-            LOG_F(">>> %", lines[i]);
-        }
-
+        PrintParserError(parser.GetSourceBuffer(), ex);
         LOG_EXITERR("");
         return 1;
     }
+
+    source = parser.GetSourceBuffer();
 
     IRCompiler ir;
     
@@ -333,7 +305,8 @@ int main(int argc, char* argv[])
     }
     catch (const IRCompilerException& ex)
     {
-        LOG_EXITERR("\n(!) IR compiler error: %", ex.what());
+        PrintIRCompilerException(source, ex);
+        LOG_EXITERR("");
         return 1;
     }
 
@@ -346,7 +319,8 @@ int main(int argc, char* argv[])
     }
     catch (const IRCompilerException& ex)
     {
-        LOG_EXITERR("\n(!) IR optimizer error: %", ex.what());
+        PrintIRCompilerException(source, ex);
+        LOG_EXITERR("");
         return 1;
     }
 
@@ -401,9 +375,9 @@ int main(int argc, char* argv[])
             auto playWav = (IRPlayWAVInstruction*)instruction.get();
             auto& name = playWav->GetWavName();
 
-            auto stringId = stringsChunk.InsertString(SafePrintf("staredit\\wav\\%", name));
-            auto wavStringId = wavChunk.FindFreeIndex();
-            wavChunk.Set(wavStringId, stringId + 1);
+            auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
+            auto wavStringId = wavChunk->FindFreeIndex();
+            wavChunk->Set(wavStringId, stringId + 1);
             playWav->SetWavStringId(wavStringId);
 
             if (wavLengths.find(name) == wavLengths.end())
@@ -425,9 +399,9 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            auto stringId = stringsChunk.InsertString(SafePrintf("staredit\\wav\\%", name));
-            auto wavStringId = wavChunk.FindFreeIndex();
-            wavChunk.Set(wavStringId, stringId + 1);
+            auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
+            auto wavStringId = wavChunk->FindFreeIndex();
+            wavChunk->Set(wavStringId, stringId + 1);
             transmission->SetWavStringId(wavStringId);
 
             transmission->SetWavTime(wavLengths[name]);
@@ -462,7 +436,7 @@ int main(int argc, char* argv[])
     LOG_F("Player % owns the LangUMS triggers.", triggersOwner);
     compiler.SetTriggersOwner(triggersOwner);
 
-    auto triggerOwnerType = ownrChunk.GetPlayerType(triggersOwner - 1);
+    auto triggerOwnerType = ownrChunk->GetPlayerType(triggersOwner - 1);
     if (triggerOwnerType == PlayerType::Human)
     {
         LOG_F("\n(!) Warning! The triggers owner (player %) is currently set to a Human player.", triggersOwner);
@@ -472,12 +446,12 @@ int main(int argc, char* argv[])
         {
             LOG_F("(!) Setting player % to a Computer player.", triggersOwner);
             LOG_F("(!) If you wish to override this decision call langums.exe again with the --force option.\n");
-            ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+            ownrChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
 
             if (chk.HasChunk(ChunkType::IOwnChunk))
             {
-                auto& iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
-                iownChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+                auto iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+                iownChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
             }
         }
     }
@@ -485,11 +459,11 @@ int main(int argc, char* argv[])
     {
         LOG_F("(!) Setting player % to a Computer player because he's the triggers owner. Use --triggers-owner to override.", triggersOwner);
 
-        ownrChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+        ownrChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
         if (chk.HasChunk(ChunkType::IOwnChunk))
         {
-            auto& iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
-            iownChunk.SetPlayerType(triggersOwner - 1, PlayerType::Computer);
+            auto iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+            iownChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
         }
     }
 
@@ -574,11 +548,32 @@ int main(int argc, char* argv[])
     }
     catch (const CompilerException& ex)
     {
-        LOG_EXITERR("\n(!) CodeGen error: %", ex.what());
+        PrintCompilerException(source, ex);
+        LOG_EXITERR("");
         return 1;
     }
 
-    LOG_F("Compilation successful! Trigger count: %", triggersChunk.GetTriggersCount());
+    LOG_F("Compilation successful! Trigger count: %", triggersChunk->GetTriggersCount());
+
+    if (opts.count("debug") > 0)
+    {
+        auto langChunk = chk.GetFirstChunk<CHKLangChunk>(ChunkType::LangumsChunk);
+        auto langData = langChunk->GetData();
+
+        memcpy(langData->m_Source, source.data(), source.length() + 1);
+        langData->m_SourceLen = source.length();
+
+        std::vector<unsigned int> usedRegisters;
+        for (auto& regDef : g_RegisterMap)
+        {
+            auto index = regDef.m_PlayerId + regDef.m_Index * 8;
+            usedRegisters.push_back(index);
+        }
+
+        std::sort(usedRegisters.begin(), usedRegisters.end());
+        memcpy(langData->m_UsedRegisters, usedRegisters.data(), usedRegisters.size() * sizeof(unsigned int));
+        langData->m_UsedRegisterCount = usedRegisters.size();
+    }
 
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);

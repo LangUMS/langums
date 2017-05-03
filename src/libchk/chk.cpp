@@ -22,7 +22,11 @@ namespace CHK
             
             m_ChunkTypes.insert(type);
 
-            if (type == "VER ")
+            if (type == "LANG")
+            {
+                chunk = std::make_unique<CHKLangChunk>(bytes, type);
+            }
+            else if (type == "VER ")
             {
                 chunk = std::make_unique<CHKVerChunk>(bytes, type);
             }

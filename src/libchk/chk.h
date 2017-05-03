@@ -19,6 +19,7 @@
 #include "cuwpusedchunk.h"
 #include "wavchunk.h"
 #include "tilesetchunk.h"
+#include "langumschunk.h"
 
 namespace CHK
 {
@@ -68,10 +69,10 @@ namespace CHK
             }
         }
 
-        void AddChunk(const std::string& type, std::unique_ptr<IChunk> chunk)
+        void AddChunk(std::unique_ptr<IChunk> chunk)
         {
-            m_ChunkTypes.insert(type);
-            m_Chunks[type].push_back(std::move(chunk));
+            m_ChunkTypes.insert(chunk->GetType());
+            m_Chunks[chunk->GetType()].push_back(std::move(chunk));
         }
 
         bool HasChunk(ChunkType type) const
@@ -100,13 +101,15 @@ namespace CHK
                 return HasChunk("UPRP");
             case ChunkType::CuwpUsedChunk:
                 return HasChunk("UPUS");
+            case ChunkType::LangumsChunk:
+                return HasChunk("LANG");
             }
 
             return false;
         }
 
         template <typename T>
-        T& GetFirstChunk(ChunkType type) const
+        T* GetFirstChunk(ChunkType type) const
         {
             switch (type)
             {
@@ -132,9 +135,11 @@ namespace CHK
                     return GetFirstChunk<T>("UPRP");
                 case ChunkType::CuwpUsedChunk:
                     return GetFirstChunk<T>("UPUS");
+                case ChunkType::LangumsChunk:
+                    return GetFirstChunk<T>("LANG");
             }
 
-            return GetFirstChunk<T>("DIM ");
+            return nullptr;
         }
 
         template <typename T>
@@ -174,15 +179,15 @@ namespace CHK
 
 
         template <typename T>
-        T& GetFirstChunk(const std::string& type) const
+        T* GetFirstChunk(const std::string& type) const
         {
             auto it = m_Chunks.find(type);
             if (it == m_Chunks.end())
             {
-                return *(T*)nullptr;
+                return nullptr;
             }
 
-            return *((T*)((*it).second.front().get()));
+            return (T*)(*it).second.front().get();
         }
 
         std::unordered_map<std::string, std::vector<std::unique_ptr<IChunk>>> m_Chunks;

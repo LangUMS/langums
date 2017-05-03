@@ -109,6 +109,26 @@ namespace Langums
         virtual ~IIRInstruction ()
         {}
 
+        IASTNode* GetASTNode() const
+        {
+            return m_ASTNode;
+        }
+
+        void SetASTNode(IASTNode* node)
+        {
+            m_ASTNode = node;
+        }
+
+        unsigned int GetInstructionId() const
+        {
+            return m_Id;
+        }
+
+        void SetInstructionId(unsigned int id)
+        {
+            m_Id = id;
+        }
+
         IRInstructionType GetType () const
         {
             return m_Type;
@@ -117,7 +137,9 @@ namespace Langums
         virtual std::string DebugDump () const = 0;
 
         private:
+        IASTNode* m_ASTNode = nullptr;
         IRInstructionType m_Type = IRInstructionType::Nop;
+        unsigned int m_Id = 0;
     };
 
     class IRNopInstruction : public IIRInstruction

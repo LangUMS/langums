@@ -23,3 +23,7 @@ langums_log.txt
 *.tmp
 langums/.vs/
 langums/langums.vcxproj.user
+ldb_d.exe
+ldb.exe
+ldb/Release/
+ldb/Debug/

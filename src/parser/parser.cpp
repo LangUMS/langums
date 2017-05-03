@@ -104,7 +104,7 @@ namespace Langums
 
     std::unique_ptr<IASTNode> Parser::Unit()
     {
-        auto unit = std::make_unique<IASTNode>(ASTNodeType::Unit);
+        auto unit = std::make_unique<IASTNode>(m_CurrentChar, ASTNodeType::Unit);
 
         while (!EndOfStream())
         {
@@ -446,7 +446,7 @@ namespace Langums
                 auto nxt = next.back();
                 next.pop_back();
 
-                auto unaryExpression = new ASTUnaryExpression(token.m_OperatorType);
+                auto unaryExpression = new ASTUnaryExpression(token.m_OperatorType, m_CurrentChar);
                 unaryExpression->AddChild(ExpressionTokenToNode(nxt, next));
                 node = std::unique_ptr<IASTNode>(unaryExpression);
             }
@@ -460,7 +460,7 @@ namespace Langums
                 auto nxt = next.back();
                 next.pop_back();
 
-                auto binaryExpression = new ASTBinaryExpression(token.m_OperatorType);
+                auto binaryExpression = new ASTBinaryExpression(token.m_OperatorType, m_CurrentChar);
                 binaryExpression->AddChild(ExpressionTokenToNode(nxt, next));
 
                 nxt = next.back();
@@ -471,13 +471,13 @@ namespace Langums
         }
         else if (token.m_Type == TokenType::Identifier)
         {
-            node = std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value));
+            node = std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value, m_CurrentChar));
         }
         else if (token.m_Type == TokenType::FunctionName)
         {
             auto argCount = token.m_NumberValue;
 
-            auto functionCall = new ASTFunctionCall(token.m_Value);
+            auto functionCall = new ASTFunctionCall(token.m_Value, m_CurrentChar);
             node = std::unique_ptr<IASTNode>(functionCall);
 
             for (auto i = 0; i < argCount; i++)
@@ -490,28 +490,28 @@ namespace Langums
         }
         else if (token.m_Type == TokenType::BooleanLiteral)
         {
-            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_Value == "true" ? 1 : 0));
+            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_Value == "true" ? 1 : 0, m_CurrentChar));
         }
         else if (token.m_Type == TokenType::NumberLiteral)
         {
-            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue));
+            node = std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue, m_CurrentChar));
         }
         else if (token.m_Type == TokenType::StringLiteral)
         {
-            node = std::unique_ptr<IASTNode>(new ASTStringLiteral(token.m_Value));
+            node = std::unique_ptr<IASTNode>(new ASTStringLiteral(token.m_Value, m_CurrentChar));
         }
         else if (token.m_Type == TokenType::ArrayOperator)
         {
             if (token.m_NumberValue != -1)
             {
-                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier);
-                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue)));
+                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier, m_CurrentChar);
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(token.m_NumberValue, m_CurrentChar)));
                 node = std::unique_ptr<IASTNode>(arrayExpression);
             }
             else
             {
-                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier);
-                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value)));
+                auto arrayExpression = new ASTArrayExpression(token.m_ArrayIdentifier, m_CurrentChar);
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(token.m_Value, m_CurrentChar)));
                 node = std::unique_ptr<IASTNode>(arrayExpression);
             }
         }
@@ -562,15 +562,15 @@ namespace Langums
 
         Whitespace();
 
-        auto unaryExpression = new ASTUnaryExpression(op);
+        auto unaryExpression = new ASTUnaryExpression(op, m_CurrentChar);
 
         if (arrayIndex == nullptr)
         {
-            unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier)));
+            unaryExpression->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier, m_CurrentChar)));
         }
         else
         {
-            auto arrayExpression = new ASTArrayExpression(identifier);
+            auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
             arrayExpression->AddChild(std::move(arrayIndex));
             unaryExpression->AddChild(std::shared_ptr<IASTNode>(arrayExpression));
         }
@@ -582,7 +582,7 @@ namespace Langums
     {
         Whitespace();
 
-        auto assignmentExpression = new ASTAssignmentExpression();
+        auto assignmentExpression = new ASTAssignmentExpression(m_CurrentChar);
 
         auto i = 0;
         while (Peek(i) != '=' && Peek(i) != '[')
@@ -598,15 +598,15 @@ namespace Langums
             Symbol('[');
             Whitespace();
 
-            auto arrayExpression = new ASTArrayExpression(identifier);
+            auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
 
             if (std::isdigit(Peek()))
             {
-                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral())));
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
             }
             else
             {
-                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+                arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
             }
 
             Whitespace();
@@ -616,7 +616,7 @@ namespace Langums
         }
         else
         {
-            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+            assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
         }
 
         Whitespace();
@@ -660,7 +660,7 @@ namespace Langums
             Symbol(']');
         }
 
-        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize);
+        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize, m_CurrentChar);
 
         if (assignmentExpression != nullptr)
         {
@@ -674,7 +674,7 @@ namespace Langums
     {
         Keyword("return");
         Whitespace();
-        auto returnStatement = new ASTReturnStatement();
+        auto returnStatement = new ASTReturnStatement(m_CurrentChar);
 
         if (Peek() != ';')
         {
@@ -763,7 +763,7 @@ namespace Langums
         Whitespace();
         Symbol('{');
 
-        auto blockStatement = new ASTBlockStatement();
+        auto blockStatement = new ASTBlockStatement(m_CurrentChar);
         
         Whitespace();
 
@@ -788,7 +788,7 @@ namespace Langums
         Keyword("if");
         Whitespace();
 
-        auto ifStatement = new ASTIfStatement();
+        auto ifStatement = new ASTIfStatement(m_CurrentChar);
         ifStatement->AddChild(Expression());
         Whitespace();
         ifStatement->AddChild(BlockStatement());
@@ -808,7 +808,7 @@ namespace Langums
         Keyword("while");
         Whitespace();
 
-        auto whileStatement = new ASTWhileStatement();
+        auto whileStatement = new ASTWhileStatement(m_CurrentChar);
         whileStatement->AddChild(Expression());
         Whitespace();
         whileStatement->AddChild(BlockStatement());
@@ -878,7 +878,7 @@ namespace Langums
         Symbol(')');
         Whitespace();
 
-        auto templateDeclaration = new ASTTemplateFunction(functionName, args, templateArgs);
+        auto templateDeclaration = new ASTTemplateFunction(functionName, args, templateArgs, m_CurrentChar);
         templateDeclaration->AddChild(BlockStatement());
         Whitespace();
 
@@ -921,7 +921,7 @@ namespace Langums
         Symbol(')');
         Whitespace();
 
-        auto functionDeclaration = new ASTFunctionDeclaration(functionName, args);
+        auto functionDeclaration = new ASTFunctionDeclaration(functionName, args, m_CurrentChar);
         functionDeclaration->AddChild(BlockStatement());
         Whitespace();
 
@@ -961,7 +961,7 @@ namespace Langums
             Symbol(']');
         }
 
-        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize);
+        auto variableDeclaration = new ASTVariableDeclaration(name, arraySize, m_CurrentChar);
 
         if (assignmentExpression != nullptr)
         {
@@ -978,7 +978,7 @@ namespace Langums
     std::unique_ptr<IASTNode> Parser::EventCondition()
     {
         auto conditionName = Identifier();
-        auto condition = new ASTEventCondition(conditionName);
+        auto condition = new ASTEventCondition(conditionName, m_CurrentChar);
 
         Whitespace();
         Symbol('(');
@@ -989,15 +989,15 @@ namespace Langums
         {
             if (c == '"')
             {
-                condition->AddChild(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral())));
+                condition->AddChild(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
             }
             else if (std::isdigit(c))
             {
-                condition->AddChild(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral())));
+                condition->AddChild(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
             }
             else
             {
-                condition->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier())));
+                condition->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
             }
             
             Whitespace();
@@ -1020,7 +1020,7 @@ namespace Langums
 
     std::unique_ptr<IASTNode> Parser::EventDeclaration()
     {
-        auto eventDeclaration = new ASTEventDeclaration();
+        auto eventDeclaration = new ASTEventDeclaration(m_CurrentChar);
 
         eventDeclaration->AddChild(EventCondition());
         Whitespace();
@@ -1077,7 +1077,7 @@ namespace Langums
             c = Peek();
         }
 
-        auto eventTemplateBlock = new ASTEventTemplateBlock(iteratorName, list);
+        auto eventTemplateBlock = new ASTEventTemplateBlock(iteratorName, list, m_CurrentChar);
 
         Symbol(')');
         Whitespace();
@@ -1109,7 +1109,7 @@ namespace Langums
         Symbol('{');
         Whitespace();
 
-        auto unitProperties = new ASTUnitProperties(name);
+        auto unitProperties = new ASTUnitProperties(name, m_CurrentChar);
 
         unitProperties->AddChild(UnitProperty());
         Whitespace();
@@ -1142,16 +1142,16 @@ namespace Langums
         if (PeekKeyword("true"))
         {
             Keyword("true");
-            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 1));
+            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 1, m_CurrentChar));
         }
 
         if (PeekKeyword("false"))
         {
             Keyword("false");
-            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 0));
+            return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, 0, m_CurrentChar));
         }
 
-        return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, NumberLiteral()));
+        return std::unique_ptr<IASTNode>(new ASTUnitProperty(name, NumberLiteral(), m_CurrentChar));
     }
 
     std::string Parser::Identifier()

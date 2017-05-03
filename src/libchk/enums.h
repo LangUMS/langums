@@ -18,7 +18,8 @@ namespace CHK
         TilesetsChunk,
         LocationsChunk,
         CuwpChunk,
-        CuwpUsedChunk
+        CuwpUsedChunk,
+        LangumsChunk
     };
 
     enum class TriggerConditionType : uint8_t

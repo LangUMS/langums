@@ -51,15 +51,76 @@ namespace Langums
         UnitProperty
     };
 
+    inline std::string ASTNodeTypeToName(ASTNodeType nodeType)
+    {
+        switch (nodeType)
+        {
+            case ASTNodeType::Unit:
+                return "Unit";
+            case ASTNodeType::FunctionDeclaration:
+                return "FunctionDeclaration";
+            case ASTNodeType::TemplateFunction:
+                return "TemplateFunction";
+            case ASTNodeType::BlockStatement:
+                return "BlockStatement";
+            case ASTNodeType::Identifier:
+                return "Identifier";
+            case ASTNodeType::StringLiteral:
+                return "StringLiteral";
+            case ASTNodeType::NumberLiteral:
+                return "NumberLiteral";
+            case ASTNodeType::AssignmentExpression:
+                return "AssignmentExpression";
+            case ASTNodeType::FunctionCall:
+                return "FunctionCall";
+            case ASTNodeType::IfStatement:
+                return "IfStatement";
+            case ASTNodeType::WhileStatement:
+                return "WhileStatement";
+            case ASTNodeType::BinaryExpression:
+                return "BinaryExpression";
+            case ASTNodeType::ArrayExpression:
+                return "ArrayExpression";
+            case ASTNodeType::UnaryExpression:
+                return "UnaryExpression";
+            case ASTNodeType::ReturnStatement:
+                return "ReturnStatement";
+            case ASTNodeType::VariableDeclaration:
+                return "VariableDeclaration";
+            case ASTNodeType::EventCondition:
+                return "EventCondition";
+            case ASTNodeType::EventDeclaration:
+                return "EventDeclaration";
+            case ASTNodeType::EventTemplateBlock:
+                return "EventTemplateBlock";
+            case ASTNodeType::UnitProperties:
+                return "UnitProperties";
+            case ASTNodeType::UnitProperty:
+                return "UnitProperty";
+        }
+
+        return "UnknownType";
+    }
+
     class IASTNode
     {
         public:
-        IASTNode(ASTNodeType type) : m_Type(type) {}
+        IASTNode(unsigned int charIndex, ASTNodeType type) : m_CharIndex(charIndex), m_Type(type) {}
         virtual ~IASTNode() {}
 
         ASTNodeType GetType() const
         {
             return m_Type;
+        }
+
+        std::string GetTypeName() const
+        {
+            return ASTNodeTypeToName(m_Type);
+        }
+
+        unsigned int GetCharIndex() const
+        {
+            return m_CharIndex;
         }
         
         void AddChild(const std::shared_ptr<IASTNode>& node)
@@ -111,13 +172,14 @@ namespace Langums
         ASTNodeType m_Type = ASTNodeType::Unit;
         std::vector<std::shared_ptr<IASTNode>> m_Children;
         std::shared_ptr<IASTNode> m_EmptyChild = nullptr;
+        unsigned int m_CharIndex;
     };
 
     class ASTStringLiteral : public IASTNode
     {
         public:
-        ASTStringLiteral(const std::string& value) :
-            m_Value(value), IASTNode(ASTNodeType::StringLiteral) {}
+        ASTStringLiteral(const std::string& value, unsigned int charIndex) :
+            m_Value(value), IASTNode(charIndex, ASTNodeType::StringLiteral) {}
 
         const std::string& GetValue() const
         {
@@ -131,8 +193,8 @@ namespace Langums
     class ASTNumberLiteral : public IASTNode
     {
         public:
-        ASTNumberLiteral(int value) :
-            m_Value(value), IASTNode(ASTNodeType::NumberLiteral) {}
+        ASTNumberLiteral(int value, unsigned int charIndex) :
+            m_Value(value), IASTNode(charIndex, ASTNodeType::NumberLiteral) {}
 
         int GetValue() const
         {
@@ -146,8 +208,8 @@ namespace Langums
     class ASTIdentifier : public IASTNode
     {
         public:
-        ASTIdentifier(const std::string& name) :
-            m_Name(name), IASTNode(ASTNodeType::Identifier) {}
+        ASTIdentifier(const std::string& name, unsigned int charIndex) :
+            m_Name(name), IASTNode(charIndex, ASTNodeType::Identifier) {}
 
         const std::string& GetName() const
         {
@@ -166,7 +228,7 @@ namespace Langums
     class ASTAssignmentExpression : public IASTNode
     {
         public:
-        ASTAssignmentExpression() : IASTNode(ASTNodeType::AssignmentExpression) {}
+        ASTAssignmentExpression(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::AssignmentExpression) {}
 
         const std::shared_ptr<IASTNode>& GetLHSValue() const
         {
@@ -182,8 +244,8 @@ namespace Langums
     class ASTBinaryExpression : public IASTNode
     {
         public:
-        ASTBinaryExpression(OperatorType op) :
-            m_Operator(op), IASTNode(ASTNodeType::BinaryExpression) {}
+        ASTBinaryExpression(OperatorType op, unsigned int charIndex) :
+            m_Operator(op), IASTNode(charIndex, ASTNodeType::BinaryExpression) {}
 
         const std::shared_ptr<IASTNode>& GetLHSValue() const
         {
@@ -207,8 +269,8 @@ namespace Langums
     class ASTArrayExpression : public IASTNode
     {
         public:
-        ASTArrayExpression(const std::string& identifier) :
-            m_Identifier(identifier), IASTNode(ASTNodeType::ArrayExpression)
+        ASTArrayExpression(const std::string& identifier, unsigned int charIndex) :
+            m_Identifier(identifier), IASTNode(charIndex, ASTNodeType::ArrayExpression)
         {}
 
         const std::string& GetIdentifier() const
@@ -228,8 +290,8 @@ namespace Langums
     class ASTUnaryExpression : public IASTNode
     {
         public:
-        ASTUnaryExpression(OperatorType op) : 
-            m_Operator(op), IASTNode(ASTNodeType::UnaryExpression) {}
+        ASTUnaryExpression(OperatorType op, unsigned int charIndex) :
+            m_Operator(op), IASTNode(charIndex, ASTNodeType::UnaryExpression) {}
 
         const std::shared_ptr<IASTNode>& GetValue() const
         {
@@ -248,7 +310,8 @@ namespace Langums
     class ASTFunctionCall : public IASTNode
     {
         public:
-        ASTFunctionCall(const std::string& fnName) : m_FunctionName(fnName), IASTNode(ASTNodeType::FunctionCall) {}
+        ASTFunctionCall(const std::string& fnName, unsigned int charIndex) :
+            m_FunctionName(fnName), IASTNode(charIndex, ASTNodeType::FunctionCall) {}
 
         const std::string& GetFunctionName() const
         {
@@ -273,7 +336,7 @@ namespace Langums
     class ASTIfStatement : public IASTNode
     {
         public:
-        ASTIfStatement() : IASTNode(ASTNodeType::IfStatement) {}
+        ASTIfStatement(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::IfStatement) {}
 
         const std::shared_ptr<IASTNode>& GetExpression() const
         {
@@ -294,7 +357,7 @@ namespace Langums
     class ASTWhileStatement : public IASTNode
     {
         public:
-        ASTWhileStatement() : IASTNode(ASTNodeType::WhileStatement) {}
+        ASTWhileStatement(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::WhileStatement) {}
 
         const std::shared_ptr<IASTNode>& GetExpression() const
         {
@@ -310,13 +373,13 @@ namespace Langums
     class ASTBlockStatement : public IASTNode
     {
         public:
-        ASTBlockStatement() : IASTNode(ASTNodeType::BlockStatement) {}
+        ASTBlockStatement(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::BlockStatement) {}
     };
 
     class ASTReturnStatement : public IASTNode
     {
         public:
-        ASTReturnStatement() : IASTNode(ASTNodeType::ReturnStatement) {}
+        ASTReturnStatement(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::ReturnStatement) {}
 
         const std::shared_ptr<IASTNode>& GetExpression() const
         {
@@ -327,8 +390,8 @@ namespace Langums
     class ASTFunctionDeclaration : public IASTNode
     {
         public:
-        ASTFunctionDeclaration(const std::string& name, const std::vector<std::string>& args) :
-            m_Name(name), m_Args(args), IASTNode(ASTNodeType::FunctionDeclaration) {}
+        ASTFunctionDeclaration(const std::string& name, const std::vector<std::string>& args, unsigned int charIndex) :
+            m_Name(name), m_Args(args), IASTNode(charIndex, ASTNodeType::FunctionDeclaration) {}
 
         const std::string& GetName() const
         {
@@ -353,8 +416,10 @@ namespace Langums
     class ASTTemplateFunction : public IASTNode
     {
         public:
-        ASTTemplateFunction(const std::string& name, const std::vector<std::string>& args, const std::vector<std::string>& templateArgs) :
-            m_Name(name), m_Args(args), m_TemplateArgs(templateArgs), IASTNode(ASTNodeType::TemplateFunction) {}
+        ASTTemplateFunction(const std::string& name, const std::vector<std::string>& args,
+            const std::vector<std::string>& templateArgs, unsigned int charIndex) :
+            m_Name(name), m_Args(args), m_TemplateArgs(templateArgs),
+            IASTNode(charIndex, ASTNodeType::TemplateFunction) {}
 
         const std::string& GetName() const
         {
@@ -390,8 +455,8 @@ namespace Langums
     class ASTVariableDeclaration : public IASTNode
     {
         public:
-        ASTVariableDeclaration(const std::string& name, unsigned int arraySize) :
-            m_Name(name), m_ArraySize(arraySize), IASTNode(ASTNodeType::VariableDeclaration) {}
+        ASTVariableDeclaration(const std::string& name, unsigned int arraySize, unsigned int charIndex) :
+            m_Name(name), m_ArraySize(arraySize), IASTNode(charIndex, ASTNodeType::VariableDeclaration) {}
 
         const std::string& GetName() const
         {
@@ -416,8 +481,8 @@ namespace Langums
     class ASTEventCondition : public IASTNode
     {
         public:
-        ASTEventCondition(const std::string& name) :
-            m_Name(name), IASTNode(ASTNodeType::EventCondition) {}
+        ASTEventCondition(const std::string& name, unsigned int charIndex) :
+            m_Name(name), IASTNode(charIndex, ASTNodeType::EventCondition) {}
 
         const std::string& GetName() const
         {
@@ -436,7 +501,7 @@ namespace Langums
     class ASTEventDeclaration : public IASTNode
     {
         public:
-        ASTEventDeclaration() : IASTNode(ASTNodeType::EventDeclaration) {}
+        ASTEventDeclaration(unsigned int charIndex) : IASTNode(charIndex, ASTNodeType::EventDeclaration) {}
 
         unsigned int GetConditionsCount() const
         {
@@ -462,8 +527,8 @@ namespace Langums
     class ASTEventTemplateBlock : public IASTNode
     {
         public:
-        ASTEventTemplateBlock(const std::string& iteratorName, const std::vector<std::string>& list) :
-            m_IteratorName(iteratorName), m_List(list), IASTNode(ASTNodeType::EventTemplateBlock)
+        ASTEventTemplateBlock(const std::string& iteratorName, const std::vector<std::string>& list, unsigned int charIndex) :
+            m_IteratorName(iteratorName), m_List(list), IASTNode(charIndex, ASTNodeType::EventTemplateBlock)
         {}
 
         const std::string& GetIteratorName() const
@@ -484,8 +549,8 @@ namespace Langums
     class ASTUnitProperties : public IASTNode
     {
         public:
-        ASTUnitProperties(const std::string& name) :
-            m_Name(name), IASTNode(ASTNodeType::UnitProperties) {}
+        ASTUnitProperties(const std::string& name, unsigned int charIndex) :
+            m_Name(name), IASTNode(charIndex, ASTNodeType::UnitProperties) {}
 
         unsigned int GetPropertiesCount() const
         {
@@ -509,8 +574,8 @@ namespace Langums
     class ASTUnitProperty : public IASTNode
     {
         public:
-        ASTUnitProperty(const std::string& name, unsigned int value) :
-            m_Name(name), m_Value(value), IASTNode(ASTNodeType::UnitProperty) {}
+        ASTUnitProperty(const std::string& name, unsigned int value, unsigned int charIndex) :
+            m_Name(name), m_Value(value), IASTNode(charIndex, ASTNodeType::UnitProperty) {}
 
         const std::string& GetName() const
         {

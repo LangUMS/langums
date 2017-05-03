@@ -13,6 +13,7 @@ namespace Langums
     };
 
     extern std::vector<RegisterDef> g_RegisterMap;
+    extern std::unordered_map<unsigned int, std::set<IIRInstruction*>> g_AddressToInstructionMap;
 
     class TriggerBuilder
     {
@@ -105,7 +106,7 @@ namespace Langums
         {
             if (m_NextAction >= 64)
             {
-                throw IRCompilerException("Internal error. Trigger actions list overflow");
+                throw IRCompilerException("Internal error. Trigger actions list overflow", 0);
             }
 
             return m_Triggers;

@@ -12,7 +12,7 @@ namespace Langums
 
         if (unit->GetType() != ASTNodeType::Unit)
         {
-            throw TemplateInstantiatorException("Internal error. Invalid AST node type, expected Unit");
+            throw TemplateInstantiatorException("Internal error. Invalid AST node type, expected Unit", unit.get());
         }
 
         auto statementsCopy = m_Unit->GetChildren();
@@ -40,7 +40,7 @@ namespace Langums
 
                 if (m_TemplateFunctions.find(fnName) != m_TemplateFunctions.end())
                 {
-                    throw TemplateInstantiatorException(SafePrintf("Second definition of templated function \"%\"", fnName));
+                    throw TemplateInstantiatorException(SafePrintf("Second definition of templated function \"%\"", fnName), statement.get());
                 }
 
                 m_TemplateFunctions.insert(std::make_pair(fnName, templateFn));
@@ -98,7 +98,7 @@ namespace Langums
 
         if (argsCount != args.size())
         {
-            throw TemplateInstantiatorException(SafePrintf("Argument mismatch for template instantiation of \"%\", expected % but got % arguments", fnName, args.size(), argsCount));
+            throw TemplateInstantiatorException(SafePrintf("Argument mismatch for template instantiation of \"%\", expected % but got % arguments", fnName, args.size(), argsCount), functionCall);
         }
 
         auto genFnName = SafePrintf("%__", fnName);
@@ -128,7 +128,7 @@ namespace Langums
                 }
                 else
                 {
-                    throw TemplateInstantiatorException(SafePrintf("Invalid template instantiation of \"%\" argument %, template arguments must be either identifiers or number literals", fnName, i));
+                    throw TemplateInstantiatorException(SafePrintf("Invalid template instantiation of \"%\" argument %, template arguments must be either identifiers or number literals", fnName, i), functionCall);
                 }
             }
             else
@@ -151,7 +151,7 @@ namespace Langums
             return;
         }
 
-        auto instantiatedFn = new ASTFunctionDeclaration(genFnName, finalArgNames);
+        auto instantiatedFn = new ASTFunctionDeclaration(genFnName, finalArgNames, templateFunction->GetCharIndex());
 
         instantiatedFn->AddChild(std::move(body));
         InstantiateTemplates(instantiatedFn);
@@ -234,7 +234,7 @@ namespace Langums
         switch (node->GetType())
         {
         case ASTNodeType::Unit:
-            newNode = new IASTNode(ASTNodeType::Unit);
+            newNode = new IASTNode(node->GetCharIndex(), ASTNodeType::Unit);
             break;
         case ASTNodeType::FunctionDeclaration:
             newNode = new ASTFunctionDeclaration(*(ASTFunctionDeclaration*)node);
@@ -288,7 +288,7 @@ namespace Langums
             newNode = new ASTArrayExpression(*(ASTArrayExpression*)node);
             break;
         default:
-            throw TemplateInstantiatorException("Unsupported AST node type");
+            throw TemplateInstantiatorException("Unsupported AST node type", node);
         }
 
         newNode->RemoveChildren();

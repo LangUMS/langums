@@ -65,7 +65,7 @@ namespace Langums
 
                 if (offset >= (int)jmpTargets.size())
                 {
-                    throw IRCompilerException("Out of bounds jump");
+                    throw IRCompilerException("Out of bounds jump", 0);
                 }
 
                 jmpTargets[offset] = true;
@@ -82,7 +82,7 @@ namespace Langums
 
                 if (offset >= (int)jmpTargets.size())
                 {
-                    throw IRCompilerException("Out of bounds jump");
+                    throw IRCompilerException("Out of bounds jump", 0);
                 }
 
                 jmpTargets[offset] = true;
@@ -99,7 +99,7 @@ namespace Langums
 
                 if (offset >= (int)jmpTargets.size())
                 {
-                    throw IRCompilerException("Out of bounds jump");
+                    throw IRCompilerException("Out of bounds jump", 0);
                 }
 
                 jmpTargets[offset] = true;
@@ -116,7 +116,7 @@ namespace Langums
 
                 if (offset >= (int)jmpTargets.size())
                 {
-                    throw IRCompilerException("Out of bounds jump");
+                    throw IRCompilerException("Out of bounds jump", 0);
                 }
 
                 jmpTargets[offset] = true;
@@ -133,7 +133,7 @@ namespace Langums
 
                 if (offset >= (int)jmpTargets.size())
                 {
-                    throw IRCompilerException("Out of bounds jump");
+                    throw IRCompilerException("Out of bounds jump", 0);
                 }
 
                 jmpTargets[offset] = true;

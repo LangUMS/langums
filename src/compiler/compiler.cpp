@@ -24,7 +24,7 @@ namespace Langums
             for (auto unitId : unused)
             {
                 RegisterDef def;
-                def.m_PlayerId = 7;
+                def.m_PlayerId = i;
                 def.m_Index = unitId;
                 g_RegisterMap.push_back(def);
             }
@@ -35,30 +35,36 @@ namespace Langums
     {
         using namespace CHK;
 
+        for (auto i = 0u; i < instructions.size(); i++)
+        {
+            instructions[i]->SetInstructionId(i);
+        }
+
+        g_AddressToInstructionMap.clear();
         m_Triggers.clear();
         m_Triggers.reserve(MAX_TRIGGERS_COUNT);
         m_JmpPatchups.clear();
 
         m_File = &chk;
-        m_StringsChunk = &chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
+        m_StringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
         if (m_StringsChunk == nullptr)
         {
-            throw CompilerException("No strings chunk found in scenario file");
+            throw CompilerException("No strings chunk found in scenario file", nullptr);
         }
          
-        m_LocationsChunk = &chk.GetFirstChunk<CHKLocationsChunk>(ChunkType::LocationsChunk);
+        m_LocationsChunk = chk.GetFirstChunk<CHKLocationsChunk>(ChunkType::LocationsChunk);
         if (m_LocationsChunk == nullptr)
         {
-            throw CompilerException("No locations chunk found in scenario file");
+            throw CompilerException("No locations chunk found in scenario file", nullptr);
         }
 
-        m_CuwpChunk = &chk.GetFirstChunk<CHKCuwpChunk>(ChunkType::CuwpChunk);
+        m_CuwpChunk = chk.GetFirstChunk<CHKCuwpChunk>(ChunkType::CuwpChunk);
         if (m_CuwpChunk == nullptr)
         {
-            throw CompilerException("No CUWP slots chunk found in scenario file");
+            throw CompilerException("No CUWP slots chunk found in scenario file", nullptr);
         }
 
-        m_CuwpUsedChunk = &chk.GetFirstChunk<CHKCuwpUsedChunk>(ChunkType::CuwpUsedChunk);
+        m_CuwpUsedChunk = chk.GetFirstChunk<CHKCuwpUsedChunk>(ChunkType::CuwpUsedChunk);
 
         auto nextCuwpSlot = 0;
 
@@ -75,7 +81,7 @@ namespace Langums
                 auto propsCount = unit->GetPropertyCount();
                 if (propsCount == 0)
                 {
-                    throw CompilerException("Malformed input. Unit with zero properties");
+                    throw CompilerException("Malformed input. Unit with zero properties", instruction.get());
                 }
 
                 auto slotIndex = nextCuwpSlot++;
@@ -85,7 +91,7 @@ namespace Langums
 
                     if (slotIndex == -1)
                     {
-                        throw CompilerException("All 64 unit slots are full");
+                        throw CompilerException("All 64 unit slots are full", instruction.get());
                     }
 
                     m_CuwpUsedChunk->SetUsed(slotIndex, true);
@@ -186,7 +192,7 @@ namespace Langums
                 auto conditionsCount = evnt->GetConditionsCount();
                 if (conditionsCount == 0)
                 {
-                    throw CompilerException("Malformed input. Event with zero conditions");
+                    throw CompilerException("Malformed input. Event with zero conditions", evnt);
                 }
 
                 TriggerBuilder eventTrigger(-1, nullptr, m_TriggersOwner);
@@ -203,7 +209,7 @@ namespace Langums
                     if (condition->GetType() == IRInstructionType::BringCond)
                     {
                         auto bring = (IRBringCondInstruction*)condition.get();
-                        auto locationId = GetLocationIdByName(bring->GetLocationName());
+                        auto locationId = GetLocationIdByName(bring->GetLocationName(), instruction.get());
 
                         eventTrigger.SetOwner(bring->GetPlayerId() + 1);
 
@@ -285,7 +291,7 @@ namespace Langums
 
                         if (locationName.length() > 0)
                         {
-                            locationId = GetLocationIdByName(locationName);
+                            locationId = GetLocationIdByName(locationName, instruction.get());
                         }
 
                         eventTrigger.Cond_CommandsLeast(cmdLeast->GetPlayerId(), cmdLeast->GetUnitId(), locationId);
@@ -300,7 +306,7 @@ namespace Langums
 
                         if (locationName.length() > 0)
                         {
-                            locationId = GetLocationIdByName(locationName);
+                            locationId = GetLocationIdByName(locationName, instruction.get());
                         }
 
                         eventTrigger.Cond_CommandsMost(cmdMost->GetPlayerId(), cmdMost->GetUnitId(), locationId);
@@ -788,7 +794,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Div)
             {
-                throw CompilerException("Malformed IR. Native Div is not implemented yet");
+                throw CompilerException("Malformed IR. Native Div is not implemented yet", instruction.get());
             }
             else if (instruction->GetType() == IRInstructionType::Rnd256)
             {
@@ -845,7 +851,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -889,7 +895,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -934,7 +940,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -963,7 +969,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -994,7 +1000,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -1026,7 +1032,7 @@ namespace Langums
 
                 if (regId > Reg_StackTop)
                 {
-                    throw CompilerException("Malformed IR. Testing past top of the stack");
+                    throw CompilerException("Malformed IR. Testing past top of the stack", instruction.get());
                 }
 
                 if (regId == Reg_StackTop)
@@ -1196,7 +1202,7 @@ namespace Langums
                 auto spawn = (IRSpawnInstruction*)instruction.get();
                 auto unitSlot = spawn->GetPropsSlot();
 
-                auto locationId = GetLocationIdByName(spawn->GetLocationName());
+                auto locationId = GetLocationIdByName(spawn->GetLocationName(), instruction.get());
                 
                 if (spawn->IsValueLiteral())
                 {
@@ -1207,7 +1213,7 @@ namespace Langums
                     auto regId = spawn->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Spawn expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Spawn expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1232,7 +1238,7 @@ namespace Langums
                 auto& locName = kill->GetLocationName();
                 if (locName.length() != 0)
                 {
-                    locationId = GetLocationIdByName(locName);
+                    locationId = GetLocationIdByName(locName, instruction.get());
                 }
 
                 if (kill->IsValueLiteral())
@@ -1244,7 +1250,7 @@ namespace Langums
                     auto regId = kill->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Kill expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Kill expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1269,7 +1275,7 @@ namespace Langums
                 auto locName = remove->GetLocationName();
                 if (locName.length() != 0)
                 {
-                    locationId = GetLocationIdByName(locName);
+                    locationId = GetLocationIdByName(locName, instruction.get());
                 }
 
                 if (remove->IsValueLiteral())
@@ -1281,7 +1287,7 @@ namespace Langums
                     auto regId = remove->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Remove expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Remove expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1302,8 +1308,8 @@ namespace Langums
             {
                 auto move = (IRMoveInstruction*)instruction.get();
 
-                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName());
-                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName());
+                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName(), instruction.get());
+                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName(), instruction.get());
 
                 if (move->IsValueLiteral())
                 {
@@ -1314,7 +1320,7 @@ namespace Langums
                     auto regId = move->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Move expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Move expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1335,8 +1341,8 @@ namespace Langums
             {
                 auto order = (IROrderInstruction*)instruction.get();
 
-                auto srcLocationId = GetLocationIdByName(order->GetSrcLocationName());
-                auto dstLocationId = GetLocationIdByName(order->GetDstLocationName());
+                auto srcLocationId = GetLocationIdByName(order->GetSrcLocationName(), instruction.get());
+                auto dstLocationId = GetLocationIdByName(order->GetDstLocationName(), instruction.get());
 
                 current.Action_OrderUnit(order->GetPlayerId(), order->GetUnitId(), order->GetOrder(), srcLocationId, dstLocationId);
             }
@@ -1344,7 +1350,7 @@ namespace Langums
             {
                 auto modify = (IRModifyInstruction*)instruction.get();
 
-                auto locationId = GetLocationIdByName(modify->GetLocationName());
+                auto locationId = GetLocationIdByName(modify->GetLocationName(), instruction.get());
                 auto playerId = modify->GetPlayerId();
                 auto unitId = modify->GetUnitId();
                 auto quantity = modify->GetRegisterId();
@@ -1373,7 +1379,7 @@ namespace Langums
                     auto regId = modify->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Modify expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Modify expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1410,7 +1416,7 @@ namespace Langums
             {
                 auto give = (IRGiveInstruction*)instruction.get();
 
-                auto locationId = GetLocationIdByName(give->GetLocationName());
+                auto locationId = GetLocationIdByName(give->GetLocationName(), instruction.get());
                 auto srcPlayerId = give->GetSrcPlayerId();
                 auto dstPlayerId = give->GetDstPlayerId();
                 auto unitId = give->GetUnitId();
@@ -1425,7 +1431,7 @@ namespace Langums
                     auto regId = give->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! Give expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! Give expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1446,8 +1452,8 @@ namespace Langums
             {
                 auto move = (IRMoveLocInstruction*)instruction.get();
 
-                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName());
-                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName());
+                auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName(), instruction.get());
+                auto dstLocationId = GetLocationIdByName(move->GetDstLocationName(), instruction.get());
                 
                 current.Action_MoveLocation(move->GetPlayerId(), move->GetUnitId(), srcLocationId, dstLocationId);
             }
@@ -1521,7 +1527,7 @@ namespace Langums
             {
                 auto centerView = (IRCenterViewInstruction*)instruction.get();
 
-                auto locationId = GetLocationIdByName(centerView->GetLocationName());
+                auto locationId = GetLocationIdByName(centerView->GetLocationName(), instruction.get());
                 auto playerId = centerView->GetPlayerId();
 
                 if (playerId + 1 == m_TriggersOwner)
@@ -1564,7 +1570,7 @@ namespace Langums
             {
                 auto ping = (IRPingInstruction*)instruction.get();
 
-                auto locationId = GetLocationIdByName(ping->GetLocationName());
+                auto locationId = GetLocationIdByName(ping->GetLocationName(), instruction.get());
                 auto playerId = ping->GetPlayerId();
 
                 if (playerId + 1 == m_TriggersOwner)
@@ -1618,7 +1624,7 @@ namespace Langums
                     auto regId = setResource->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! SetResource expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! SetResource expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1661,7 +1667,7 @@ namespace Langums
                     auto regId = setResource->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! IncResource expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! IncResource expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1693,7 +1699,7 @@ namespace Langums
                     auto regId = setResource->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! DecResource expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! DecResource expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1725,7 +1731,7 @@ namespace Langums
                     auto regId = setScore->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! SetScore expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! SetScore expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1768,7 +1774,7 @@ namespace Langums
                     auto regId = incScore->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! IncScore expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! IncScore expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1800,7 +1806,7 @@ namespace Langums
                     auto regId = incScore->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! DecScore expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! DecScore expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1831,7 +1837,7 @@ namespace Langums
                     auto regId = setCountdown->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! SetCountdown expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! SetCountdown expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1873,7 +1879,7 @@ namespace Langums
                     auto regId = addCountdown->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! AddCountdown expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! AddCountdown expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1904,7 +1910,7 @@ namespace Langums
                     auto regId = subCountdown->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! SubCountdown expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! SubCountdown expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -1962,7 +1968,7 @@ namespace Langums
                     auto regId = setDeaths->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! SetDeaths expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! SetDeaths expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -2005,7 +2011,7 @@ namespace Langums
                     auto regId = incDeaths->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! IncDeaths expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! IncDeaths expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -2037,7 +2043,7 @@ namespace Langums
                     auto regId = decDeaths->GetRegisterId();
                     if (regId != Reg_StackTop)
                     {
-                        throw CompilerException(SafePrintf("Malformed IR! DecDeaths expects the quantity on top of the stack."));
+                        throw CompilerException(SafePrintf("Malformed IR! DecDeaths expects the quantity on top of the stack."), instruction.get());
                     }
 
                     regId = ++m_StackPointer;
@@ -2099,14 +2105,14 @@ namespace Langums
             else if (instruction->GetType() == IRInstructionType::SetDoodad)
             {
                 auto setDoodad = (IRSetDoodadInstruction*)instruction.get();
-                auto locationId = GetLocationIdByName(setDoodad->GetLocationName());
+                auto locationId = GetLocationIdByName(setDoodad->GetLocationName(), instruction.get());
 
                 current.Action_SetDoodadState(setDoodad->GetPlayerId(), setDoodad->GetUnitId(), setDoodad->GetState(), locationId);
             }
             else if (instruction->GetType() == IRInstructionType::SetInvincible)
             {
                 auto setInvincible = (IRSetInvincibleInstruction*)instruction.get();
-                auto locationId = GetLocationIdByName(setInvincible->GetLocationName());
+                auto locationId = GetLocationIdByName(setInvincible->GetLocationName(), instruction.get());
 
                 current.Action_SetInvincibility(setInvincible->GetPlayerId(), setInvincible->GetUnitId(), setInvincible->GetState(), locationId);
             }
@@ -2120,7 +2126,7 @@ namespace Langums
                 auto& locName = aiScript->GetLocationName();
                 if (locName.length() > 0)
                 {
-                    locationId = GetLocationIdByName(locName);
+                    locationId = GetLocationIdByName(locName, instruction.get());
                 }
 
                 if (playerId + 1 == m_TriggersOwner)
@@ -2283,7 +2289,7 @@ namespace Langums
                 }
                 else if (type == LeaderboardType::ControlAtLocation)
                 {
-                    auto locationId = GetLocationIdByName(leaderboard->GetLocationName());
+                    auto locationId = GetLocationIdByName(leaderboard->GetLocationName(), instruction.get());
 
                     if (quantity > 0)
                     {
@@ -2388,7 +2394,7 @@ namespace Langums
                 auto stringId = m_StringsChunk->InsertString(transmission->GetLocationName());
                 auto name = SafePrintf("staredit\\wav\\%", transmission->GetWavName());
                 auto wavStringId = m_StringsChunk->InsertString(name);
-                auto locationId = GetLocationIdByName(transmission->GetLocationName());
+                auto locationId = GetLocationIdByName(transmission->GetLocationName(), instruction.get());
 
                 auto time = transmission->GetTime();
                 current.Action_Transmission(stringId, transmission->GetUnitId(), locationId, time, CHK::TriggerActionState::SetTo, wavStringId, transmission->GetWavTime());
@@ -2422,7 +2428,7 @@ namespace Langums
             }
             else
             {
-                throw CompilerException("Unknown instruction type");
+                throw CompilerException("Unknown instruction type", instruction.get());
             }
         }
 
@@ -2434,7 +2440,7 @@ namespace Langums
 
             if (m_JumpAddresses.find(targetInstruction) == m_JumpAddresses.end())
             {
-                throw CompilerException("Internal error. Failed to find address for jump target");
+                throw CompilerException("Internal error. Failed to find address for jump target", targetInstruction);
             }
 
             auto targetAddress = m_JumpAddresses[targetInstruction];
@@ -2443,7 +2449,7 @@ namespace Langums
             auto actionId = GetLastTriggerActionId(trigger);
             if (actionId == -1)
             {
-                throw CompilerException("Internal error. Trigger action buffer is full");
+                throw CompilerException("Internal error. Trigger action buffer is full", targetInstruction);
             }
 
             Action_JumpTo(targetAddress, trigger.m_Actions[actionId]);
@@ -2471,12 +2477,12 @@ namespace Langums
             m_Triggers.push_back(hyperTrigger);
         }
 
-        auto& triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
-        auto oldBytes = triggersChunk.GetBytes();
+        auto triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
+        auto oldBytes = triggersChunk->GetBytes();
         auto triggerCount = m_Triggers.size();
         if (preserveTriggers)
         {
-            triggerCount += triggersChunk.GetTriggersCount();
+            triggerCount += triggersChunk->GetTriggersCount();
         }
 
         std::vector<char> bytes;
@@ -2488,7 +2494,7 @@ namespace Langums
             memcpy(bytes.data() + m_Triggers.size() * sizeof(Trigger), oldBytes.data(), oldBytes.size());
         }
 
-        triggersChunk.SetBytes(bytes);
+        triggersChunk->SetBytes(bytes);
 
         return true;
     }
@@ -2590,11 +2596,11 @@ namespace Langums
         return index;
     }
 
-    unsigned int Compiler::GetLocationIdByName(const std::string& name)
+    unsigned int Compiler::GetLocationIdByName(const std::string& name, IIRInstruction* instruction)
     {
         if (name.length() == 0)
         {
-            throw CompilerException("Invalid empty location name");
+            throw CompilerException("Invalid empty location name", instruction);
         }
 
         if (name == "AnyLocation")
@@ -2605,13 +2611,13 @@ namespace Langums
         auto locationStringId = m_StringsChunk->FindString(name);
         if (locationStringId == -1)
         {
-            throw CompilerException(SafePrintf("Location \"%\" not found", name));
+            throw CompilerException(SafePrintf("Location \"%\" not found", name), instruction);
         }
 
         auto locationId = m_LocationsChunk->FindLocation(locationStringId + 1);
         if (locationId == -1)
         {
-            throw CompilerException(SafePrintf("Location \"%\" not found", name));
+            throw CompilerException(SafePrintf("Location \"%\" not found", name), instruction);
         }
 
         return locationId;
