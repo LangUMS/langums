@@ -4,7 +4,6 @@
 #include "log.h"
 #include "cxxopts.h"
 #include "stringutil.h"
-#include "stormlib/StormLib.h"
 #include "libchk/chk.h"
 #include "parser/preprocessor.h"
 #include "parser/parser.h"
@@ -15,6 +14,8 @@
 #include "compiler/registermap_parser.h"
 #include "wavinfo.h"
 #include "pretty_errors.h"
+#include "mpq_wrapper.h"
+#include "debugger/debugger.h"
 
 #undef min
 #undef max
@@ -26,6 +27,7 @@ using namespace CHK;
 using namespace std::experimental;
 
 #define SCENARIO_FILENAME "staredit\\scenario.chk"
+#define DEFAULT_PROCESS_NAME "starcraft.exe"
 
 int main(int argc, char* argv[])
 {
@@ -45,7 +47,8 @@ int main(int argc, char* argv[])
         ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes but you can open the map in StarEdit.", cxxopts::value<bool>())
         ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
         ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
-        ("debug", "Inserts LangUMS debug information to the map so it can be used in the debugger.", cxxopts::value<bool>())
+        ("debug", "Attaches the debugger after compiling the map. (experimental!)", cxxopts::value<bool>())
+        ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
         ;
     opts.parse(argc, argv);
 
@@ -124,37 +127,33 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    HANDLE mpq = nullptr;
-    auto mpqPath = tempPath.generic_u8string();
-    if (!SFileOpenArchive(mpqPath.c_str(), 0, 0, &mpq))
+    std::unique_ptr<MPQWrapper> mpqWrapper;
+
+    try
     {
-        auto errorCode = GetLastError();
-        LOG_EXITERR("\n(!) SFileOpenArchive failed, error code: %. Looks like an invalid scx file.", errorCode);
+        mpqWrapper = std::make_unique<MPQWrapper>(tempPath.generic_u8string(), false);
+    }
+    catch (MPQWrapperException& ex)
+    {
+        LOG_EXITERR("\n(!) StormLib error: %", ex.what());
         return 1;
     }
 
     LOG_F("Map looks like a valid MPQ file.");
      
-    HANDLE scenarioFile = nullptr;
-    if (!SFileOpenFileEx(mpq, SCENARIO_FILENAME, 0, &scenarioFile))
-    {
-        LOG_EXITERR("\n(!) Failed to find scenario.chk inside MPQ, not a Brood War map file?");
-        return 1;
-    }
-
-    auto scenarioFileSize = SFileGetFileSize(scenarioFile, 0);
-
     std::vector<char> scenarioBytes;
-    scenarioBytes.resize(scenarioFileSize);
 
-    if (!SFileReadFile(scenarioFile, scenarioBytes.data(), scenarioFileSize, 0, 0))
+    try
     {
-        LOG_EXITERR("\n(!) SFileReadFile failed for scenario.chk.");
+        mpqWrapper->ReadFile(SCENARIO_FILENAME, scenarioBytes);
+    }
+    catch (MPQWrapperException& ex)
+    {
+        LOG_EXITERR("\n(!) StormLib error: %", ex.what());
         return 1;
     }
 
-    LOG_F("Reading from scenario.chk (% bytes).", scenarioFileSize);
-
+    LOG_F("Reading from scenario.chk (% bytes).", scenarioBytes.size());
     CHK::File chk(scenarioBytes, opts["strip"].count() > 0);
 
     auto& chunkTypes = chk.GetChunkTypes();
@@ -355,14 +354,15 @@ int main(int argc, char* argv[])
         auto& wavBytes = wavInfo.GetData();
 
         auto mpqFilename = SafePrintf("staredit\\wav\\%", filename);
-        if (!SFileAddWave(mpq, path.c_str(), mpqFilename.c_str(), MPQ_COMPRESSION_ADPCM_STEREO, MPQ_WAVE_QUALITY_HIGH))
+
+        try
         {
-            LOG_EXITERR("(!) Error - failed to add \"%\" to MPQ archive.", path);
-            return 1;
+            mpqWrapper->AddWavFile(path, mpqFilename);
         }
-        else
+        catch (MPQWrapperException& ex)
         {
-            LOG_F("Successfully added \"%\" to MPQ archive.", filename);
+            LOG_EXITERR("\n(!) StormLib error: %", ex.what());
+            return 1;
         }
     }
 
@@ -555,63 +555,51 @@ int main(int argc, char* argv[])
 
     LOG_F("Compilation successful! Trigger count: %", triggersChunk->GetTriggersCount());
 
-    if (opts.count("debug") > 0)
-    {
-        auto langChunk = chk.GetFirstChunk<CHKLangChunk>(ChunkType::LangumsChunk);
-        auto langData = langChunk->GetData();
-
-        memcpy(langData->m_Source, source.data(), source.length() + 1);
-        langData->m_SourceLen = source.length();
-
-        std::vector<unsigned int> usedRegisters;
-        for (auto& regDef : g_RegisterMap)
-        {
-            auto index = regDef.m_PlayerId + regDef.m_Index * 8;
-            usedRegisters.push_back(index);
-        }
-
-        std::sort(usedRegisters.begin(), usedRegisters.end());
-        memcpy(langData->m_UsedRegisters, usedRegisters.data(), usedRegisters.size() * sizeof(unsigned int));
-        langData->m_UsedRegisterCount = usedRegisters.size();
-    }
-
     std::vector<char> chkBytes;
     chk.Serialize(chkBytes);
 
-    auto fileFlags = MPQ_FILE_REPLACEEXISTING | MPQ_FILE_COMPRESS;
-    if (opts.count("disable-compression") > 0)
+    auto compress = opts.count("disable-compression") == 0;
+    if (!compress)
     {
-        fileFlags = MPQ_FILE_REPLACEEXISTING;
         LOG_F("(!) Warning! Compression is disabled. Resulting file size will be much larger tha usual.");
     }
 
-    if (!SFileCreateFile(mpq, SCENARIO_FILENAME, 0, chkBytes.size(), 0, fileFlags, &scenarioFile))
+    try
     {
-        LOG_EXITERR("Failed to open scenario.chk for writing.");
+        mpqWrapper->WriteFile(SCENARIO_FILENAME, chkBytes, compress);
+    }
+    catch (MPQWrapperException& ex)
+    {
+        LOG_EXITERR("\n(!) StormLib error: %", ex.what());
         return 1;
     }
 
-    if (!SFileWriteFile(scenarioFile, chkBytes.data(), chkBytes.size(), MPQ_COMPRESSION_PKWARE))
-    {
-        LOG_EXITERR("Failed to write out scenario.chk to MPQ archive.");
-        return 1;
-    }
-
-    SFileCloseFile(scenarioFile);
-    scenarioFile = nullptr;
-    SFileCloseArchive(mpq);
-    mpq = nullptr;
+    mpqWrapper = nullptr;
 
     auto fileSize = std::experimental::filesystem::file_size(tempPath);
     LOG_F("Final size: % kb", fileSize / 1024);
 
     if (!filesystem::copy_file(tempPath, dstPath, filesystem::copy_options::overwrite_existing, ec))
     {
-        LOG_EXITERR("Failed to create destination file, error code: %", ec);
-        return 1;
+        LOG_F("\n(!) Failed to create destination file, error code: %", ec);
+    }
+    else
+    {
+        LOG_F("Written to: %", dstPath.generic_u8string());
     }
 
-    LOG_F("Written to: %", dstPath.generic_u8string());
+    if (opts.count("debug") > 0)
+    {
+        std::string processName = DEFAULT_PROCESS_NAME;
+        if (opts.count("debug-process") > 0)
+        {
+            processName = opts["debug-process"].as<std::string>();
+        }
+
+        Debugger debugger;
+        debugger.Attach(processName);
+        return 0;
+    }
 
     LOG_DEINIT();
     return 0;

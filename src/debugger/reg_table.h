@@ -6,7 +6,7 @@
 #define PLAYER_COUNT 12
 #define UNIT_COUNT 228 
 
-#define DEATH_TABLE_OFFSET 0x01713324
+#define DEATH_TABLE_OFFSET 0x8C3324
 
 namespace Langums
 {
@@ -18,6 +18,11 @@ namespace Langums
             m_GameHandle(gameHandle), m_BaseAddress(baseAddress)
         {
             m_RegisterTableAddress = (char*)m_BaseAddress + DEATH_TABLE_OFFSET;
+        }
+
+        unsigned int Get(unsigned int playerId, unsigned int unitId)
+        {
+            return m_Registers[unitId][playerId];
         }
 
         bool Update()

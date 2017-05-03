@@ -7,22 +7,11 @@
 #include "ichunk.h"
 #include "../serialization.h"
 
-#define CHK_LANGUMS_CHUNK_MAGIC_HEADER 0xF3F7AE00
-#define CHK_LANGUMS_CHUNK_MAX_REGISTERS 1024
-#define CHK_LANGUMS_CHUNK_MAX_SOURCE_LEN 65535
-
 namespace CHK
 {
 
     struct LangChunkData
     {
-        unsigned int m_MagicHeader = CHK_LANGUMS_CHUNK_MAGIC_HEADER;
-
-        unsigned int m_UsedRegisters[CHK_LANGUMS_CHUNK_MAX_REGISTERS]; // used registers by the compiler - indexId = (unitId + playerId * 228)
-        unsigned int m_UsedRegisterCount = 0;
-
-        char m_Source[CHK_LANGUMS_CHUNK_MAX_SOURCE_LEN]; // langums source
-        unsigned int m_SourceLen = 0;
     };
 
     class CHKLangChunk : public IChunk

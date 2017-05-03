@@ -50,6 +50,9 @@
     <Filter Include="stormlib\pklib">
       <UniqueIdentifier>{d9f43bc0-5ec1-4558-82c5-f073db06a236}</UniqueIdentifier>
     </Filter>
+    <Filter Include="debugger">
+      <UniqueIdentifier>{4e7cc1d2-ef87-4861-a59e-ca811b3e06a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -838,6 +841,15 @@
     <ClCompile Include="..\src\libchk\iownchunk.cpp">
       <Filter>libchk</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\debugger\process_util_win32.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mpq_wrapper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\debugger.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1076,6 +1088,21 @@
     </ClInclude>
     <ClInclude Include="..\src\libchk\langumschunk.h">
       <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\memsearch.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\process_util.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\reg_table.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mpq_wrapper.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger.h">
+      <Filter>debugger</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

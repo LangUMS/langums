@@ -30,6 +30,37 @@ namespace Langums
         return nullptr;
     }
 
+    void* FindAddressOfString(ProcessHandle handle, const std::string& s, void* startAddress)
+    {
+        auto address = (char*)startAddress;
+        auto len = s.length();
+        auto windowSize = len * 4;
+
+        std::vector<char> chunk;
+        chunk.resize(len);
+
+        size_t bytesRead;
+        while (ReadMemory(handle, address, chunk.size(), chunk.data(), bytesRead))
+        {
+            for (auto q = 0u; q < len; q++)
+            {
+                if (chunk[q] != s[q])
+                {
+                    break;
+                }
+
+                if (q == len - 1)
+                {
+                    return address;
+                }
+            }
+
+            address += 1;
+        }
+
+        return nullptr;
+    }
+
 }
 
 #endif
