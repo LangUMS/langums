@@ -467,7 +467,7 @@ namespace Langums
                 return SafePrintf ("MSG \"%\" [ALL]", msg);
             }
 
-            return SafePrintf ("MSG \"%\" %", msg, m_PlayerId);
+            return SafePrintf ("MSG \"%\" %", msg, CHK::PlayersByName[m_PlayerId]);
         }
 
         private:

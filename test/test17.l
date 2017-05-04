@@ -1,3 +1,11 @@
+for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+  bring(PlayerId, AtLeast, 1, AllUnits, TestLocation) => {
+    print("The SCV is here!");
+  }
+}
+
 fn main() {
-    print("<07>test <03>- <06>foo bar <05>1234");
+  for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+    print("hello", PlayerId);
+  }
 }

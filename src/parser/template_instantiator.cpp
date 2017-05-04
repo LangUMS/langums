@@ -15,21 +15,7 @@ namespace Langums
             throw TemplateInstantiatorException("Internal error. Invalid AST node type, expected Unit", unit.get());
         }
 
-        auto statementsCopy = m_Unit->GetChildren();
-        for (auto& statement : statementsCopy)
-        {
-            if (statement->GetType() == ASTNodeType::EventTemplateBlock)
-            {
-                InstantiateEventTemplateBlock((ASTEventTemplateBlock*)statement.get());
-            }
-        }
-
-        ProcessInternal(unit.get());
-    }
-
-    void TemplateInstantiator::ProcessInternal(IASTNode* node)
-    {
-        auto& statements = node->GetChildren();
+        auto statements = m_Unit->GetChildren();
 
         for (auto& statement : statements)
         {
@@ -47,19 +33,15 @@ namespace Langums
             }
         }
 
-        auto statementsCopy = statements;
-        for (auto& statement : statementsCopy)
-        {
-            if (statement->GetType() != ASTNodeType::TemplateFunction)
-            {
-                InstantiateTemplates(statement.get());
-            }
-        }
+        InstantiateTemplates(unit.get());
     }
 
     void TemplateInstantiator::InstantiateTemplates(IASTNode* node)
     {
-        auto& children = node->GetChildren();
+        auto children = node->GetChildren();
+        node->RemoveChildren();
+
+        std::vector<std::shared_ptr<IASTNode>> newChildren;
 
         for (auto& child : children)
         {
@@ -69,16 +51,39 @@ namespace Langums
                 auto& fnName = fnCall->GetFunctionName();
                 if (m_TemplateFunctions.find(fnName) == m_TemplateFunctions.end())
                 {
+                    newChildren.push_back(child);
                     continue;
                 }
 
                 auto templateFn = m_TemplateFunctions[fnName];
                 InstantiateTemplateFunction(templateFn, fnCall);
+                newChildren.push_back(child);
+            }
+            else if (child->GetType() == ASTNodeType::RepeatTemplate)
+            {
+                auto repeatTemplate = (ASTRepeatTemplate*)child.get();
+
+                auto statements = InstantiateRepeatTemplate(repeatTemplate);
+                for (auto& statement : statements)
+                {
+                    newChildren.push_back(std::move(statement));
+                }
             }
             else
             {
-                InstantiateTemplates(child.get());
+                newChildren.push_back(child);
             }
+        }
+
+        for (auto& child : newChildren)
+        {
+            if (child->GetType() == ASTNodeType::TemplateFunction)
+            {
+                continue;
+            }
+
+            InstantiateTemplates(child.get());
+            node->AddChild(child);
         }
     }
 
@@ -106,7 +111,8 @@ namespace Langums
         std::vector<std::shared_ptr<IASTNode>> finalArgs;
         std::vector<std::string> finalArgNames;
 
-        auto body = CloneNode(templateFunction->GetChild(0).get());
+        auto& bodyChild = templateFunction->GetChild(0);
+        auto body = CloneNode(bodyChild.get());
 
         for (auto i = 0u; i < args.size(); i++)
         {
@@ -161,6 +167,41 @@ namespace Langums
         m_InstantiatedTemplates.insert(std::make_pair(genFnName, instantiatedFn));
     }
 
+    std::vector<std::unique_ptr<IASTNode>> TemplateInstantiator::InstantiateRepeatTemplate(ASTRepeatTemplate* repeatTemplate)
+    {
+        std::vector<std::unique_ptr<IASTNode>> nodes;
+
+        auto& iterator = repeatTemplate->GetIteratorName();
+        auto& list = repeatTemplate->GetList();
+
+        for (auto& item : list)
+        {
+            auto firstChild = repeatTemplate->GetChild(0);
+            if (firstChild->GetType() == ASTNodeType::BlockStatement)
+            {
+                auto& statements = firstChild->GetChildren();
+                for (auto& statement : statements)
+                {
+                    auto newStatement = CloneNode(statement.get());
+                    ReplaceIdentifier(newStatement.get(), iterator, item);
+                    nodes.push_back(std::move(newStatement));
+                }
+            }
+            else
+            {
+                auto& eventDeclarations = repeatTemplate->GetChildren();
+                for (auto& eventDeclaration : eventDeclarations)
+                {
+                    auto newStatement = CloneNode(eventDeclaration.get());
+                    ReplaceIdentifier(newStatement.get(), iterator, item);
+                    nodes.push_back(std::move(newStatement));
+                }
+            }
+        }
+
+        return nodes;
+    }
+    /*
     void TemplateInstantiator::InstantiateEventTemplateBlock(ASTEventTemplateBlock* eventBlock)
     {
         auto& iterator = eventBlock->GetIteratorName();
@@ -197,7 +238,7 @@ namespace Langums
                 InstantiateEventTemplate(child.get(), token, replacement);
             }
         }
-    }
+    }*/
 
     void TemplateInstantiator::ReplaceIdentifier(IASTNode* node, const std::string& identifierName, const std::shared_ptr<IASTNode>& replaceWith)
     {
@@ -292,9 +333,24 @@ namespace Langums
         }
 
         newNode->RemoveChildren();
-        for (auto& child : node->GetChildren())
+
+        auto& children = node->GetChildren();
+        for (auto& child : children)
         {
             newNode->AddChild(CloneNode(child.get()));
+        }
+
+        if (newNode->GetType() == ASTNodeType::IfStatement)
+        {
+            if (newNode->GetChild(1) == nullptr)
+            {
+                int q = 5;
+            }
+
+            if (newNode->GetChild(1)->GetChildCount() == 0)
+            {
+                int q = 5;
+            }
         }
 
         return std::unique_ptr<IASTNode>(newNode);
