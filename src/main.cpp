@@ -21,7 +21,7 @@
 #undef min
 #undef max
 
-#define VERSION "v0.1.0"
+#define VERSION "v0.1.3"
 
 using namespace Langums;
 using namespace CHK;

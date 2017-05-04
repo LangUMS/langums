@@ -345,6 +345,7 @@ Notes:
 
 | Event prototype                                                                        | Description                                                               |
 |----------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| value(VariableName, [Comparison](#comparison), Quantity)                               | When a global variable has a specific value.                              |
 | bring([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit), Location) | When a player owns a quantity of units at location.                       |
 | commands([Player](#player), [Comparison](#comparison), Quantity, [Unit](#unit))        | When a player commands a number of units.                                 |
 | commands_least([Player](#player), [Unit](#unit), optional: Location)                   | When a player commands the least number of units at an optional location. |

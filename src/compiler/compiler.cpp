@@ -206,7 +206,27 @@ namespace Langums
                     i++;
 
                     auto& condition = instructions[i];
-                    if (condition->GetType() == IRInstructionType::BringCond)
+                    if (condition->GetType() == IRInstructionType::RegCond)
+                    {
+                        auto reg = (IRRegCondInstruction*)condition.get();
+
+                        TriggerComparisonType comparison;
+                        switch (reg->GetComparison())
+                        {
+                        case ConditionComparison::Exactly:
+                            comparison = TriggerComparisonType::Exactly;
+                            break;
+                        case ConditionComparison::AtLeast:
+                            comparison = TriggerComparisonType::AtLeast;
+                            break;
+                        case ConditionComparison::AtMost:
+                            comparison = TriggerComparisonType::AtMost;
+                            break;
+                        }
+
+                        eventTrigger.Cond_TestReg(reg->GetRegisterId(), reg->GetQuantity(), comparison);
+                    }
+                    else if (condition->GetType() == IRInstructionType::BringCond)
                     {
                         auto bring = (IRBringCondInstruction*)condition.get();
                         auto locationId = GetLocationIdByName(bring->GetLocationName(), instruction.get());
@@ -2418,6 +2438,7 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::Unit ||
                 instruction->GetType() == IRInstructionType::UnitProp ||
                 instruction->GetType() == IRInstructionType::Event ||
+                instruction->GetType() == IRInstructionType::RegCond ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||
                 instruction->GetType() == IRInstructionType::LeastResCond ||

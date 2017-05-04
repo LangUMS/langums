@@ -23,6 +23,42 @@ namespace Langums
 
         auto& unitNodes = ast->GetChildren();
 
+        for (auto& node : unitNodes)
+        {
+            if (node->GetType() == ASTNodeType::VariableDeclaration)
+            {
+                auto variable = (ASTVariableDeclaration*)node.get();
+                auto& name = variable->GetName();
+
+                if (m_GlobalAliases.HasAlias(name, 0))
+                {
+                    throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name), node.get());
+                }
+
+                auto arraySize = variable->GetArraySize();
+                m_GlobalAliases.Allocate(name, arraySize);
+
+                auto& expression = variable->GetExpression();
+
+                if (expression != nullptr)
+                {
+                    if (expression->GetType() != ASTNodeType::NumberLiteral)
+                    {
+                        throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name), node.get());
+                    }
+
+                    auto number = (ASTNumberLiteral*)expression.get();
+                    auto value = number->GetValue();
+
+                    for (auto i = 0u; i < arraySize; i++)
+                    {
+                        auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
+                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
+                    }
+                }
+            }
+        }
+
         auto nextUnitSlot = 0;
 
         for (auto& node : unitNodes)
@@ -97,7 +133,39 @@ namespace Langums
                     auto condition = (ASTEventCondition*)eventDeclaration->GetCondition(i).get();
                     auto& name = condition->GetName();
 
-                    if (name == "bring")
+                    if (name == "value")
+                    {
+                        unsigned int regId = 0;
+
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() == ASTNodeType::Identifier)
+                        {
+                            auto identifier = (ASTIdentifier*)arg0.get();
+                            regId = m_GlobalAliases.GetAlias(identifier->GetName(), 0, identifier);
+                        }
+                        else if (arg0->GetType() == ASTNodeType::ArrayExpression)
+                        {
+                            auto arrayExpression = (ASTArrayExpression*)arg0.get();
+                            auto index = arrayExpression->GetIndex();
+                            if (index->GetType() != ASTNodeType::NumberLiteral)
+                            {
+                                throw IRCompilerException(SafePrintf("Invalid index for array expression in argument 0 in call to \"%\", expected number literal", name), condition);
+                            }
+
+                            auto arrayIndex = (ASTNumberLiteral*)index.get();
+                            regId = m_GlobalAliases.GetAlias(arrayExpression->GetIdentifier(), arrayIndex->GetValue(), arrayExpression);
+                        }
+                        else
+                        {
+                            throw IRCompilerException(SafePrintf("Invalid argument type for argument 0 in call to \"%\", expected global variable name", name), condition);
+                        }
+
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1); 
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
+
+                        EmitInstruction(new IRRegCondInstruction(regId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                    }
+                    else if (name == "bring")
                     {
                         auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
                         auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
@@ -233,42 +301,6 @@ namespace Langums
                     else
                     {
                         throw IRCompilerException(SafePrintf("Unknown condition type \"%\"", name), condition);
-                    }
-                }
-            }
-        }
-
-        for (auto& node : unitNodes)
-        {
-            if (node->GetType() == ASTNodeType::VariableDeclaration)
-            {
-                auto variable = (ASTVariableDeclaration*)node.get();
-                auto& name = variable->GetName();
-
-                if (m_GlobalAliases.HasAlias(name, 0))
-                {
-                    throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name), node.get());
-                }
-
-                auto arraySize = variable->GetArraySize();
-                m_GlobalAliases.Allocate(name, arraySize);
-
-                auto& expression = variable->GetExpression();
-                
-                if (expression != nullptr)
-                {
-                    if (expression->GetType() != ASTNodeType::NumberLiteral)
-                    {
-                        throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name), node.get());
-                    }
-
-                    auto number = (ASTNumberLiteral*)expression.get();
-                    auto value = number->GetValue();
-
-                    for (auto i = 0u; i < arraySize; i++)
-                    {
-                        auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
-                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
                     }
                 }
             }

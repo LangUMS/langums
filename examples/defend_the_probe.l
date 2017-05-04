@@ -111,6 +111,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
+  value(probe_spawned, Exactly, 1),
   bring(PlayerId, AtLeast, 1, AllUnits, BuyMarines),
   accumulate(PlayerId, AtLeast, MARINE_COST, Minerals) => {
     take_resource(PlayerId, Minerals, MARINE_COST);
