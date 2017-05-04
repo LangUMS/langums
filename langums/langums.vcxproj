@@ -132,6 +132,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\debugger\debugger_cli.cpp" />
+    <ClCompile Include="..\src\debugger\debugger_thread.cpp" />
     <ClCompile Include="..\src\debugger\process_util_win32.cpp" />
     <ClCompile Include="..\src\libchk\chk.cpp" />
     <ClCompile Include="..\src\libchk\cuwpchunk.cpp" />
@@ -404,6 +406,9 @@
     <ClInclude Include="..\src\compiler\triggerbuilder.h" />
     <ClInclude Include="..\src\cxxopts.h" />
     <ClInclude Include="..\src\debugger\debugger.h" />
+    <ClInclude Include="..\src\debugger\debugger_cli.h" />
+    <ClInclude Include="..\src\debugger\debugger_cmds.h" />
+    <ClInclude Include="..\src\debugger\debugger_thread.h" />
     <ClInclude Include="..\src\debugger\memsearch.h" />
     <ClInclude Include="..\src\debugger\memwatch.h" />
     <ClInclude Include="..\src\debugger\process_util.h" />

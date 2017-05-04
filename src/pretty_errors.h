@@ -18,7 +18,7 @@
 namespace Langums
 {
 
-    std::vector<std::string> Split(const std::string& src)
+    inline std::vector<std::string> Split(const std::string& src)
     {
         std::stringstream ss(src);
         std::string line;
@@ -33,7 +33,7 @@ namespace Langums
         return lines;
     }
 
-    unsigned int GetLineNumber(const std::string& src, int charIndex)
+    inline unsigned int GetLineNumber(const std::string& src, int charIndex)
     {
         auto lineNumber = 1;
         for (auto i = 0; i < std::min((int)src.length(), charIndex); i++)
@@ -47,7 +47,7 @@ namespace Langums
         return lineNumber;
     }
 
-    void PrintCodeContext(const std::string& src, unsigned int charIndex)
+    inline void PrintCodeContext(const std::string& src, unsigned int charIndex)
     {
         auto lines = Split(src);
 
@@ -63,12 +63,12 @@ namespace Langums
         }
     }
 
-    void PrintPreprocessorException(const std::string& src, const PreprocessorException& ex)
+    inline void PrintPreprocessorException(const std::string& src, const PreprocessorException& ex)
     {
         LOG_F("\n(!) Preprocessor error: %", ex.what());
     }
 
-    void PrintParserError(const std::string& src, const ParserException& ex)
+    inline void PrintParserError(const std::string& src, const ParserException& ex)
     {
         auto charIndex = ex.GetCharPosition();
         auto lineNumber = GetLineNumber(src, charIndex);
@@ -77,7 +77,7 @@ namespace Langums
         PrintCodeContext(src, charIndex);
     }
 
-    void PrintTemplateInstantiatorException(const std::string& src, const TemplateInstantiatorException& ex)
+    inline void PrintTemplateInstantiatorException(const std::string& src, const TemplateInstantiatorException& ex)
     {
         auto astNode = ex.GetASTNode();
         auto astNodeType = astNode->GetTypeName();
@@ -89,7 +89,7 @@ namespace Langums
         PrintCodeContext(src, charIndex);
     }
 
-    void PrintIRCompilerException(const std::string& src, const IRCompilerException& ex)
+    inline void PrintIRCompilerException(const std::string& src, const IRCompilerException& ex)
     {
         auto astNode = ex.GetASTNode();
         auto astNodeType = astNode->GetTypeName();
@@ -101,7 +101,7 @@ namespace Langums
         PrintCodeContext(src, charIndex);
     }
 
-    void PrintCompilerException(const std::string& src, const CompilerException& ex)
+    inline void PrintCompilerException(const std::string& src, const CompilerException& ex)
     {
         auto instruction = ex.GetInstruction();
         if (!instruction)

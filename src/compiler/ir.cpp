@@ -52,14 +52,14 @@ namespace Langums
                 m_UnitProperties.insert(std::make_pair(name, nextUnitSlot++));
 
                 auto propsCount = unitProps->GetPropertiesCount();
-                EmitInstruction(new IRUnitInstruction(propsCount), m_Instructions, node.get());
+                EmitInstruction(new IRUnitInstruction(propsCount), m_Instructions, node.get(), m_GlobalAliases);
 
                 for (auto i = 0u; i < propsCount; i++)
                 {
                     auto unitProp = (ASTUnitProperty*)unitProps->GetProperty(i).get();
                     auto propType = ParseUnitPropType(unitProp->GetName(), unitProp);
                     
-                    EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions, unitProp);
+                    EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions, unitProp, m_GlobalAliases);
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace Langums
                     throw IRCompilerException("Maximum event conditions reached (63 conditions per event)", node.get());
                 }
 
-                EmitInstruction(new IREventInstruction(nextSwitchId++, conditionsCount), m_Instructions, node.get());
+                EmitInstruction(new IREventInstruction(nextSwitchId++, conditionsCount), m_Instructions, node.get(), m_GlobalAliases);
 
                 for (auto i = 0u; i < conditionsCount; i++)
                 {
@@ -105,7 +105,7 @@ namespace Langums
                         auto unitId = ParseUnitTypeArgument(condition->GetArgument(3), name, 3);
                         auto locationName = ParseLocationArgument(condition->GetArgument(4), name, 4);
 
-                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else if (name == "commands" || name == "killed" || name == "deaths")
                     {
@@ -116,15 +116,15 @@ namespace Langums
 
                         if (name == "commands")
                         {
-                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition);
+                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "killed")
                         {
-                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition);
+                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "deaths")
                         {
-                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition);
+                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                         }
                     }
                     else if (name == "commands_least" || name == "commands_most")
@@ -141,11 +141,11 @@ namespace Langums
 
                         if (name == "commands_least")
                         {
-                            EmitInstruction(new IRCmdLeastCondInstruction(playerId, unitId, locationName), m_Instructions, condition);
+                            EmitInstruction(new IRCmdLeastCondInstruction(playerId, unitId, locationName), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "commands_most")
                         {
-                            EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions, condition);
+                            EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions, condition, m_GlobalAliases);
                         }
                     }
                     else if (name == "killed_least" || name == "killed_most")
@@ -155,11 +155,11 @@ namespace Langums
 
                         if (name == "killed_least")
                         {
-                            EmitInstruction(new IRKillLeastCondInstruction(playerId, unitId), m_Instructions, condition);
+                            EmitInstruction(new IRKillLeastCondInstruction(playerId, unitId), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "killed_most")
                         {
-                            EmitInstruction(new IRKillMostCondInstruction(playerId, unitId), m_Instructions, condition);
+                            EmitInstruction(new IRKillMostCondInstruction(playerId, unitId), m_Instructions, condition, m_GlobalAliases);
                         }
                     }
                     else if (name == "accumulate")
@@ -169,7 +169,7 @@ namespace Langums
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
                         auto resType = ParseResourceTypeArgument(condition->GetArgument(3), name, 3);
 
-                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else if (name == "least_resources" || name == "most_resources")
                     {
@@ -178,11 +178,11 @@ namespace Langums
 
                         if (name == "least_resources")
                         {
-                            EmitInstruction(new IRLeastResCondInstruction(playerId, resType), m_Instructions, condition);
+                            EmitInstruction(new IRLeastResCondInstruction(playerId, resType), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "most_resources")
                         {
-                            EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions, condition);
+                            EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions, condition, m_GlobalAliases);
                         }
                     }
                     else if (name == "score")
@@ -192,7 +192,7 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(2), name, 2);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(3), name, 3);
 
-                        EmitInstruction(new IRScoreCondInstruction(playerId, scoreType, comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IRScoreCondInstruction(playerId, scoreType, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else if (name == "lowest_score" || name == "highest_score")
                     {
@@ -201,11 +201,11 @@ namespace Langums
 
                         if (name == "lowest_score")
                         {
-                            EmitInstruction(new IRLowScoreCondInstruction(playerId, scoreType), m_Instructions, condition);
+                            EmitInstruction(new IRLowScoreCondInstruction(playerId, scoreType), m_Instructions, condition, m_GlobalAliases);
                         }
                         else if (name == "highest_score")
                         {
-                            EmitInstruction(new IRHiScoreCondInstruction(playerId, scoreType), m_Instructions, condition);
+                            EmitInstruction(new IRHiScoreCondInstruction(playerId, scoreType), m_Instructions, condition, m_GlobalAliases);
                         }
                     }
                     else if (name == "elapsed_time")
@@ -213,14 +213,14 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else if (name == "countdown")
                     {
                         auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else if (name == "opponents")
                     {
@@ -228,7 +228,7 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
 
-                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity), m_Instructions, condition);
+                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
                     }
                     else
                     {
@@ -268,7 +268,7 @@ namespace Langums
                     for (auto i = 0u; i < arraySize; i++)
                     {
                         auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
-                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get());
+                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
                     }
                 }
             }
@@ -278,7 +278,7 @@ namespace Langums
         m_EventCount = 0;
 
         m_PollEventsInstructions.clear();
-        EmitInstruction(new IRChkPlayers(), m_PollEventsInstructions, nullptr);
+        EmitInstruction(new IRChkPlayers(), m_PollEventsInstructions, nullptr, m_GlobalAliases);
 
         for (auto& node : unitNodes)
         {
@@ -309,18 +309,18 @@ namespace Langums
                 }
 
                 auto switchId = nextSwitchId++;
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), m_PollEventsInstructions, node.get());
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), m_PollEventsInstructions, node.get(), m_GlobalAliases);
 
                 for (auto& instruction : bodyInstructions)
                 {
                     m_PollEventsInstructions.push_back(std::move(instruction));
                 }
 
-                EmitInstruction(new IRSetSwInstruction(switchId, 0), m_PollEventsInstructions, node.get());
+                EmitInstruction(new IRSetSwInstruction(switchId, 0), m_PollEventsInstructions, node.get(), m_GlobalAliases);
             }
         }
 
-        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr);
+        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, m_GlobalAliases);
 
         auto main = m_FunctionDeclarations["main"];
         EmitFunction(main, m_Instructions, m_GlobalAliases);
@@ -346,14 +346,14 @@ namespace Langums
                     throw IRCompilerException("poll_events() can only be called from a single place", fnCall);
                 }
 
-                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions, fnCall);
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions, fnCall, aliases);
 
                 for (auto& instruction : m_PollEventsInstructions)
                 {
                     instructions.push_back(std::move(instruction));
                 }
              
-                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions, fnCall);
+                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions, fnCall, aliases);
 
                 m_PollEventsInstructions.clear();
             }
@@ -362,8 +362,12 @@ namespace Langums
         {
             for (auto i = 0u; i < m_EventCount; i++)
             {
-                EmitInstruction(new IRSetSwInstruction((int)Reg_ReservedEnd + i, false), instructions, fnCall);
+                EmitInstruction(new IRSetSwInstruction((int)Reg_ReservedEnd + i, false), instructions, fnCall, aliases);
             }
+        }
+        else if (fnName == "debugger")
+        {
+            EmitInstruction(new IRDebugBrkInstruction(), instructions, fnCall, aliases);
         }
         else if (fnName == "is_present")
         {
@@ -387,13 +391,13 @@ namespace Langums
                 }
             }
 
-            EmitInstruction(isPresent, instructions, fnCall);
+            EmitInstruction(isPresent, instructions, fnCall, aliases);
         }
         else if (fnName == "rnd256" || fnName == "random")
         {
             if (!ignoreReturnValue)
             {
-                EmitInstruction(new IRRnd256Instruction(), instructions, fnCall);
+                EmitInstruction(new IRRnd256Instruction(), instructions, fnCall, aliases);
             }
         }
         else if (fnName == "set_vision")
@@ -425,7 +429,7 @@ namespace Langums
             unsigned int scriptId;
             memcpy(&scriptId, scriptName.data(), 4);
 
-            EmitInstruction(new IRAIScriptInstruction(playerId, scriptId, "AnyLocation"), instructions, fnCall);
+            EmitInstruction(new IRAIScriptInstruction(playerId, scriptId, "AnyLocation"), instructions, fnCall, aliases);
         }
         else if (fnName == "end")
         {
@@ -442,7 +446,7 @@ namespace Langums
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto endCondition = ParseEndGameCondition(fnCall->GetArgument(1), fnName, 1);
 
-            EmitInstruction(new IREndGameInstruction(endCondition, playerId), instructions, fnCall);
+            EmitInstruction(new IREndGameInstruction(endCondition, playerId), instructions, fnCall, aliases);
         }
         else if (fnName == "set_resource")
         {
@@ -462,7 +466,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSetResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSetResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "add_resource")
         {
@@ -482,7 +486,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRIncResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRIncResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "take_resource")
         {
@@ -502,7 +506,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRDecResourceInstruction(playerId, resType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "set_score")
         {
@@ -522,7 +526,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "add_score")
         {
@@ -542,7 +546,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRIncScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRIncScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "subtract_score")
         {
@@ -562,7 +566,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRDecScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRDecScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "set_score")
         {
@@ -582,7 +586,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSetScoreInstruction(playerId, scoreType, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "set_countdown")
         {
@@ -599,7 +603,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSetCountdownInstruction(regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSetCountdownInstruction(regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "add_countdown")
         {
@@ -616,7 +620,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRAddCountdownInstruction(regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRAddCountdownInstruction(regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "sub_countdown")
         {
@@ -633,23 +637,23 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(0), fnName, 0, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSubCountdownInstruction(regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSubCountdownInstruction(regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "pause_countdown()")
         {
-            EmitInstruction(new IRPauseCountdownInstruction(false), instructions, fnCall);
+            EmitInstruction(new IRPauseCountdownInstruction(false), instructions, fnCall, aliases);
         }
         else if (fnName == "unpause_countdown()")
         {
-            EmitInstruction(new IRPauseCountdownInstruction(true), instructions, fnCall);
+            EmitInstruction(new IRPauseCountdownInstruction(true), instructions, fnCall, aliases);
         }
         else if (fnName == "mute_unit_speech()")
         {
-            EmitInstruction(new IRMuteUnitSpeechInstruction(false), instructions, fnCall);
+            EmitInstruction(new IRMuteUnitSpeechInstruction(false), instructions, fnCall, aliases);
         }
         else if (fnName == "unmute_unit_speech()")
         {
-            EmitInstruction(new IRMuteUnitSpeechInstruction(true), instructions, fnCall);
+            EmitInstruction(new IRMuteUnitSpeechInstruction(true), instructions, fnCall, aliases);
         }
         else if (fnName == "set_deaths")
         {
@@ -669,7 +673,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRSetDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRSetDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "add_deaths")
         {
@@ -689,7 +693,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRIncDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRIncDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "remove_deaths")
         {
@@ -709,7 +713,7 @@ namespace Langums
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
 
-            EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall);
+            EmitInstruction(new IRDecDeathsInstruction(playerId, unitId, regId, isLiteral), instructions, fnCall, aliases);
         }
         else if (fnName == "talking_portrait")
         {
@@ -726,7 +730,7 @@ namespace Langums
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto unitId = ParseUnitTypeArgument(fnCall->GetArgument(1), fnName, 1);
             auto time = ParseQuantityArgument(fnCall->GetArgument(2), fnName, 2);
-            EmitInstruction(new IRTalkInstruction(playerId, unitId, time * 1000), instructions, fnCall);
+            EmitInstruction(new IRTalkInstruction(playerId, unitId, time * 1000), instructions, fnCall, aliases);
         }
         else if (fnName == "set_doodad")
         {
@@ -745,7 +749,7 @@ namespace Langums
             auto state = ParseToggleState(fnCall->GetArgument(2), fnName, 2);
             auto locationName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
 
-            EmitInstruction(new IRSetDoodadInstruction(playerId, unitId, locationName, state), instructions, fnCall);
+            EmitInstruction(new IRSetDoodadInstruction(playerId, unitId, locationName, state), instructions, fnCall, aliases);
         }
         else if (fnName == "set_invincibility")
         {
@@ -764,7 +768,7 @@ namespace Langums
             auto state = ParseToggleState(fnCall->GetArgument(2), fnName, 2);
             auto locationName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
 
-            EmitInstruction(new IRSetInvincibleInstruction(playerId, unitId, locationName, state), instructions, fnCall);
+            EmitInstruction(new IRSetInvincibleInstruction(playerId, unitId, locationName, state), instructions, fnCall, aliases);
         }
         else if (fnName == "run_ai_script")
         {
@@ -782,7 +786,7 @@ namespace Langums
                 locationName = ParseLocationArgument(fnCall->GetArgument(2), fnName, 2);
             }
 
-            EmitInstruction(new IRAIScriptInstruction(playerId, scriptName, locationName), instructions, fnCall);
+            EmitInstruction(new IRAIScriptInstruction(playerId, scriptName, locationName), instructions, fnCall, aliases);
         }
         else if (fnName == "set_alliance")
         {
@@ -795,7 +799,7 @@ namespace Langums
             auto targetPlayerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
             auto status = ParseAllianceStatusArgument(fnCall->GetArgument(2), fnName, 2);
 
-            EmitInstruction(new IRSetAllyInstruction(playerId, targetPlayerId, status), instructions, fnCall);
+            EmitInstruction(new IRSetAllyInstruction(playerId, targetPlayerId, status), instructions, fnCall, aliases);
         }
         else if (fnName == "set_mission_objectives")
         {
@@ -819,11 +823,11 @@ namespace Langums
 
             auto stringLiteral = (ASTStringLiteral*)arg0.get();
 
-            EmitInstruction(new IRSetObjInstruction(playerId, stringLiteral->GetValue()), instructions, fnCall);
+            EmitInstruction(new IRSetObjInstruction(playerId, stringLiteral->GetValue()), instructions, fnCall, aliases);
         }
         else if (fnName == "pause_game" || fnName == "unpause_game")
         {
-            EmitInstruction(new IRPauseGameInstruction(fnName == "unpause_game"), instructions, fnCall);
+            EmitInstruction(new IRPauseGameInstruction(fnName == "unpause_game"), instructions, fnCall, aliases);
         }
         else if (fnName == "set_next_scenario")
         {
@@ -840,7 +844,7 @@ namespace Langums
 
             auto stringLiteral = (ASTStringLiteral*)arg0.get();
 
-            EmitInstruction(new IRNextScenInstruction(stringLiteral->GetValue()), instructions, fnCall);
+            EmitInstruction(new IRNextScenInstruction(stringLiteral->GetValue()), instructions, fnCall, aliases);
         }
         else if (fnName == "show_leaderboard")
         {
@@ -889,7 +893,7 @@ namespace Langums
                 showLeaderboard->SetResourceType(resourceType);
             }
 
-            EmitInstruction(showLeaderboard, instructions, fnCall);
+            EmitInstruction(showLeaderboard, instructions, fnCall, aliases);
         }
         else if (fnName == "show_leaderboard_goal")
         {
@@ -939,18 +943,18 @@ namespace Langums
                 showLeaderboard->SetResourceType(resourceType);
             }
 
-            EmitInstruction(showLeaderboard, instructions, fnCall);
+            EmitInstruction(showLeaderboard, instructions, fnCall, aliases);
         }
         else if (fnName == "leaderboard_show_cpu")
         {
             if (!fnCall->HasChildren())
             {
-                EmitInstruction(new IRLeaderboardCpuInstruction(TriggerActionState::SetSwitch), instructions, fnCall);
+                EmitInstruction(new IRLeaderboardCpuInstruction(TriggerActionState::SetSwitch), instructions, fnCall, aliases);
             }
             else
             {
                 auto state = ParseToggleState(fnCall->GetArgument(0), fnName, 0);
-                EmitInstruction(new IRLeaderboardCpuInstruction(state), instructions, fnCall);
+                EmitInstruction(new IRLeaderboardCpuInstruction(state), instructions, fnCall, aliases);
             }
         }
         else if (fnName == "center_view")
@@ -968,7 +972,7 @@ namespace Langums
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto locName = ParseLocationArgument(fnCall->GetArgument(1), fnName, 1);
 
-            EmitInstruction(new IRCenterViewInstruction(playerId, locName), instructions, fnCall);
+            EmitInstruction(new IRCenterViewInstruction(playerId, locName), instructions, fnCall, aliases);
         }
         else if (fnName == "ping")
         {
@@ -985,7 +989,7 @@ namespace Langums
             auto playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             auto locName = ParseLocationArgument(fnCall->GetArgument(1), fnName, 1);
 
-            EmitInstruction(new IRPingInstruction(playerId, locName), instructions, fnCall);
+            EmitInstruction(new IRPingInstruction(playerId, locName), instructions, fnCall, aliases);
         }
         else if (fnName == "print")
         {
@@ -1008,7 +1012,7 @@ namespace Langums
                 playerId = ParsePlayerIdArgument(fnCall->GetArgument(1), fnName, 1);
             }
 
-            EmitInstruction(new IRDisplayMsgInstruction(msg->GetValue(), playerId), instructions, fnCall);
+            EmitInstruction(new IRDisplayMsgInstruction(msg->GetValue(), playerId), instructions, fnCall, aliases);
         }
         else if (fnName == "sleep")
         {
@@ -1018,7 +1022,7 @@ namespace Langums
             }
 
             auto quantity = ParseQuantityArgument(fnCall->GetArgument(0), fnName, 0);
-            EmitInstruction(new IRWaitInstruction(quantity), instructions, fnCall);
+            EmitInstruction(new IRWaitInstruction(quantity), instructions, fnCall, aliases);
         }
         else if (fnName == "spawn" || fnName == "kill" || fnName == "remove")
         {
@@ -1073,15 +1077,15 @@ namespace Langums
                     propsSlot = m_UnitProperties[slotName];
                 }
 
-                EmitInstruction(new IRSpawnInstruction(playerId, unitId, regId, isLiteral, locName, propsSlot), instructions, fnCall);
+                EmitInstruction(new IRSpawnInstruction(playerId, unitId, regId, isLiteral, locName, propsSlot), instructions, fnCall, aliases);
             }
             else if (fnName == "kill")
             {
-                EmitInstruction(new IRKillInstruction(playerId, unitId, regId, isLiteral, locName), instructions, fnCall);
+                EmitInstruction(new IRKillInstruction(playerId, unitId, regId, isLiteral, locName), instructions, fnCall, aliases);
             }
             else if (fnName == "remove")
             {
-                EmitInstruction(new IRRemoveInstruction(playerId, unitId, regId, isLiteral, locName), instructions, fnCall);
+                EmitInstruction(new IRRemoveInstruction(playerId, unitId, regId, isLiteral, locName), instructions, fnCall, aliases);
             }
         }
         else if (fnName == "move")
@@ -1105,7 +1109,7 @@ namespace Langums
             auto srcLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
             auto dstLocName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
-            EmitInstruction(new IRMoveInstruction(playerId, unitId, regId, isLiteral, srcLocName, dstLocName), instructions, fnCall);
+            EmitInstruction(new IRMoveInstruction(playerId, unitId, regId, isLiteral, srcLocName, dstLocName), instructions, fnCall, aliases);
         }
         else if (fnName == "order")
         {
@@ -1125,7 +1129,7 @@ namespace Langums
             auto srcLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
             auto dstLocName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
-            EmitInstruction(new IROrderInstruction(playerId, unitId, order, srcLocName, dstLocName), instructions, fnCall);
+            EmitInstruction(new IROrderInstruction(playerId, unitId, order, srcLocName, dstLocName), instructions, fnCall, aliases);
         }
         else if (fnName == "modify")
         {
@@ -1155,7 +1159,7 @@ namespace Langums
             auto amount = ParseQuantityArgument(fnCall->GetArgument(4), fnName, 4);
             auto locName = ParseLocationArgument(fnCall->GetArgument(5), fnName, 5);
 
-            EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount, modifyType, locName), instructions, fnCall);
+            EmitInstruction(new IRModifyInstruction(playerId, unitId, regId, isLiteral, amount, modifyType, locName), instructions, fnCall, aliases);
         }
         else if (fnName == "give")
         {
@@ -1178,7 +1182,7 @@ namespace Langums
 
             auto locName = ParseLocationArgument(fnCall->GetArgument(4), fnName, 4);
 
-            EmitInstruction(new IRGiveInstruction(srcPlayerId, dstPlayerId, unitId, regId, isLiteral, locName), instructions, fnCall);
+            EmitInstruction(new IRGiveInstruction(srcPlayerId, dstPlayerId, unitId, regId, isLiteral, locName), instructions, fnCall, aliases);
         }
         else if (fnName == "move_loc")
         {
@@ -1197,7 +1201,7 @@ namespace Langums
             auto srcLocName = ParseLocationArgument(fnCall->GetArgument(2), fnName, 2);
             auto dstLocName = ParseLocationArgument(fnCall->GetArgument(3), fnName, 3);
 
-            EmitInstruction(new IRMoveLocInstruction(playerId, unitId, srcLocName, dstLocName), instructions, fnCall);
+            EmitInstruction(new IRMoveLocInstruction(playerId, unitId, srcLocName, dstLocName), instructions, fnCall, aliases);
         }
         else if (fnName == "play_sound")
         {
@@ -1221,7 +1225,7 @@ namespace Langums
                 playerId = ParsePlayerIdArgument(fnCall->GetArgument(0), fnName, 0);
             }
 
-            EmitInstruction(new IRPlayWAVInstruction(playerId, wavFilename, 0), instructions, fnCall);
+            EmitInstruction(new IRPlayWAVInstruction(playerId, wavFilename, 0), instructions, fnCall, aliases);
         }
         /*else if (fnName == "transmission")
         {
@@ -1255,7 +1259,7 @@ namespace Langums
             auto hasReturnValue = instructions.back()->GetType() == IRInstructionType::Push;
             if (hasReturnValue && ignoreReturnValue)
             {
-                EmitInstruction(new IRPopInstruction(), instructions, fnCall);
+                EmitInstruction(new IRPopInstruction(), instructions, fnCall, aliases);
             }
         }
         else
@@ -1274,13 +1278,13 @@ namespace Langums
         {
             EmitExpression(rhs.get(), instructions, aliases);
             EmitExpression(lhs.get(), instructions, aliases);
-            EmitInstruction(new IRAddInstruction(), instructions, expression);
+            EmitInstruction(new IRAddInstruction(), instructions, expression, aliases);
         }
         else if (op == OperatorType::Subtract)
         {
             EmitExpression(rhs.get(), instructions, aliases);
             EmitExpression(lhs.get(), instructions, aliases);
-            EmitInstruction(new IRSubInstruction(), instructions, expression);
+            EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
         }
         else if (op == OperatorType::Multiply)
         {
@@ -1291,7 +1295,7 @@ namespace Langums
 
                 if (value == 0)
                 {
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
                     return;
                 }
 
@@ -1304,20 +1308,20 @@ namespace Langums
                 if (value == 2) // multiplication by 2 is converted to an addition
                 {
                     EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRCopyRegInstruction(Reg_StackTop, Reg_StackTop + 1), instructions, expression);
-                    EmitInstruction(new IRAddInstruction(), instructions, expression);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRCopyRegInstruction(Reg_StackTop, Reg_StackTop + 1), instructions, expression, aliases);
+                    EmitInstruction(new IRAddInstruction(), instructions, expression, aliases);
                     return;
                 }
 
                 EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                EmitInstruction(new IRMulConstInstruction(value), instructions, expression);
+                EmitInstruction(new IRMulConstInstruction(value), instructions, expression, aliases);
                 return;
             }
 
             EmitExpression(rhs.get(), instructions, aliases);
             EmitExpression(lhs.get(), instructions, aliases);
-            EmitInstruction(new IRMulInstruction(), instructions, expression);
+            EmitInstruction(new IRMulInstruction(), instructions, expression, aliases);
         }
         else if (op == OperatorType::Divide)
         {
@@ -1327,15 +1331,15 @@ namespace Langums
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
 
-            EmitInstruction(new IRSetRegInstruction(Reg_Temp1, 0), instructions, expression);
-            EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions, expression);
-            EmitInstruction(new IRPushInstruction(Reg_Temp0), instructions, expression);
-            EmitInstruction(new IRIncRegInstruction(Reg_Temp1, 1), instructions, expression);
-            EmitInstruction(new IRSubInstruction(), instructions, expression);
-            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, -3), instructions, expression);
-            EmitInstruction(new IRPopInstruction(), instructions, expression);
-            EmitInstruction(new IRDecRegInstruction(Reg_Temp1, 1), instructions, expression);
-            EmitInstruction(new IRPushInstruction(Reg_Temp1), instructions, expression);
+            EmitInstruction(new IRSetRegInstruction(Reg_Temp1, 0), instructions, expression, aliases);
+            EmitInstruction(new IRPopInstruction(Reg_Temp0), instructions, expression, aliases);
+            EmitInstruction(new IRPushInstruction(Reg_Temp0), instructions, expression, aliases);
+            EmitInstruction(new IRIncRegInstruction(Reg_Temp1, 1), instructions, expression, aliases);
+            EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+            EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, -3), instructions, expression, aliases);
+            EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+            EmitInstruction(new IRDecRegInstruction(Reg_Temp1, 1), instructions, expression, aliases);
+            EmitInstruction(new IRPushInstruction(Reg_Temp1), instructions, expression, aliases);
         }
         else if (op == OperatorType::Equals)
         {
@@ -1362,30 +1366,30 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions, expression);
-                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::NotEquals)
@@ -1413,30 +1417,30 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfNotEqInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfNotEqInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions, expression);
-                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 4), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::LessThanOrEquals)
@@ -1464,18 +1468,18 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(rhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfGrtInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfGrtInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else if (rhs->GetType() == ASTNodeType::NumberLiteral)
@@ -1501,28 +1505,28 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::LessThan)
@@ -1550,18 +1554,18 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(rhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else if (rhs->GetType() == ASTNodeType::NumberLiteral)
@@ -1587,30 +1591,30 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfLessInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfLessInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRDecRegInstruction(Reg_StackTop + 1, 1), instructions, expression);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                EmitInstruction(new IRDecRegInstruction(Reg_StackTop + 1, 1), instructions, expression, aliases);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::GreaterThanOrEquals)
@@ -1638,18 +1642,18 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(rhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfLessInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfLessInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else if (rhs->GetType() == ASTNodeType::NumberLiteral)
@@ -1675,30 +1679,30 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtOrEqualInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 4), instructions, expression);
-                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 4), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwSetInstruction(Switch_ArithmeticUnderflow, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::GreaterThan)
@@ -1726,18 +1730,18 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(rhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfLessOrEqualInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else if (rhs->GetType() == ASTNodeType::NumberLiteral)
@@ -1763,29 +1767,29 @@ namespace Langums
                 if (regId == Reg_StackTop)
                 {
                     EmitExpression(lhs.get(), instructions, aliases);
-                    EmitInstruction(new IRJmpIfGrtInstruction(Reg_StackTop, value, 3), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtInstruction(Reg_StackTop, value, 3), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                    EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
                 }
                 else
                 {
-                    EmitInstruction(new IRJmpIfGrtInstruction(regId, value, 4), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
-                    EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                    EmitInstruction(new IRPopInstruction(), instructions, expression);
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRJmpIfGrtInstruction(regId, value, 4), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
+                    EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                    EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRSubInstruction(), instructions, expression);
-                EmitInstruction(new IRIncRegInstruction(Reg_StackTop + 1, 1), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                EmitInstruction(new IRSubInstruction(), instructions, expression, aliases);
+                EmitInstruction(new IRIncRegInstruction(Reg_StackTop + 1, 1), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(Switch_ArithmeticUnderflow, 2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::And)
@@ -1797,7 +1801,7 @@ namespace Langums
 
                 if (value == 0)
                 {
-                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
+                    EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
                 }
                 else
                 {
@@ -1819,31 +1823,31 @@ namespace Langums
                     if (regId == Reg_StackTop)
                     {
                         EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression);
-                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
-                        EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
+                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression, aliases);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
+                        EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
                     }
                     else
                     {
-                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions, expression);
-                        EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
-                        EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                        EmitInstruction(new IRPopInstruction(), instructions, expression);
-                        EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
+                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions, expression, aliases);
+                        EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
+                        EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                        EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                        EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
                     }
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 6), instructions, expression);
-                EmitInstruction(new IRPopInstruction(), instructions, expression);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 6), instructions, expression, aliases);
+                EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
+                EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
             }
         }
         else if (op == OperatorType::Or)
@@ -1855,7 +1859,7 @@ namespace Langums
 
                 if (value == 1)
                 {
-                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
+                    EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
                 }
                 else
                 {
@@ -1877,31 +1881,31 @@ namespace Langums
                     if (regId == Reg_StackTop)
                     {
                         EmitExpression(lhs->GetType() == ASTNodeType::NumberLiteral ? rhs.get() : lhs.get(), instructions, aliases);
-                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression);
-                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
-                        EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
+                        EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression, aliases);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
+                        EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                        EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
                     }
                     else
                     {
-                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions, expression);
-                        EmitInstruction(new IRPushInstruction(1, true), instructions, expression);
-                        EmitInstruction(new IRJmpInstruction(3), instructions, expression);
-                        EmitInstruction(new IRPopInstruction(), instructions, expression);
-                        EmitInstruction(new IRPushInstruction(0, true), instructions, expression);
+                        EmitInstruction(new IRJmpIfEqInstruction(regId, 0, 4), instructions, expression, aliases);
+                        EmitInstruction(new IRPushInstruction(1, true), instructions, expression, aliases);
+                        EmitInstruction(new IRJmpInstruction(3), instructions, expression, aliases);
+                        EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
+                        EmitInstruction(new IRPushInstruction(0, true), instructions, expression, aliases);
                     }
                 }
             }
             else
             {
                 EmitExpression(lhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 6), instructions, expression);
-                EmitInstruction(new IRPopInstruction(), instructions, expression);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 6), instructions, expression, aliases);
+                EmitInstruction(new IRPopInstruction(), instructions, expression, aliases);
                 EmitExpression(rhs.get(), instructions, aliases);
-                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 3), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-                EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+                EmitInstruction(new IRJmpIfNotEqInstruction(Reg_StackTop, 0, 3), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+                EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+                EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
             }
         }
         else
@@ -1918,10 +1922,10 @@ namespace Langums
         if (op == OperatorType::Not)
         {
             EmitExpression(lhs.get(), instructions, aliases);
-            EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression);
-            EmitInstruction(new IRJmpInstruction(2), instructions, expression);
-            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression);
+            EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, 3), instructions, expression, aliases);
+            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 0), instructions, expression, aliases);
+            EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
+            EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
         }
         else if (op == OperatorType::PostfixIncrement)
         {
@@ -1934,8 +1938,8 @@ namespace Langums
                     throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()), expression);
                 }
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression);
-                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression);
+                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
@@ -1943,8 +1947,8 @@ namespace Langums
                 auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression);
-                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression);
+                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else
             {
@@ -1962,8 +1966,8 @@ namespace Langums
                     throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()), expression);
                 }
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression);
-                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression);
+                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
@@ -1971,8 +1975,8 @@ namespace Langums
                 auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression);
-                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression);
+                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else
             {
@@ -1990,13 +1994,13 @@ namespace Langums
         if (expression->GetType() == ASTNodeType::NumberLiteral)
         {
             auto number = (ASTNumberLiteral*)expression;
-            EmitInstruction(new IRPushInstruction(number->GetValue(), true), instructions, expression);
+            EmitInstruction(new IRPushInstruction(number->GetValue(), true), instructions, expression, aliases);
         }
         else if (expression->GetType() == ASTNodeType::Identifier)
         {
             auto identifier = (ASTIdentifier*)expression;
             auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases, expression);
-            EmitInstruction(new IRPushInstruction(regId), instructions, expression);
+            EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
         }
         else if (expression->GetType() == ASTNodeType::BinaryExpression)
         {
@@ -2011,7 +2015,7 @@ namespace Langums
             auto arrayExpression = (ASTArrayExpression*)expression;
             auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
             auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
-            EmitInstruction(new IRPushInstruction(regId), instructions, expression);
+            EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
         }
         else if (expression->GetType() == ASTNodeType::FunctionCall)
         {
@@ -2068,12 +2072,12 @@ namespace Langums
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
                 {
                     auto number = (ASTNumberLiteral*)expression.get();
-                    EmitInstruction(new IRSetRegInstruction(regId, number->GetValue()), instructions, expression.get());
+                    EmitInstruction(new IRSetRegInstruction(regId, number->GetValue()), instructions, expression.get(), aliases);
                 }
                 else
                 {
                     EmitExpression(expression.get(), instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(regId), instructions, expression.get());
+                    EmitInstruction(new IRPopInstruction(regId), instructions, expression.get(), aliases);
                 }
             }
             else if (statement->GetType() == ASTNodeType::AssignmentExpression)
@@ -2123,7 +2127,7 @@ namespace Langums
                 if (rhs->GetType() == ASTNodeType::NumberLiteral)
                 {
                     auto number = (ASTNumberLiteral*)rhs.get();
-                    EmitInstruction(new IRSetRegInstruction(lhsRegIndex, number->GetValue()), instructions, rhs.get());
+                    EmitInstruction(new IRSetRegInstruction(lhsRegIndex, number->GetValue()), instructions, rhs.get(), aliases);
                 }
                 else if (rhs->GetType() == ASTNodeType::Identifier)
                 {
@@ -2135,7 +2139,7 @@ namespace Langums
                         throw IRCompilerException("Invalid value on right side of assignment expression", expression);
                     }
 
-                    EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions, rhs.get());
+                    EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions, rhs.get(), aliases);
                 }
                 else if (rhs->GetType() == ASTNodeType::ArrayExpression)
                 {
@@ -2143,12 +2147,12 @@ namespace Langums
                     auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
                     auto rhsRegIndex = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
-                    EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions, rhs.get());
+                    EmitInstruction(new IRCopyRegInstruction(lhsRegIndex, rhsRegIndex), instructions, rhs.get(), aliases);
                 }
                 else
                 {
                     EmitExpression(rhs.get(), instructions, aliases);
-                    EmitInstruction(new IRPopInstruction(lhsRegIndex), instructions, rhs.get());
+                    EmitInstruction(new IRPopInstruction(lhsRegIndex), instructions, rhs.get(), aliases);
                 }
             }
             else if (statement->GetType() == ASTNodeType::UnaryExpression)
@@ -2229,7 +2233,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions, expression.get());
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions, expression.get(), aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2238,7 +2242,7 @@ namespace Langums
 
                     if (elseBodyInstructions.size() > 0)
                     {
-                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, expression.get());
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, expression.get(), aliases);
                     }
 
                     for (auto& instruction : elseBodyInstructions)
@@ -2264,7 +2268,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions, arrayExpression);
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + offset), instructions, arrayExpression, aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2273,7 +2277,7 @@ namespace Langums
 
                     if (elseBodyInstructions.size() > 0)
                     {
-                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, arrayExpression);
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, arrayExpression, aliases);
                     }
 
                     for (auto& instruction : elseBodyInstructions)
@@ -2292,7 +2296,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, binaryExpression);
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, binaryExpression, aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2301,7 +2305,7 @@ namespace Langums
 
                     if (elseBodyInstructions.size() > 0)
                     {
-                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, binaryExpression);
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, binaryExpression, aliases);
                     }
 
                     for (auto& instruction : elseBodyInstructions)
@@ -2320,7 +2324,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, unaryExpression);
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, unaryExpression, aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2329,7 +2333,7 @@ namespace Langums
 
                     if (elseBodyInstructions.size() > 0)
                     {
-                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, unaryExpression);
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, unaryExpression, aliases);
                     }
 
                     for (auto& instruction : elseBodyInstructions)
@@ -2347,7 +2351,7 @@ namespace Langums
                         offset = 2;
                     }
 
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, expression.get());
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + offset), instructions, expression.get(), aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
@@ -2356,7 +2360,7 @@ namespace Langums
 
                     if (elseBodyInstructions.size() > 0)
                     {
-                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, expression.get());
+                        EmitInstruction(new IRJmpInstruction(elseBodyInstructions.size() + 1), instructions, expression.get(), aliases);
                     }
 
                     for (auto& instruction : elseBodyInstructions)
@@ -2387,7 +2391,7 @@ namespace Langums
                     {
                         auto loopStart = instructions.size();
                         EmitBlockStatement((ASTBlockStatement*)body.get(), instructions, aliases);
-                        EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get());
+                        EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get(), aliases);
                     }
                 }
                 else if (expression->GetType() == ASTNodeType::Identifier)
@@ -2404,7 +2408,7 @@ namespace Langums
 
                     auto loopStart = (int)instructions.size();
                     auto regId = RegisterNameToIndex(identifier->GetName(), 0, aliases, expression.get());
-                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions, expression.get());
+                    EmitInstruction(new IRJmpIfEqInstruction(regId, 0, bodyInstructions.size() + 2), instructions, expression.get(), aliases);
 
                     auto instructionCount = instructions.size();
                     for (auto& instruction : bodyInstructions)
@@ -2412,7 +2416,7 @@ namespace Langums
                         instructions.push_back(std::move(instruction));
                     }
 
-                    EmitInstruction(new IRJmpInstruction(loopStart - (int)instructions.size()), instructions, expression.get());
+                    EmitInstruction(new IRJmpInstruction(loopStart - (int)instructions.size()), instructions, expression.get(), aliases);
                 }
                 else if (expression->GetType() == ASTNodeType::BinaryExpression)
                 {
@@ -2427,14 +2431,14 @@ namespace Langums
                     auto loopStart = instructions.size();
                     auto binaryExpression = (ASTBinaryExpression*)expression.get();
                     EmitBinaryExpression(binaryExpression, instructions, aliases);
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + 2), instructions, expression.get());
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + 2), instructions, expression.get(), aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
 
-                    EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get());
+                    EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get(), aliases);
                 }
                 else if (expression->GetType() == ASTNodeType::UnaryExpression)
                 {
@@ -2449,14 +2453,14 @@ namespace Langums
                     auto loopStart = instructions.size();
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
                     EmitUnaryExpression(unaryExpression, instructions, aliases);
-                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + 2), instructions, expression.get());
+                    EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + 2), instructions, expression.get(), aliases);
 
                     for (auto& instruction : bodyInstructions)
                     {
                         instructions.push_back(std::move(instruction));
                     }
 
-                    EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get());
+                    EmitInstruction(new IRJmpInstruction(loopStart, true), instructions, expression.get(), aliases);
                 }
                 else
                 {
@@ -2473,7 +2477,7 @@ namespace Langums
                     if (expression->GetType() == ASTNodeType::NumberLiteral)
                     {
                         auto number = (ASTNumberLiteral*)expression.get();
-                        EmitInstruction(new IRPushInstruction(number->GetValue(), true), instructions, expression.get());
+                        EmitInstruction(new IRPushInstruction(number->GetValue(), true), instructions, expression.get(), aliases);
                     }
                     else
                     {
@@ -2481,7 +2485,7 @@ namespace Langums
                     }
                 }
 
-                EmitInstruction(new IRJmpInstruction(JMP_TO_END_OFFSET_CONSTANT), instructions, statement.get());
+                EmitInstruction(new IRJmpInstruction(JMP_TO_END_OFFSET_CONSTANT), instructions, statement.get(), aliases);
             }
             else
             {
@@ -2519,7 +2523,7 @@ namespace Langums
             auto& argName = args[i];
             aliases.Allocate(argName, 1);
             auto regId = aliases.GetAlias(argName, 0, fn);
-            EmitInstruction(new IRPopInstruction(regId), instructions, fn);
+            EmitInstruction(new IRPopInstruction(regId), instructions, fn, aliases);
         }
 
         auto instructionsStart = instructions.size();
@@ -2553,7 +2557,7 @@ namespace Langums
         {
             if (instructions.back()->GetType() != IRInstructionType::Jmp)
             {
-                EmitInstruction(new IRJmpInstruction(startIndex, true), instructions, fn);
+                EmitInstruction(new IRJmpInstruction(startIndex, true), instructions, fn, aliases);
             }
         }
         else if (instructions.back()->GetType() != IRInstructionType::Push)

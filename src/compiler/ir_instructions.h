@@ -1,6 +1,8 @@
 #ifndef __LANGUMS_IRINSTRUCTIONS_H
 #define __LANGUMS_IRINSTRUCTIONS_H
 
+#include <unordered_map>
+
 #include "ir_utility.h"
 
 namespace Langums
@@ -9,6 +11,7 @@ namespace Langums
     enum class IRInstructionType
     {
         Nop = 0,
+        DebugBrk,       // puts an automatic debug breakpoint for the debugger
         // core
         Push,           // pushes value on top of the stack and decrements the stack pointer
         Pop,            // pops a value from the stack and increments the stack pointer
@@ -129,6 +132,16 @@ namespace Langums
             m_Id = id;
         }
 
+        void SetDebugRegisterNames(const std::unordered_map<unsigned int, std::string>& names)
+        {
+            m_DebugRegisterNames = names;
+        }
+
+        const std::unordered_map<unsigned int, std::string>& GetDebugRegisterNames() const
+        {
+            return m_DebugRegisterNames;
+        }
+
         IRInstructionType GetType () const
         {
             return m_Type;
@@ -140,6 +153,7 @@ namespace Langums
         IASTNode* m_ASTNode = nullptr;
         IRInstructionType m_Type = IRInstructionType::Nop;
         unsigned int m_Id = 0;
+        std::unordered_map<unsigned int, std::string> m_DebugRegisterNames;
     };
 
     class IRNopInstruction : public IIRInstruction
@@ -151,6 +165,18 @@ namespace Langums
         std::string DebugDump () const
         {
             return "NOP";
+        }
+    };
+
+    class IRDebugBrkInstruction : public IIRInstruction
+    {
+        public:
+        IRDebugBrkInstruction () : IIRInstruction (IRInstructionType::DebugBrk)
+        {}
+
+        std::string DebugDump () const
+        {
+            return "DBGBRK";
         }
     };
 
@@ -2290,11 +2316,11 @@ namespace Langums
     class IRSetAllyInstruction : public IIRInstruction
     {
         public:
-        IRSetAllyInstruction (uint8_t playerId, uint8_t targetPlayerId, AllianceStatus status) :
+        IRSetAllyInstruction (int playerId, uint8_t targetPlayerId, AllianceStatus status) :
             m_PlayerId (playerId), m_TargetPlayerId (targetPlayerId), m_Status (status), IIRInstruction (IRInstructionType::SetAlly)
         {}
 
-        uint8_t GetPlayerId () const
+        int GetPlayerId () const
         {
             return m_PlayerId;
         }
@@ -2325,11 +2351,18 @@ namespace Langums
                 break;
             }
 
-            return SafePrintf ("SETALLY % % %", CHK::PlayersByName[m_PlayerId], CHK::PlayersByName[m_TargetPlayerId], status);
+            if (m_PlayerId == -1)
+            {
+                return SafePrintf ("SETALLY [ALL] % %", CHK::PlayersByName[m_TargetPlayerId], status);
+            }
+            else
+            {
+                return SafePrintf ("SETALLY % % %", CHK::PlayersByName[m_PlayerId], CHK::PlayersByName[m_TargetPlayerId], status);
+            }
         }
 
         private:
-        uint8_t m_PlayerId;
+        int m_PlayerId;
         uint8_t m_TargetPlayerId;
         AllianceStatus m_Status;
     };

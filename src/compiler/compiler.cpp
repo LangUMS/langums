@@ -7,7 +7,7 @@
 namespace Langums
 {
 
-    Compiler::Compiler()
+    Compiler::Compiler(bool debug) : m_Debug(debug)
     {
         g_RegisterMap.clear();
 
@@ -429,7 +429,7 @@ namespace Langums
             }
         }
 
-        auto current = TriggerBuilder(nextAddress++, nullptr, m_TriggersOwner);
+        auto current = TriggerBuilder(nextAddress++, instructions[0].get(), m_TriggersOwner);
 
         bool needsIndirectJumps = false;
 
@@ -486,7 +486,7 @@ namespace Langums
                     auto retAddress = nextAddress++;
                     
                     auto stackTop = m_StackPointer--;
-                    auto copyAddress = CodeGen_CopyReg(stackTop, push->GetRegisterId(), nextAddress, retAddress);
+                    auto copyAddress = CodeGen_CopyReg(stackTop, push->GetRegisterId(), nextAddress, retAddress, instruction.get());
 
                     // clear storage and jump to step 1
                     current.Action_SetReg(Reg_CopyStorage, 0);
@@ -579,7 +579,7 @@ namespace Langums
                     srcId = m_StackPointer + (srcId - Reg_StackTop) + 1;
                 }
 
-                auto copyAddress = CodeGen_CopyReg(dstId, srcId, nextAddress, retAddress);
+                auto copyAddress = CodeGen_CopyReg(dstId, srcId, nextAddress, retAddress, instruction.get());
 
                 // clear storage and jump to step 1
                 current.Action_SetReg(Reg_CopyStorage, 0);
@@ -1105,7 +1105,7 @@ namespace Langums
 
                 current.Action_JumpTo(startAddress);
                 PushTriggers(current.GetTriggers());
-                current = TriggerBuilder(startAddress, nullptr, m_TriggersOwner);
+                current = TriggerBuilder(startAddress, instruction.get(), m_TriggersOwner);
                 current.Action_SetSwitch(Switch_Player1 + m_TriggersOwner - 1, TriggerActionState::SetSwitch);
                 current.Action_Wait(0);
 
@@ -1116,7 +1116,7 @@ namespace Langums
                         continue;
                     }
 
-                    auto checkIfPlayerActive = TriggerBuilder(startAddress, nullptr, i + 1);
+                    auto checkIfPlayerActive = TriggerBuilder(startAddress, instruction.get(), i + 1);
                     checkIfPlayerActive.Action_SetSwitch(Switch_Player1 + i, TriggerActionState::SetSwitch);
                     PushTriggers(checkIfPlayerActive.GetTriggers());
                 }
@@ -2399,6 +2399,19 @@ namespace Langums
                 auto time = transmission->GetTime();
                 current.Action_Transmission(stringId, transmission->GetUnitId(), locationId, time, CHK::TriggerActionState::SetTo, wavStringId, transmission->GetWavTime());
             }
+            else if (instruction->GetType() == IRInstructionType::DebugBrk)
+            {
+                if (m_Debug)
+                {
+                    auto address = nextAddress++;
+
+                    current.Action_Wait(0);
+                    current.Action_JumpTo(address);
+                    PushTriggers(current.GetTriggers());
+
+                    current = TriggerBuilder(address, instruction.get(), m_TriggersOwner);
+                }
+            }
             else if
             (
                 instruction->GetType() == IRInstructionType::Nop ||
@@ -2507,7 +2520,7 @@ namespace Langums
         retCondition.m_Flags = 16;
     }
 
-    unsigned int Compiler::CodeGen_CopyReg(unsigned int dstReg, unsigned int srcReg, unsigned int& nextAddress, unsigned int retAddress)
+    unsigned int Compiler::CodeGen_CopyReg(unsigned int dstReg, unsigned int srcReg, unsigned int& nextAddress, unsigned int retAddress, IIRInstruction* instruction)
     {
         using namespace CHK;
 
@@ -2517,7 +2530,7 @@ namespace Langums
         // step 1 - copy to storage
         for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
         {
-            auto copyToStorageTrigger = TriggerBuilder(copyAddress, nullptr, m_TriggersOwner);
+            auto copyToStorageTrigger = TriggerBuilder(copyAddress, instruction, m_TriggersOwner);
             copyToStorageTrigger.Cond_TestReg(srcReg, i, TriggerComparisonType::AtLeast);
             copyToStorageTrigger.Action_DecReg(srcReg, i);
             copyToStorageTrigger.Action_IncReg(Reg_CopyStorage, i);
@@ -2525,7 +2538,7 @@ namespace Langums
         }
 
         // step 1 (finish) - finish copy and jump to step 2
-        auto finishCopyTrigger = TriggerBuilder(copyAddress, nullptr, m_TriggersOwner);
+        auto finishCopyTrigger = TriggerBuilder(copyAddress, instruction, m_TriggersOwner);
         finishCopyTrigger.Cond_TestReg(srcReg, 0, TriggerComparisonType::Exactly);
         finishCopyTrigger.Action_SetReg(dstReg, 0);
         finishCopyTrigger.Action_JumpTo(copy2Address);
@@ -2534,7 +2547,7 @@ namespace Langums
         // step 3 - copy from storage
         for (auto i = m_CopyBatchSize; i >= 1; i /= 2)
         {
-            auto copyFromStorageTrigger = TriggerBuilder(copy2Address, nullptr, m_TriggersOwner);
+            auto copyFromStorageTrigger = TriggerBuilder(copy2Address, instruction, m_TriggersOwner);
             copyFromStorageTrigger.Cond_TestReg(Reg_CopyStorage, i, TriggerComparisonType::AtLeast);
             copyFromStorageTrigger.Action_DecReg(Reg_CopyStorage, i);
             copyFromStorageTrigger.Action_IncReg(srcReg, i);
@@ -2543,7 +2556,7 @@ namespace Langums
         }
 
         // step 3 (finish)
-        auto finishCopyFromStorageTrigger = TriggerBuilder(copy2Address, nullptr, m_TriggersOwner);
+        auto finishCopyFromStorageTrigger = TriggerBuilder(copy2Address, instruction, m_TriggersOwner);
         finishCopyFromStorageTrigger.Cond_TestReg(Reg_CopyStorage, 0, TriggerComparisonType::Exactly);
         finishCopyFromStorageTrigger.Action_JumpTo(retAddress);
         PushTriggers(finishCopyFromStorageTrigger.GetTriggers());
@@ -2693,7 +2706,7 @@ namespace Langums
             PushTriggers(countBits.GetTriggers());
         }
 
-        auto copyAddress = CodeGen_CopyReg(Reg_Temp2, Reg_MulLeft, nextAddress, checkAddress);
+        auto copyAddress = CodeGen_CopyReg(Reg_Temp2, Reg_MulLeft, nextAddress, checkAddress, nullptr);
 
         auto finishCountBits = TriggerBuilder(mulAddress, nullptr, m_TriggersOwner);
         finishCountBits.Cond_TestReg(Reg_MulRight, 1, TriggerComparisonType::Exactly);

@@ -16,6 +16,7 @@
 #include "pretty_errors.h"
 #include "mpq_wrapper.h"
 #include "debugger/debugger.h"
+#include "debugger/debugger_cli.h"
 
 #undef min
 #undef max
@@ -417,7 +418,7 @@ int main(int argc, char* argv[])
 
     LOG_F("\nEmitted % instructions.\n", instructions.size());
 
-    Compiler compiler;
+    Compiler compiler(opts.count("debug") > 0);
 
     auto triggersOwner = 8; // player 8 owns the triggers by default
 
@@ -605,12 +606,8 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        while (true)
-        {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-
-        return 0;
+        DebuggerCli cli(&debugger);
+        return cli.Repl();
     }
 
     LOG_DEINIT();

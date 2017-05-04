@@ -29,128 +29,102 @@ namespace Langums
         }
     }
 
-    Debugger::~Debugger()
-    {
-        if (m_Thread == nullptr)
-        {
-            return;
-        }
-
-        m_ShutdownThread = true;
-        while (m_ShutdownThread)
-        {
-        }
-
-        m_Thread->join();
-    }
-
     bool Debugger::Attach(const std::string& processName)
     {
-        if (m_Thread != nullptr)
+        if (m_DebuggerThread != nullptr)
         {
             return false;
         }
 
-        m_ProcessName = processName;
-        m_Thread = std::make_unique<std::thread>(std::bind(&Debugger::RunThread, this));
+        m_DebuggerThread = std::make_unique<DebuggerThread>(processName);
         return true;
     }
 
     void Debugger::Detach()
     {
-        if (m_Thread == nullptr)
+        m_DebuggerThread = nullptr;
+    }
+    
+    DebuggerThreadState Debugger::GetState() const
+    {
+        if (m_DebuggerThread == nullptr)
         {
-            return;
+            return DebuggerThreadState::NotRunning;
         }
 
-        if (!m_ShutdownThread)
-        {
-            m_ShutdownThread = true;
-            while (m_ShutdownThread)
-            {
-            }
-        }
-
-        m_Thread->join();
-        m_Thread = nullptr;
+        return m_DebuggerThread->GetState();
     }
 
-    void Debugger::RunThread()
+    unsigned int Debugger::GetCurrentAddress() const
     {
-        using namespace std::chrono;
-
-        LOG_F("Debugger: Looking for \"%\"", m_ProcessName);
-
-        auto before = high_resolution_clock::now();
-        
-        m_State = DebuggerState::WaitingForProcess;
-
-        m_Process = nullptr;
-        while (m_Process == nullptr)
-        {
-            m_Process = Process::OpenByName(m_ProcessName, m_BaseAddress);
-            std::this_thread::sleep_for(milliseconds(500));
-
-            auto now = high_resolution_clock::now();
-
-            if ((now - before) > seconds(90))
-            {
-                LOG_F("\n(!) Debugger: Failed to find \"%\" for 90 seconds, bailing out...", m_ProcessName);
-                m_State = DebuggerState::NotRunning;
-                m_ShutdownThread = true;
-                return;
-            }
-        }
-
-        m_State = DebuggerState::Attached;
-
-        m_Registers = std::make_unique<RegTable>(m_Process, m_BaseAddress);
-        LOG_F("Debugger: Attached to process.");
-
-        auto updateRate = 1.0 / (double)m_PollRate;
-            
-        before = high_resolution_clock::now();
-        auto acc = 0.0;
-
-        while (true)
-        {
-            auto now = high_resolution_clock::now();
-            auto dt = (double)duration_cast<milliseconds>(now - before).count() / 1000.0;
-            before = now;
-
-            acc += dt;
-            if (acc >= updateRate)
-            {
-                m_Registers->Update();
-
-                auto& icDef = g_RegisterMap[Reg_InstructionCounter];
-                m_InstructionCounter = m_Registers->Get(icDef.m_PlayerId, icDef.m_Index);
-                acc -= updateRate;
-            }
-
-            if (dt < updateRate)
-            {
-                std::this_thread::sleep_for(milliseconds((size_t)((updateRate - dt) * 1000.0)));
-            }
-
-            if (m_ShutdownThread || !Process::IsRunning(m_Process))
-            {
-                m_ShutdownThread = false;
-                break;
-            }
-        }
+        return m_DebuggerThread->GetInstructionCounter();
     }
 
-    void Debugger::PauseGame(bool state)
+    IIRInstruction* Debugger::GetCurrentInstruction() const
     {
-        if (state)
+        return AddressToInstruction(GetCurrentAddress());
+    }
+
+    IASTNode* Debugger::GetCurrentASTNode() const
+    {
+        auto instruction = GetCurrentInstruction();
+        if (instruction == nullptr)
         {
-            Process::Suspend(m_Process);
+            return nullptr;
         }
-        else
+
+        return instruction->GetASTNode();
+    }
+
+    int Debugger::GetCurrentSourceCharIndex() const
+    {
+        auto astNode = GetCurrentASTNode();
+        if (astNode == nullptr)
         {
-            Process::Resume(m_Process);
+            return -1;
         }
+
+        return astNode->GetCharIndex();
+    }
+
+    unsigned int Debugger::GetRegisterValue(unsigned int regId) const
+    {
+        return m_DebuggerThread->GetRegisterValue(regId);
+    }
+
+    void Debugger::SetRegisterValue(unsigned int regId, unsigned int value)
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerSetRegisterCmd(regId, value)));
+    }
+
+    void Debugger::SuspendExecution()
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerSuspendCmd()));
+    }
+
+    void Debugger::ResumeExecution()
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerResumeCmd()));
+    }
+
+    void Debugger::SetBreakpoint(unsigned int breakpointId, unsigned int address)
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerSetBreakpointCmd(breakpointId, address)));
+    }
+
+    void Debugger::RemoveBreakpoint(unsigned int breakpointId)
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerRemoveBreakpointCmd(breakpointId)));
+    }
+
+    void Debugger::ContinueToNextAddress()
+    {
+        m_DebuggerThread->InsertCommand(std::unique_ptr<IDebuggerCmd>(new DebuggerContinueToNextCmd()));
+    }
+
+    int Debugger::GetCurrentBreakpointId() const
+    {
+        return m_DebuggerThread->GetCurrentBreakpoint();
     }
 
     IIRInstruction* Debugger::AddressToInstruction(unsigned int address) const

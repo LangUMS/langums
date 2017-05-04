@@ -38,14 +38,14 @@ Table of Contents
     * [Unit](#unit)
     * [AIScript](#aiscript)
 
-### Bugs, issues and feature requests should go to [the issues section](https://github.com/AlexanderDzhoganov/langums/issues).
-### I accept and merge [pull requests](https://github.com/AlexanderDzhoganov/langums/pulls) (please follow the code style of the project).
-### Guides and tutorials go [in the wiki](https://github.com/AlexanderDzhoganov/langums/wiki).
+### Bugs, issues and feature requests should go to [the issues section](https://github.com/LangUMS/langums/issues).
+### I accept and merge [pull requests](https://github.com/LangUMS/langums/pulls) (please follow the code style of the project).
+### Guides and tutorials go [in the wiki](https://github.com/LangUMS/langums/wiki).
 ### [Discord channel](https://discord.gg/TNehfve) for support and discussion.
 
 ## Usage
 
-1. Get the latest langums.exe from [here](https://github.com/AlexanderDzhoganov/langums/blob/master/langums.exe?raw=true).
+1. Get the latest langums.exe from [here](https://github.com/LangUMS/langums/blob/master/langums.exe?raw=true).
 
 2. You will need to install [Microsoft Visual Studio 2015 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=48145) (x86) if you don't have it already.
 
@@ -78,7 +78,7 @@ There is [a wonderful extension for VS Code](https://marketplace.visualstudio.co
 
 ## Language basics
 
-You can try out all of the examples below using the [test.scx map from here](https://github.com/AlexanderDzhoganov/langums/blob/master/test/test.scx?raw=true).
+You can try out all of the examples below using the [test.scx map from here](https://github.com/LangUMS/langums/blob/master/test/test.scx?raw=true).
 
 Every program must contain a `main()` function which is the entry point where the code starts executing immediately after the map starts.
 The "hello world" program for LangUMS would look like:
@@ -306,6 +306,7 @@ Notes:
 | set_next_scenario(Text)                       | Sets the next map to run (singleplayer only)                                                                                                          |
 | play_sound(Text, optional: [Player](#player)) | Plays a sound from a .wav file. Defaults to all players. [See here for more info](#how-do-you-use-play_sound).                                        |
 | clear_buffered_events()                       | Clears all buffered events from the event queue (if there are any).                                                                                   |
+| debugger()                                    | Places a debugger breakpoint.                                                                                                                         |
 
 ### Score functions
 
@@ -527,6 +528,7 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     spawn(TerranMarine, PlayerId, 1, BuyMarines);
     print("You purchased a marine, take good care of it.");
   }
+}
 ```
 
 The result is the same but it helps to not repeat the same code. You can use almost anything as an event template list like players, locations, units, resource types, etc.
@@ -534,7 +536,7 @@ At the moment nested template event declarations are not supported but it's a pl
 
 ## Examples
 
-[Look at the examples/ folder here for examples.](https://github.com/AlexanderDzhoganov/langums/tree/master/examples)
+[Look at the examples/ folder here for examples.](https://github.com/LangUMS/langums/tree/master/examples)
 Feel free to contribute your own.
 
 ## FAQ
@@ -558,7 +560,7 @@ Use the `--reg` command-line option to pass a registers file. See `Integrating w
 
 #### Some piece of code behaves weirdly or is clearly executed wrong. What can I do?
 
-Please report it [by adding a new issue here](https://github.com/AlexanderDzhoganov/langums/issues/new).
+Please report it [by adding a new issue here](https://github.com/LangUMS/langums/issues/new).
 You can try using the `--disable-optimizations` option, if that fixes the issue it's a bug in the optimizer. In any case please report it.
 
 #### The compiler emits more triggers than I'd like. What can I do?
@@ -661,8 +663,8 @@ You can pass this file to the compiler with the `--reg` option e.g.
 langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_registers.txt
 ```
 
-A sample file with the default mappings [is available here](https://github.com/AlexanderDzhoganov/langums/blob/master/registermap.txt?raw=true).
-[Here you can find](https://github.com/AlexanderDzhoganov/langums#unit) a list of all unit types.
+A sample file with the default mappings [is available here](https://github.com/LangUMS/langums/blob/master/registermap.txt?raw=true).
+[Here you can find](https://github.com/LangUMS/langums#unit) a list of all unit types.
 
 #### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
 
@@ -678,27 +680,27 @@ will set the death counter for Player5's marines to the value of variable `foo`.
 
 ### Compiling the code
 
-A Visual Studio 2017 project is provided in the [langums/](https://github.com/AlexanderDzhoganov/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
+A Visual Studio 2017 project is provided in the [langums/](https://github.com/LangUMS/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
 
 ### Parts of LangUMS
 
 #### Frontend
-- [CHK library](https://github.com/AlexanderDzhoganov/langums/tree/master/src/libchk)
-- [Preprocessor](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/preprocessor.cpp)
-- [Parser](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/parser.cpp)
-- [AST](https://github.com/AlexanderDzhoganov/langums/blob/master/src/ast/ast.h)
-- [AST optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/parser/ast_optimizer.cpp)
+- [CHK library](https://github.com/LangUMS/langums/tree/master/src/libchk)
+- [Preprocessor](https://github.com/LangUMS/langums/blob/master/src/parser/preprocessor.cpp)
+- [Parser](https://github.com/LangUMS/langums/blob/master/src/parser/parser.cpp)
+- [AST](https://github.com/LangUMS/langums/blob/master/src/ast/ast.h)
+- [AST optimizer](https://github.com/LangUMS/langums/blob/master/src/parser/ast_optimizer.cpp)
 
 #### Backend (IR)
 
-- [IR language](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_instructions.h)
-- [IR generation](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir.cpp)
-- [IR optimizer](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/ir_optimizer.cpp)
+- [IR language](https://github.com/LangUMS/langums/blob/master/src/compiler/ir_instructions.h)
+- [IR generation](https://github.com/LangUMS/langums/blob/master/src/compiler/ir.cpp)
+- [IR optimizer](https://github.com/LangUMS/langums/blob/master/src/compiler/ir_optimizer.cpp)
 
 #### Backend (codegen)
 
-- [Codegen](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/compiler.cpp)
-- [TriggerBuilder](https://github.com/AlexanderDzhoganov/langums/blob/master/src/compiler/triggerbuilder.cpp)
+- [Codegen](https://github.com/LangUMS/langums/blob/master/src/compiler/compiler.cpp)
+- [TriggerBuilder](https://github.com/LangUMS/langums/blob/master/src/compiler/triggerbuilder.cpp)
 
 ## Future plans
 

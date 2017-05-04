@@ -32,7 +32,7 @@ namespace Langums
     class Compiler
     {
         public:
-        Compiler();
+        Compiler(bool debug);
 
         void SetCopyBatchSize(uint32_t copyBatchSize)
         {
@@ -54,7 +54,7 @@ namespace Langums
         private:
         void Cond_Always(CHK::TriggerCondition& retCondition);
 
-        unsigned int CodeGen_CopyReg(unsigned int dstRegId, unsigned int srcRegId, unsigned int& nextAddress, unsigned int retAddress);
+        unsigned int CodeGen_CopyReg(unsigned int dstRegId, unsigned int srcRegId, unsigned int& nextAddress, unsigned int retAddress, IIRInstruction* instruction);
         void Action_PreserveTrigger(CHK::TriggerAction& retAction);
         void Action_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
         void Action_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
@@ -101,6 +101,7 @@ namespace Langums
         unsigned int m_MultiplyAddress;
 
         std::vector<RegisterDef> m_RegisterMap;
+        bool m_Debug = false;
     };
 
 }

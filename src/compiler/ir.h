@@ -117,6 +117,11 @@ namespace Langums
             m_Aliases.erase(name);
         }
 
+        const std::unordered_map<std::string, std::vector<unsigned int>>& GetAliases() const
+        {
+            return m_Aliases;
+        }
+
         private:
         unsigned int GetNextFreeId()
         {
@@ -174,9 +179,18 @@ namespace Langums
         }
 
         private:
-        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node)
+        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node, RegisterAliases& aliases)
         {
             instruction->SetASTNode(node);
+
+            std::unordered_map<unsigned int, std::string> registerNames;
+            for (auto& alias : aliases.GetAliases())
+            {
+                registerNames.insert(std::make_pair((unsigned int)Reg_ReservedEnd + alias.second.back(), alias.first));
+            }
+
+            instruction->SetDebugRegisterNames(registerNames);
+
             instructions.push_back(std::unique_ptr<IIRInstruction>(instruction));
         }
 

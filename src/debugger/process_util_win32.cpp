@@ -120,7 +120,7 @@ namespace Langums
             return false;
         }
 
-        return exitCode != STILL_ACTIVE;
+        return exitCode == STILL_ACTIVE;
     }
 
 }

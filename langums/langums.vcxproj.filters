@@ -850,6 +850,12 @@
     <ClCompile Include="..\src\debugger\debugger.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\debugger\debugger_thread.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\debugger_cli.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1105,6 +1111,15 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="..\src\debugger\memwatch.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_thread.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_cmds.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_cli.h">
       <Filter>debugger</Filter>
     </ClInclude>
   </ItemGroup>

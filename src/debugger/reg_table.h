@@ -22,9 +22,28 @@ namespace Langums
             m_RegisterTableAddress = (char*)m_BaseAddress + DEATH_TABLE_OFFSET;
         }
 
-        unsigned int Get(unsigned int playerId, unsigned int unitId)
+        unsigned int Get(unsigned int playerId, unsigned int unitId) const
         {
             return m_Registers[unitId][playerId];
+        }
+
+        bool Set(unsigned int playerId, unsigned int unitId, unsigned int value)
+        {
+            using namespace Process;
+
+            size_t bytesWritten;
+            if (!WriteMemory(m_GameHandle, &m_Registers[unitId][playerId], sizeof(unsigned int), &value, bytesWritten))
+            {
+                return false;
+            }
+
+            if (bytesWritten != sizeof(unsigned int))
+            {
+                return false;
+            }
+
+            m_Registers[unitId][playerId] = value;
+            return true;
         }
 
         bool Update()

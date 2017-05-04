@@ -125,22 +125,30 @@ namespace Langums
         
         void AddChild(const std::shared_ptr<IASTNode>& node)
         {
+            node->m_Parent = this;
             m_Children.push_back(node);
         }
 
         void RemoveChild(size_t index)
         {
+            m_Children[index]->m_Parent = nullptr;
             m_Children.erase(m_Children.begin() + index);
         }
 
         void RemoveChildren()
         {
+            for (auto& child : m_Children)
+            {
+                child->m_Parent = nullptr;
+            }
+
             m_Children.clear();
         }
 
         void SetChild(size_t index, const std::shared_ptr<IASTNode>& node)
         {
             m_Children[index] = node;
+            node->m_Parent = this;
         }
 
         bool HasChildren() const
@@ -168,7 +176,14 @@ namespace Langums
             return m_Children;
         }
 
+        IASTNode* GetParent() const
+        {
+            return m_Parent;
+        }
+
         private:
+        IASTNode* m_Parent = nullptr;
+
         ASTNodeType m_Type = ASTNodeType::Unit;
         std::vector<std::shared_ptr<IASTNode>> m_Children;
         std::shared_ptr<IASTNode> m_EmptyChild = nullptr;
