@@ -258,6 +258,7 @@ Notes:
 * Text arguments must be passed in `"` quotes e.g. `"This is some text"`.
 * Location arguments can be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
 * The special value `AnyLocation` can be passed to `Location` type arguments.
+* The special value `All` can be passed to `Quantity` and `QuantityExpression` arguments involving unity quantities e.g. `kill(Player1, TerranMarine, All)`.
 
 ### Unit functions
 

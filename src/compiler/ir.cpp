@@ -2707,6 +2707,27 @@ namespace Langums
 
     int IRCompiler::ParseQuantityArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex)
     {
+        if (node->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto string = (ASTStringLiteral*)node.get();
+            if (string->GetValue() == "All")
+            {
+                return 0;
+            }
+
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected quantity", argIndex, fnName), node.get());
+        }
+        else if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            if (identifier->GetName() == "All")
+            {
+                return 0;
+            }
+
+            throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected quantity", argIndex, fnName), node.get());
+        }
+
         if (node->GetType() != ASTNodeType::NumberLiteral)
         {
             throw IRCompilerException(SafePrintf("Invalid argument type for argument % in call to \"%\", expected quantity", argIndex, fnName), node.get());
@@ -3175,7 +3196,21 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral)
     {
         auto regId = 0;
-        if (node->GetType() == ASTNodeType::NumberLiteral)
+        
+        if (node->GetType() == ASTNodeType::Identifier)
+        {
+            auto identifier = (ASTIdentifier*)node.get();
+            if (identifier->GetName() == "All")
+            {
+                isLiteral = true;
+                regId = 0;
+            }
+            else
+            {
+                throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected quantity expression", argIndex, fnName), node.get());
+            }
+        }
+        else if (node->GetType() == ASTNodeType::NumberLiteral)
         {
             auto unitQuantity = (ASTNumberLiteral*)node.get();
             regId = unitQuantity->GetValue();
