@@ -136,19 +136,7 @@ namespace Langums
     void DebuggerCli::Reg()
     {
         auto instruction = m_Debugger->GetCurrentInstruction();
-        if (instruction == nullptr)
-        {
-            std::cout << "Unknown instruction.";
-        }
-        else
-        {
-            auto& regNames = instruction->GetDebugRegisterNames();
-            for (auto& pair : regNames)
-            {
-                auto value = m_Debugger->GetRegisterValue(pair.first);
-                std::cout << "% " << pair.second << " = " << value << std::endl;
-            }
-        }
+        
     }
 
     void DebuggerCli::Next()

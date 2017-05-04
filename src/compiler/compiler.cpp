@@ -7,6 +7,8 @@
 namespace Langums
 {
 
+    using namespace CHK;
+
     Compiler::Compiler(bool debug) : m_Debug(debug)
     {
         g_RegisterMap.clear();
@@ -114,66 +116,66 @@ namespace Langums
                     if (propType == UnitPropType::HitPoints)
                     {
                         slot->m_HitPoints = std::min(100u, value);
-                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::HitPointsIsValid;
+                        slot->m_ValidDataElements |= (uint16_t)CUWPDataElementFlag::HitPointsIsValid;
                     }
                     else if (propType == UnitPropType::ShieldPoints)
                     {
                         slot->m_ShieldPoints = std::min(100u, value);
-                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::ShieldPointsIsValid;
+                        slot->m_ValidDataElements |= (uint16_t)CUWPDataElementFlag::ShieldPointsIsValid;
                     }
                     else if (propType == UnitPropType::Energy)
                     {
                         slot->m_Energy = std::min(100u, value);
-                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::EnergyIsValid;
+                        slot->m_ValidDataElements |= (uint16_t)CUWPDataElementFlag::EnergyIsValid;
                     }
                     else if (propType == UnitPropType::ResourceAmount)
                     {
                         slot->m_ResourceAmount = value;
-                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::ResourceAmountIsValid;
+                        slot->m_ValidDataElements |= (uint16_t)CUWPDataElementFlag::ResourceAmountIsValid;
                     }
                     else if (propType == UnitPropType::HangarCount)
                     {
                         slot->m_HangarCount = value;
-                        slot->m_ValidDataElements |= (uint16_t)CHK::CUWPDataElementFlag::HangarCountIsValid;
+                        slot->m_ValidDataElements |= (uint16_t)CUWPDataElementFlag::HangarCountIsValid;
                     }
                     else if (propType == UnitPropType::Cloaked)
                     {
                         if (value)
                         {
-                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Cloaked;
-                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::CloakIsValid;
+                            slot->m_Flags |= (uint16_t)CUWPFlag::Cloaked;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CUWPSpecialPropertiesFlag::CloakIsValid;
                         }
                     }
                     else if (propType == UnitPropType::Burrowed)
                     {
                         if (value)
                         {
-                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Burrowed;
-                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::BurrowIsValid;
+                            slot->m_Flags |= (uint16_t)CUWPFlag::Burrowed;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CUWPSpecialPropertiesFlag::BurrowIsValid;
                         }
                     }
                     else if (propType == UnitPropType::InTransit)
                     {
                         if (value)
                         {
-                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::InTransit;
-                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::InTransitIsValid;
+                            slot->m_Flags |= (uint16_t)CUWPFlag::InTransit;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CUWPSpecialPropertiesFlag::InTransitIsValid;
                         }
                     }
                     else if (propType == UnitPropType::Hallucinated)
                     {
                         if (value)
                         {
-                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Hallucinated;
-                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::HallucinatedIsValid;
+                            slot->m_Flags |= (uint16_t)CUWPFlag::Hallucinated;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CUWPSpecialPropertiesFlag::HallucinatedIsValid;
                         }
                     }
                     else if (propType == UnitPropType::Invincible)
                     {
                         if (value)
                         {
-                            slot->m_Flags |= (uint16_t)CHK::CUWPFlag::Invincible;
-                            slot->m_ValidSpecialProperties |= (uint16_t)CHK::CUWPSpecialPropertiesFlag::InvincibleIsValid;
+                            slot->m_Flags |= (uint16_t)CUWPFlag::Invincible;
+                            slot->m_ValidSpecialProperties |= (uint16_t)CUWPSpecialPropertiesFlag::InvincibleIsValid;
                         }
                     }
 
@@ -206,7 +208,27 @@ namespace Langums
                     i++;
 
                     auto& condition = instructions[i];
-                    if (condition->GetType() == IRInstructionType::BringCond)
+                    if (condition->GetType() == IRInstructionType::RegCond)
+                    {
+                        auto reg = (IRRegCondInstruction*)condition.get();
+
+                        TriggerComparisonType comparison;
+                        switch (reg->GetComparison())
+                        {
+                        case ConditionComparison::Exactly:
+                            comparison = TriggerComparisonType::Exactly;
+                            break;
+                        case ConditionComparison::AtLeast:
+                            comparison = TriggerComparisonType::AtLeast;
+                            break;
+                        case ConditionComparison::AtMost:
+                            comparison = TriggerComparisonType::AtMost;
+                            break;
+                        }
+
+                        eventTrigger.Cond_TestReg(reg->GetRegisterId(), reg->GetQuantity(), comparison);
+                    }
+                    else if (condition->GetType() == IRInstructionType::BringCond)
                     {
                         auto bring = (IRBringCondInstruction*)condition.get();
                         auto locationId = GetLocationIdByName(bring->GetLocationName(), instruction.get());
@@ -430,6 +452,22 @@ namespace Langums
         }
 
         auto current = TriggerBuilder(nextAddress++, instructions[0].get(), m_TriggersOwner);
+        if (m_Debug)
+        {
+            auto address = nextAddress++;
+            auto address2 = nextAddress++;
+
+            current.Action_SetDeaths(0, 0, 0xB4DF00D, TriggerActionState::SetTo);
+            current.Action_JumpTo(address);
+            PushTriggers(current.GetTriggers());
+
+            current = TriggerBuilder(address, instructions[0].get(), m_TriggersOwner);
+            current.Cond_Deaths(0, TriggerComparisonType::Exactly, 0, 0);
+            current.Action_JumpTo(address2);
+            PushTriggers(current.GetTriggers());
+
+            current = TriggerBuilder(address2, instructions[0].get(), m_TriggersOwner);
+        }
 
         bool needsIndirectJumps = false;
 
@@ -475,7 +513,9 @@ namespace Langums
 
             if (instruction->GetType() == IRInstructionType::Push)
             {
+                current.AssociateInstruction(instruction.get());
                 auto push = (IRPushInstruction*)instruction.get();
+
                 if (push->IsValueLiteral())
                 {
                     auto stackTop = m_StackPointer--;
@@ -497,6 +537,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Pop)
             {
+                current.AssociateInstruction(instruction.get());
                 auto pop = (IRPopInstruction*)instruction.get();
                 if (pop->GetRegisterId() == -1)
                 {
@@ -528,6 +569,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetReg)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setReg = (IRSetRegInstruction*)instruction.get();
 
                 auto regId = setReg->GetRegisterId();
@@ -540,6 +582,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::IncReg)
             {
+                current.AssociateInstruction(instruction.get());
                 auto incReg = (IRIncRegInstruction*)instruction.get();
 
                 auto regId = incReg->GetRegisterId();
@@ -552,6 +595,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DecReg)
             {
+                current.AssociateInstruction(instruction.get());
                 auto decReg = (IRDecRegInstruction*)instruction.get();
                 auto regId = decReg->GetRegisterId();
                 if (regId >= Reg_StackTop)
@@ -563,6 +607,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::CopyReg)
             {
+                current.AssociateInstruction(instruction.get());
                 auto retAddress = nextAddress++;
 
                 auto copyReg = (IRCopyRegInstruction*)instruction.get();
@@ -590,6 +635,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Add)
             {
+                current.AssociateInstruction(instruction.get());
                 auto addAddress = nextAddress++;
                 current.Action_JumpTo(addAddress);
 
@@ -616,6 +662,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Sub)
             {
+                current.AssociateInstruction(instruction.get());
                 auto subAddress = nextAddress++;
                 current.Action_SetSwitch(Switch_ArithmeticUnderflow, TriggerActionState::ClearSwitch);
                 current.Action_JumpTo(subAddress);
@@ -652,6 +699,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Mul)
             {
+                current.AssociateInstruction(instruction.get());
                 auto left = ++m_StackPointer;
                 auto right = m_StackPointer + 1;
 
@@ -712,6 +760,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::MulConst)
             {
+                current.AssociateInstruction(instruction.get());
                 auto mulConst = (IRMulConstInstruction*)instruction.get();
                 auto value = mulConst->GetValue();
 
@@ -798,6 +847,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Rnd256)
             {
+                current.AssociateInstruction(instruction.get());
                 auto rndAddress = nextAddress++;
 
                 for (auto i = 0; i < 8; i++)
@@ -827,6 +877,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Jmp)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
 
@@ -844,6 +895,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfEq)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfEqInstruction*)instruction.get();
                 auto value = jmp->GetValue();
 
@@ -888,6 +940,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfNotEq)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfNotEqInstruction*)instruction.get();
 
                 auto value = jmp->GetValue();
@@ -933,6 +986,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfGrt)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfGrtInstruction*)instruction.get();
                 auto value = jmp->GetValue();
 
@@ -962,6 +1016,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfGrtOrEq)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfGrtOrEqualInstruction*)instruction.get();
                 auto value = jmp->GetValue();
 
@@ -993,6 +1048,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfLess)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfLessInstruction*)instruction.get();
                 auto value = jmp->GetValue();
 
@@ -1025,6 +1081,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfLessOrEq)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfLessInstruction*)instruction.get();
                 auto value = jmp->GetValue();
 
@@ -1054,6 +1111,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfSwNotSet)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfSwNotSetInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
                 if (targetIndex >= (int)instructions.size())
@@ -1073,6 +1131,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::JmpIfSwSet)
             {
+                current.AssociateInstruction(instruction.get());
                 auto jmp = (IRJmpIfSwSetInstruction*)instruction.get();
                 auto targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
                 if (targetIndex >= (int)instructions.size())
@@ -1091,11 +1150,13 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetSw)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setSwitch = (IRSetSwInstruction*)instruction.get();
                 current.Action_SetSwitch(setSwitch->GetSwitchId(), setSwitch->GetState() ? TriggerActionState::SetSwitch : TriggerActionState::ClearSwitch);
             }
             else if (instruction->GetType() == IRInstructionType::ChkPlayers)
             {
+                current.AssociateInstruction(instruction.get());
                 auto startAddress = nextAddress++;
 
                 for (auto i = 0u; i < 8; i++)
@@ -1123,6 +1184,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::IsPresent)
             {
+                current.AssociateInstruction(instruction.get());
                 auto isPresent = (IRIsPresentInstruction*)instruction.get();
                 auto& playerIds = isPresent->GetPlayerIds();
 
@@ -1152,6 +1214,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DisplayMsg)
             {
+                current.AssociateInstruction(instruction.get());
                 auto displayMsgReg = (IRDisplayMsgInstruction*)instruction.get();
                 auto playerId = displayMsgReg->GetPlayerId();
                 auto stringId = m_StringsChunk->InsertString(displayMsgReg->GetMessage());
@@ -1173,7 +1236,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -1194,11 +1257,13 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Wait)
             {
+                current.AssociateInstruction(instruction.get());
                 auto wait = (IRWaitInstruction*)instruction.get();
                 current.Action_Wait(wait->GetMilliseconds());
             }
             else if (instruction->GetType() == IRInstructionType::Spawn)
             {
+                current.AssociateInstruction(instruction.get());
                 auto spawn = (IRSpawnInstruction*)instruction.get();
                 auto unitSlot = spawn->GetPropsSlot();
 
@@ -1232,6 +1297,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Kill)
             {
+                current.AssociateInstruction(instruction.get());
                 auto kill = (IRKillInstruction*)instruction.get();
 
                 auto locationId = -1;
@@ -1269,6 +1335,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Remove)
             {
+                current.AssociateInstruction(instruction.get());
                 auto remove = (IRRemoveInstruction*)instruction.get();
 
                 auto locationId = -1;
@@ -1306,6 +1373,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Move)
             {
+                current.AssociateInstruction(instruction.get());
                 auto move = (IRMoveInstruction*)instruction.get();
 
                 auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName(), instruction.get());
@@ -1339,6 +1407,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Order)
             {
+                current.AssociateInstruction(instruction.get());
                 auto order = (IROrderInstruction*)instruction.get();
 
                 auto srcLocationId = GetLocationIdByName(order->GetSrcLocationName(), instruction.get());
@@ -1348,6 +1417,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Modify)
             {
+                current.AssociateInstruction(instruction.get());
                 auto modify = (IRModifyInstruction*)instruction.get();
 
                 auto locationId = GetLocationIdByName(modify->GetLocationName(), instruction.get());
@@ -1414,6 +1484,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Give)
             {
+                current.AssociateInstruction(instruction.get());
                 auto give = (IRGiveInstruction*)instruction.get();
 
                 auto locationId = GetLocationIdByName(give->GetLocationName(), instruction.get());
@@ -1450,6 +1521,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::MoveLoc)
             {
+                current.AssociateInstruction(instruction.get());
                 auto move = (IRMoveLocInstruction*)instruction.get();
 
                 auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName(), instruction.get());
@@ -1459,6 +1531,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::EndGame)
             {
+                current.AssociateInstruction(instruction.get());
                 auto endGame = (IREndGameInstruction*)instruction.get();
 
                 auto type = endGame->GetEndGameType();
@@ -1492,7 +1565,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -1525,6 +1598,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::CenterView)
             {
+                current.AssociateInstruction(instruction.get());
                 auto centerView = (IRCenterViewInstruction*)instruction.get();
 
                 auto locationId = GetLocationIdByName(centerView->GetLocationName(), instruction.get());
@@ -1547,7 +1621,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -1568,6 +1642,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Ping)
             {
+                current.AssociateInstruction(instruction.get());
                 auto ping = (IRPingInstruction*)instruction.get();
 
                 auto locationId = GetLocationIdByName(ping->GetLocationName(), instruction.get());
@@ -1590,7 +1665,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -1611,6 +1686,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetResource)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setResource = (IRSetResourceInstruction*)instruction.get();
                 auto playerId = setResource->GetPlayerId();
 
@@ -1654,6 +1730,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::IncResource)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setResource = (IRIncResourceInstruction*)instruction.get();
                 auto playerId = setResource->GetPlayerId();
 
@@ -1686,6 +1763,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DecResource)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setResource = (IRDecResourceInstruction*)instruction.get();
                 auto playerId = setResource->GetPlayerId();
 
@@ -1718,6 +1796,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetScore)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setScore = (IRSetScoreInstruction*)instruction.get();
                 auto playerId = setScore->GetPlayerId();
 
@@ -1761,6 +1840,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::IncScore)
             {
+                current.AssociateInstruction(instruction.get());
                 auto incScore = (IRIncScoreInstruction*)instruction.get();
                 auto playerId = incScore->GetPlayerId();
 
@@ -1793,6 +1873,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DecScore)
             {
+                current.AssociateInstruction(instruction.get());
                 auto incScore = (IRIncScoreInstruction*)instruction.get();
                 auto playerId = incScore->GetPlayerId();
 
@@ -1825,6 +1906,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetCountdown)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setCountdown = (IRSetCountdownInstruction*)instruction.get();
 
                 if (setCountdown->IsValueLiteral())
@@ -1867,6 +1949,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::AddCountdown)
             {
+                current.AssociateInstruction(instruction.get());
                 auto addCountdown = (IRAddCountdownInstruction*)instruction.get();
 
                 if (addCountdown->IsValueLiteral())
@@ -1898,6 +1981,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SubCountdown)
             {
+                current.AssociateInstruction(instruction.get());
                 auto subCountdown = (IRSubCountdownInstruction*)instruction.get();
 
                 if (subCountdown->IsValueLiteral())
@@ -1929,6 +2013,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::PauseCountdown)
             {
+                current.AssociateInstruction(instruction.get());
                 auto pauseCountdown = (IRPauseCountdownInstruction*)instruction.get();
 
                 if (pauseCountdown->IsUnpause())
@@ -1942,6 +2027,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::MuteUnitSpeech)
             {
+                current.AssociateInstruction(instruction.get());
                 auto muteUnit = (IRMuteUnitSpeechInstruction*)instruction.get();
 
                 if (muteUnit->IsUnmute())
@@ -1955,6 +2041,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetDeaths)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setDeaths = (IRSetDeathsInstruction*)instruction.get();
                 auto playerId = setDeaths->GetPlayerId();
 
@@ -1998,6 +2085,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::IncDeaths)
             {
+                current.AssociateInstruction(instruction.get());
                 auto incDeaths = (IRIncDeathsInstruction*)instruction.get();
                 auto playerId = incDeaths->GetPlayerId();
 
@@ -2030,6 +2118,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::DecDeaths)
             {
+                current.AssociateInstruction(instruction.get());
                 auto decDeaths = (IRDecDeathsInstruction*)instruction.get();
                 auto playerId = decDeaths->GetPlayerId();
 
@@ -2062,6 +2151,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Talk)
             {
+                current.AssociateInstruction(instruction.get());
                 auto talk = (IRTalkInstruction*)instruction.get();
 
                 auto playerId = talk->GetPlayerId();
@@ -2083,7 +2173,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -2104,6 +2194,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetDoodad)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setDoodad = (IRSetDoodadInstruction*)instruction.get();
                 auto locationId = GetLocationIdByName(setDoodad->GetLocationName(), instruction.get());
 
@@ -2111,6 +2202,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetInvincible)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setInvincible = (IRSetInvincibleInstruction*)instruction.get();
                 auto locationId = GetLocationIdByName(setInvincible->GetLocationName(), instruction.get());
 
@@ -2118,6 +2210,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::AIScript)
             {
+                current.AssociateInstruction(instruction.get());
                 auto aiScript = (IRAIScriptInstruction*)instruction.get();
 
                 auto playerId = aiScript->GetPlayerId();
@@ -2146,7 +2239,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -2167,6 +2260,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetAlly)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setAlly = (IRSetAllyInstruction*)instruction.get();
 
                 auto playerId = setAlly->GetPlayerId();
@@ -2189,7 +2283,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -2210,6 +2304,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::SetObj)
             {
+                current.AssociateInstruction(instruction.get());
                 auto setObj = (IRSetObjInstruction*)instruction.get();
                 auto stringId = m_StringsChunk->InsertString(setObj->GetText());
                 auto playerId = setObj->GetPlayerId();
@@ -2231,7 +2326,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -2252,6 +2347,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::PauseGame)
             {
+                current.AssociateInstruction(instruction.get());
                 auto pause = (IRPauseGameInstruction*)instruction.get();
                 if (pause->IsUnpause())
                 {
@@ -2264,6 +2360,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::NextScen)
             {
+                current.AssociateInstruction(instruction.get());
                 auto nextScenario = (IRNextScenInstruction*)instruction.get();
                 auto& name = nextScenario->GetName();
                 auto stringId = m_StringsChunk->InsertString(name);
@@ -2271,6 +2368,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Leaderboard)
             {
+                current.AssociateInstruction(instruction.get());
                 auto leaderboard = (IRLeaderboardInstruction*)instruction.get();
                 auto stringId = m_StringsChunk->InsertString(leaderboard->GetText());
                 auto quantity = leaderboard->GetGoalQuantity();
@@ -2340,11 +2438,13 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::LeaderboardCpu)
             {
+                current.AssociateInstruction(instruction.get());
                 auto leaderboardCpu = (IRLeaderboardCpuInstruction*)instruction.get();
                 current.Action_LeaderboardShowComputerPlayers(leaderboardCpu->GetState());
             }
             else if (instruction->GetType() == IRInstructionType::PlayWAV)
             {
+                current.AssociateInstruction(instruction.get());
                 auto playWav = (IRPlayWAVInstruction*)instruction.get();
                 auto name = SafePrintf("staredit\\wav\\%", playWav->GetWavName());
                 auto wavStringId = m_StringsChunk->InsertString(name);
@@ -2368,7 +2468,7 @@ namespace Langums
                     PushTriggers(waitTrigger.GetTriggers());
 
                     auto all = false;
-                    if (playerId == -1 || playerId == (int)CHK::PlayerId::AllPlayers)
+                    if (playerId == -1 || playerId == (int)PlayerId::AllPlayers)
                     {
                         all = true;
                         playerId = m_TriggersOwner - 1;
@@ -2389,6 +2489,7 @@ namespace Langums
             }
             else if (instruction->GetType() == IRInstructionType::Transmission)
             {
+                current.AssociateInstruction(instruction.get());
                 auto transmission = (IRTransmissionInstructrion*)instruction.get();
 
                 auto stringId = m_StringsChunk->InsertString(transmission->GetLocationName());
@@ -2397,12 +2498,13 @@ namespace Langums
                 auto locationId = GetLocationIdByName(transmission->GetLocationName(), instruction.get());
 
                 auto time = transmission->GetTime();
-                current.Action_Transmission(stringId, transmission->GetUnitId(), locationId, time, CHK::TriggerActionState::SetTo, wavStringId, transmission->GetWavTime());
+                current.Action_Transmission(stringId, transmission->GetUnitId(), locationId, time, TriggerActionState::SetTo, wavStringId, transmission->GetWavTime());
             }
             else if (instruction->GetType() == IRInstructionType::DebugBrk)
             {
                 if (m_Debug)
                 {
+                    current.AssociateInstruction(instruction.get());
                     auto address = nextAddress++;
 
                     current.Action_Wait(0);
@@ -2418,6 +2520,7 @@ namespace Langums
                 instruction->GetType() == IRInstructionType::Unit ||
                 instruction->GetType() == IRInstructionType::UnitProp ||
                 instruction->GetType() == IRInstructionType::Event ||
+                instruction->GetType() == IRInstructionType::RegCond ||
                 instruction->GetType() == IRInstructionType::BringCond ||
                 instruction->GetType() == IRInstructionType::AccumCond ||
                 instruction->GetType() == IRInstructionType::LeastResCond ||
@@ -2607,6 +2710,21 @@ namespace Langums
         }
 
         return index;
+    }
+
+    void Compiler::PushTriggers(const std::vector<Trigger>& triggers, IIRInstruction* jmpTarget)
+    {
+        m_Triggers.reserve(m_Triggers.size() + triggers.size());
+
+        for (auto& trigger : triggers)
+        {
+            m_Triggers.push_back(trigger);
+            if (jmpTarget != nullptr)
+            {
+                auto ptr = &m_Triggers.back();
+                m_JmpPatchups.insert(std::make_pair(ptr, jmpTarget));
+            }
+        }
     }
 
     unsigned int Compiler::GetLocationIdByName(const std::string& name, IIRInstruction* instruction)

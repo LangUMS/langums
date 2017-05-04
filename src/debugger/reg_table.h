@@ -6,9 +6,6 @@
 #define PLAYER_COUNT 12
 #define UNIT_COUNT 228 
 
-#define DATA_OFFSET 0x8B80B0
-#define UNIT_TABLE_OFFSET 0x8BB2E4
-#define DEATH_TABLE_OFFSET 0x8C3324
 
 namespace Langums
 {
@@ -16,10 +13,9 @@ namespace Langums
     class RegTable
     {
         public:
-        RegTable(Process::ProcessHandle gameHandle, void* baseAddress) :
-            m_GameHandle(gameHandle), m_BaseAddress(baseAddress)
+        RegTable(Process::ProcessHandle gameHandle, void* address) :
+            m_GameHandle(gameHandle), m_RegisterTableAddress(address)
         {
-            m_RegisterTableAddress = (char*)m_BaseAddress + DEATH_TABLE_OFFSET;
         }
 
         unsigned int Get(unsigned int playerId, unsigned int unitId) const

@@ -146,7 +146,6 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
     move(AllUnits, PlayerId, 100, BuySiegeTanks, BuySiegeTanksReturn);
   }
 
-
   bring(PlayerId, AtLeast, 1, AllUnits, BuySCV),
   accumulate(PlayerId, AtLeast, SCV_COST, Minerals) => {
     take_resource(PlayerId, Minerals, SCV_COST);
@@ -160,12 +159,12 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 
 // reward logic
 
-deaths(Player8, AtLeast, 4, ZergZergling) => {
-  remove_deaths(Player8, ZergZergling, 1);
+deaths(Player8, AtLeast, 2, ZergZergling) => {
+  remove_deaths(Player8, ZergZergling, 2);
   add_resource(AllPlayers, Minerals, 1);
 }
 
-deaths(Player8, AtLeast, 3, ZergHydralisk) => {
+deaths(Player8, AtLeast, 1, ZergHydralisk) => {
   remove_deaths(Player8, ZergHydralisk, 1);
   add_resource(AllPlayers, Minerals, 1);
 }
@@ -176,7 +175,7 @@ deaths(Player8, AtLeast, 1, ZergUltralisk) => {
 }
 
 deaths(Player8, AtLeast, 3, ZergInfestedTerran) => {
-  remove_deaths(Player8, ZergInfestedTerran, 2);
+  remove_deaths(Player8, ZergInfestedTerran, 3);
   add_resource(AllPlayers, Minerals, 1);
 }
 
@@ -254,12 +253,9 @@ fn setup_alliances() {
   set_alliance(Player7, Player8, Enemy);
   set_alliance(Player8, Player7, Enemy);
 
-  set_vision(Player1, Player7, true);
-  set_vision(Player2, Player7, true);
-  set_vision(Player3, Player7, true);
-  set_vision(Player4, Player7, true);
-  set_vision(Player5, Player7, true);
-  set_vision(Player6, Player7, true);
+  for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+    set_vision(PlayerId, Player7, true);
+  }
 }
 
 fn spawn_if_present<PlayerId, Unit, Loc>(PlayerId, Unit, Loc) {
@@ -270,12 +266,9 @@ fn spawn_if_present<PlayerId, Unit, Loc>(PlayerId, Unit, Loc) {
 }
 
 fn spawn_heroes() {
-  spawn_if_present(Player1, HeroJimRaynorMarine, MapCenter);
-  spawn_if_present(Player2, HeroJimRaynorMarine, MapCenter);
-  spawn_if_present(Player3, HeroJimRaynorMarine, MapCenter);
-  spawn_if_present(Player4, HeroJimRaynorMarine, MapCenter);
-  spawn_if_present(Player5, HeroJimRaynorMarine, MapCenter);
-  spawn_if_present(Player6, HeroJimRaynorMarine, MapCenter);
+  for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
+    spawn_if_present(PlayerId, HeroJimRaynorMarine, MapCenter);
+  }
   
   center_view(AllPlayers, MapCenter);
 }

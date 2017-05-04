@@ -21,7 +21,55 @@ namespace Langums
             throw IRCompilerException("Invalid AST node type, expected Unit", ast.get());
         }
 
+        m_Unit = ast.get();
+
         auto& unitNodes = ast->GetChildren();
+        m_EventCount = 0;
+        for (auto& node : unitNodes)
+        {
+            if (node->GetType() == ASTNodeType::EventDeclaration)
+            {
+                m_EventCount++;
+            }
+        }
+
+        m_DebugStackFrames.clear();
+
+        for (auto& node : unitNodes)
+        {
+            if (node->GetType() == ASTNodeType::VariableDeclaration)
+            {
+                auto variable = (ASTVariableDeclaration*)node.get();
+                auto& name = variable->GetName();
+
+                if (m_GlobalAliases.HasAlias(name, 0))
+                {
+                    throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name), node.get());
+                }
+
+                auto arraySize = variable->GetArraySize();
+                m_GlobalAliases.Allocate(name, arraySize);
+
+                auto& expression = variable->GetExpression();
+
+                if (expression != nullptr)
+                {
+                    if (expression->GetType() != ASTNodeType::NumberLiteral)
+                    {
+                        throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name), node.get());
+                    }
+
+                    auto number = (ASTNumberLiteral*)expression.get();
+                    auto value = number->GetValue();
+
+                    for (auto i = 0u; i < arraySize; i++)
+                    {
+                        auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
+                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
+                    }
+                }
+            }
+        }
 
         auto nextUnitSlot = 0;
 
@@ -97,7 +145,39 @@ namespace Langums
                     auto condition = (ASTEventCondition*)eventDeclaration->GetCondition(i).get();
                     auto& name = condition->GetName();
 
-                    if (name == "bring")
+                    if (name == "value")
+                    {
+                        unsigned int regId = 0;
+
+                        auto arg0 = condition->GetArgument(0);
+                        if (arg0->GetType() == ASTNodeType::Identifier)
+                        {
+                            auto identifier = (ASTIdentifier*)arg0.get();
+                            regId = m_GlobalAliases.GetAlias(identifier->GetName(), 0, identifier);
+                        }
+                        else if (arg0->GetType() == ASTNodeType::ArrayExpression)
+                        {
+                            auto arrayExpression = (ASTArrayExpression*)arg0.get();
+                            auto index = arrayExpression->GetIndex();
+                            if (index->GetType() != ASTNodeType::NumberLiteral)
+                            {
+                                throw IRCompilerException(SafePrintf("Invalid index for array expression in argument 0 in call to \"%\", expected number literal", name), condition);
+                            }
+
+                            auto arrayIndex = (ASTNumberLiteral*)index.get();
+                            regId = m_GlobalAliases.GetAlias(arrayExpression->GetIdentifier(), arrayIndex->GetValue(), arrayExpression);
+                        }
+                        else
+                        {
+                            throw IRCompilerException(SafePrintf("Invalid argument type for argument 0 in call to \"%\", expected global variable name", name), condition);
+                        }
+
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1); 
+                        auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
+
+                        EmitInstruction(new IRRegCondInstruction(regId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                    }
+                    else if (name == "bring")
                     {
                         auto playerId = ParsePlayerIdArgument(condition->GetArgument(0), name, 0);
                         auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
@@ -238,53 +318,90 @@ namespace Langums
             }
         }
 
-        for (auto& node : unitNodes)
+        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, m_GlobalAliases);
+        
+        auto main = m_FunctionDeclarations["main"];
+        EmitFunction(main, m_Instructions, m_GlobalAliases);
+        return true;
+    }
+
+    void IRCompiler::Optimize()
+    {
+        IROptimizer optimizer;
+        m_Instructions = optimizer.Process(std::move(m_Instructions));
+    }
+
+    std::string IRCompiler::DumpInstructions(bool lineNumbers) const
+    {
+        std::string dump;
+
+        for (auto i = 0u; i < m_Instructions.size(); i++)
         {
-            if (node->GetType() == ASTNodeType::VariableDeclaration)
+            if (lineNumbers)
             {
-                auto variable = (ASTVariableDeclaration*)node.get();
-                auto& name = variable->GetName();
+                dump += SafePrintf("%. ", i);
+            }
 
-                if (m_GlobalAliases.HasAlias(name, 0))
-                {
-                    throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name), node.get());
-                }
+            dump += m_Instructions[i]->DebugDump();
 
-                auto arraySize = variable->GetArraySize();
-                m_GlobalAliases.Allocate(name, arraySize);
-
-                auto& expression = variable->GetExpression();
-                
-                if (expression != nullptr)
-                {
-                    if (expression->GetType() != ASTNodeType::NumberLiteral)
-                    {
-                        throw IRCompilerException(SafePrintf("Trying to initialize global \"%\" with something other than a number literal", name), node.get());
-                    }
-
-                    auto number = (ASTNumberLiteral*)expression.get();
-                    auto value = number->GetValue();
-
-                    for (auto i = 0u; i < arraySize; i++)
-                    {
-                        auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
-                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
-                    }
-                }
+            if (i < m_Instructions.size() - 1)
+            {
+                dump += '\n';
             }
         }
 
-        nextSwitchId = (int)Switch_ReservedEnd;
-        m_EventCount = 0;
+        return dump;
+    }
 
-        m_PollEventsInstructions.clear();
-        EmitInstruction(new IRChkPlayers(), m_PollEventsInstructions, nullptr, m_GlobalAliases);
+    void IRCompiler::EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node, RegisterAliases& aliases)
+    {
+        instruction->SetASTNode(node);
 
-        for (auto& node : unitNodes)
+        auto stackFrames = m_DebugStackFrames;
+
+        for (auto& frame : stackFrames)
         {
-            if (node->GetType() == ASTNodeType::EventDeclaration)
+            for (auto& global : m_GlobalAliases.GetAliases())
             {
-                m_EventCount++;
+                auto regId = m_GlobalAliases.GetAlias(global.first, 0, node);
+                frame->m_Variables.push_back(std::make_pair(regId, global.first));
+            }
+        }
+
+        instruction->SetDebugStackFrames(stackFrames);
+
+        instructions.push_back(std::unique_ptr<IIRInstruction>(instruction));
+    }
+
+    void IRCompiler::EmitFunctionCall(ASTFunctionCall* fnCall, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool ignoreReturnValue)
+    {
+        auto stackFrame = std::make_shared<StackFrame>();
+        stackFrame->m_FunctionName = fnCall->GetFunctionName();
+        stackFrame->m_ASTNode = fnCall;
+        m_DebugStackFrames.push_back(stackFrame);
+
+        auto& fnName = fnCall->GetFunctionName();
+
+        if (fnName == "poll_events")
+        {
+            EmitInstruction(new IRChkPlayers(), instructions, nullptr, m_GlobalAliases);
+            EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions, fnCall, aliases);
+
+            auto nextSwitchId = (int)Switch_ReservedEnd;
+
+            auto& nodes = m_Unit->GetChildren();
+            for (auto& node : nodes)
+            {
+                if (node->GetType() != ASTNodeType::EventDeclaration)
+                {
+                    continue;
+                }
+
+                auto frame = std::make_shared<StackFrame>();
+                frame->m_ASTNode = fnCall;
+                frame->m_FunctionName = "EventHandler";
+                m_DebugStackFrames.push_back(frame);
+
                 auto eventDeclaration = (ASTEventDeclaration*)node.get();
                 auto body = eventDeclaration->GetBody();
                 if (body->GetType() != ASTNodeType::BlockStatement)
@@ -309,54 +426,19 @@ namespace Langums
                 }
 
                 auto switchId = nextSwitchId++;
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), m_PollEventsInstructions, node.get(), m_GlobalAliases);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), instructions, node.get(), m_GlobalAliases);
 
                 for (auto& instruction : bodyInstructions)
                 {
-                    m_PollEventsInstructions.push_back(std::move(instruction));
-                }
-
-                EmitInstruction(new IRSetSwInstruction(switchId, 0), m_PollEventsInstructions, node.get(), m_GlobalAliases);
-            }
-        }
-
-        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, m_GlobalAliases);
-
-        auto main = m_FunctionDeclarations["main"];
-        EmitFunction(main, m_Instructions, m_GlobalAliases);
-        return true;
-    }
-
-    void IRCompiler::Optimize()
-    {
-        IROptimizer optimizer;
-        m_Instructions = optimizer.Process(std::move(m_Instructions));
-    }
-
-    void IRCompiler::EmitFunctionCall(ASTFunctionCall* fnCall, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool ignoreReturnValue)
-    {
-        auto& fnName = fnCall->GetFunctionName();
-
-        if (fnName == "poll_events")
-        {
-            if (m_EventCount > 0)
-            {
-                if (m_PollEventsInstructions.size() == 0)
-                {
-                    throw IRCompilerException("poll_events() can only be called from a single place", fnCall);
-                }
-
-                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions, fnCall, aliases);
-
-                for (auto& instruction : m_PollEventsInstructions)
-                {
                     instructions.push_back(std::move(instruction));
                 }
-             
-                EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions, fnCall, aliases);
 
-                m_PollEventsInstructions.clear();
+                EmitInstruction(new IRSetSwInstruction(switchId, false), instructions, node.get(), m_GlobalAliases);
+
+                m_DebugStackFrames.pop_back();
             }
+            
+            EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions, fnCall, aliases);
         }
         else if (fnName == "clear_buffered_events")
         {
@@ -1266,6 +1348,8 @@ namespace Langums
         {
             throw IRCompilerException(SafePrintf("Invalid function name \"%\"", fnName), fnCall);
         }
+
+        m_DebugStackFrames.pop_back();
     }
 
     void IRCompiler::EmitBinaryExpression(ASTBinaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
@@ -2045,6 +2129,9 @@ namespace Langums
 
                 auto& name = variableDeclaration->GetName();
                 aliases.Allocate(name, variableDeclaration->GetArraySize());
+                auto regId = aliases.GetAlias(name, 0, variableDeclaration);
+                m_DebugStackFrames.back()->m_Variables.push_back(std::make_pair(regId, name));
+
                 localVariables.push_back(name);
             }
         }
@@ -2505,6 +2592,10 @@ namespace Langums
 
     unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
     {
+        auto frame = std::make_shared<StackFrame>();
+        frame->m_ASTNode = fn;
+        frame->m_FunctionName = fn->GetName();
+
         auto body = fn->GetChild(0);
         if (body->GetType() != ASTNodeType::BlockStatement)
         {
@@ -2523,8 +2614,13 @@ namespace Langums
             auto& argName = args[i];
             aliases.Allocate(argName, 1);
             auto regId = aliases.GetAlias(argName, 0, fn);
+
+            frame->m_Variables.push_back(std::make_pair(regId, argName));
+
             EmitInstruction(new IRPopInstruction(regId), instructions, fn, aliases);
         }
+
+        m_DebugStackFrames.push_back(frame);
 
         auto instructionsStart = instructions.size();
         EmitBlockStatement(blockStatement, instructions, aliases);
@@ -2564,6 +2660,8 @@ namespace Langums
         {
             //EmitInstruction(new IRPushInstruction(0, true), instructions);
         }
+
+        m_DebugStackFrames.pop_back();
 
         return startIndex;
     }

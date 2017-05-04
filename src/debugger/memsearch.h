@@ -7,7 +7,7 @@ namespace Langums
 {
     using namespace Process;
 
-    void* FindAddressOf32BitValue(ProcessHandle handle, unsigned int value, void* startAddress)
+    inline void* FindAddressOf32BitValue(ProcessHandle handle, unsigned int value, void* startAddress)
     {
         auto address = (unsigned int*)startAddress;
         std::vector<unsigned int> chunk;
@@ -30,7 +30,7 @@ namespace Langums
         return nullptr;
     }
 
-    void* FindAddressOfString(ProcessHandle handle, const std::string& s, void* startAddress)
+    inline void* FindAddressOfString(ProcessHandle handle, const std::string& s, void* startAddress)
     {
         auto address = (char*)startAddress;
         auto len = s.length();

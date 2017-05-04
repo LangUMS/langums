@@ -147,7 +147,7 @@ namespace Langums
             }
             else if (PeekKeyword("for"))
             {
-                unit->AddChild(EventTemplateBlock());
+                unit->AddChild(UnitScopeRepeatTemplate());
             }
             else
             {
@@ -691,6 +691,13 @@ namespace Langums
 
         Whitespace();
 
+        if (PeekKeyword("for"))
+        {
+            statement = RepeatTemplate();
+            Whitespace();
+            return statement;
+        }
+
         if (PeekKeyword("var"))
         {
             statement = VariableDeclaration();
@@ -1043,8 +1050,8 @@ namespace Langums
 
         return std::unique_ptr<IASTNode>(eventDeclaration);
     }
-
-    std::unique_ptr<IASTNode> Parser::EventTemplateBlock()
+    
+    std::unique_ptr<IASTNode> Parser::UnitScopeRepeatTemplate()
     {
         Keyword("for");
         Whitespace();
@@ -1063,21 +1070,46 @@ namespace Langums
         Symbol('(');
         Whitespace();
 
-        std::vector<std::string> list;
-        list.push_back(Identifier());
-        Whitespace();
+        auto repeatTemplate = new ASTRepeatTemplate(iteratorName, m_CurrentChar);
 
         auto c = Peek();
+        if (std::isdigit(c))
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+        }
+        else if (c == '"')
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+        }
+        else
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+        }
+
+        c = Peek();
         while (c == ',')
         {
             Next();
             Whitespace();
-            list.push_back(Identifier());
+
+            c = Peek();
+
+            if (std::isdigit(c))
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+            }
+            else if (c == '"')
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+            }
+            else
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+            }
+
             Whitespace();
             c = Peek();
         }
-
-        auto eventTemplateBlock = new ASTEventTemplateBlock(iteratorName, list, m_CurrentChar);
 
         Symbol(')');
         Whitespace();
@@ -1085,17 +1117,90 @@ namespace Langums
         Symbol('{');
         Whitespace();
 
-        c = Peek();
-        while (c != '}')
+        while (Peek() != '}')
         {
-            eventTemplateBlock->AddChild(EventDeclaration());
+            repeatTemplate->AddChild(EventDeclaration());
             Whitespace();
-            c = Peek();
+
+            if (Peek() == '}')
+            {
+                break;
+            }
         }
 
         Symbol('}');
         Whitespace();
-        return std::unique_ptr<IASTNode>(eventTemplateBlock);
+
+        return std::unique_ptr<IASTNode>(repeatTemplate);
+    }
+
+    std::unique_ptr<IASTNode> Parser::RepeatTemplate()
+    {
+        Keyword("for");
+        Whitespace();
+        Symbol('<');
+        Whitespace();
+
+        auto iteratorName = Identifier();
+
+        Whitespace();
+        Symbol('>');
+        Whitespace();
+
+        Keyword("in");
+        Whitespace();
+
+        Symbol('(');
+        Whitespace();
+
+        auto repeatTemplate = new ASTRepeatTemplate(iteratorName, m_CurrentChar);
+
+        auto c = Peek();
+        if (std::isdigit(c))
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+        }
+        else if (c == '"')
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+        }
+        else
+        {
+            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+        }
+
+        c = Peek();
+        while (c == ',')
+        {
+            Next();
+            Whitespace();
+
+            c = Peek();
+
+            if (std::isdigit(c))
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+            }
+            else if (c == '"')
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+            }
+            else
+            {
+                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+            }
+
+            Whitespace();
+            c = Peek();
+        }
+
+        Symbol(')');
+        Whitespace();
+
+        repeatTemplate->AddChild(BlockStatement());
+        
+        Whitespace();
+        return std::unique_ptr<IASTNode>(repeatTemplate);
     }
 
     std::unique_ptr<IASTNode> Parser::UnitProperties()

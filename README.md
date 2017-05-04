@@ -16,7 +16,7 @@ Table of Contents
   * [Spawning units with properties](#spawning-units-with-properties)
   * [Preprocessor](#preprocessor)
   * [Template functions](#template-functions)
-  * [Template event declarations](#template-event-declarations)
+  * [Repeat templates](#repeat-templates)
   * [Examples](#examples)
   * [FAQ](#faq)
   * [Limitations](#limitations)
@@ -75,6 +75,7 @@ There is [a wonderful extension for VS Code](https://marketplace.visualstudio.co
 - `if` and `if/else` statements
 - `while` loop
 - Event handlers
+- Metaprogramming facilities
 
 ## Language basics
 
@@ -377,6 +378,12 @@ Notes:
 | lowest_score([Player](#player), [ScoreType](#scoretype))                               | When a player has the lowest score.             |
 | highest_score([Player](#player), [ScoreType](#scoretype))                              | When a player has the highest score.            |
 
+### Misc conditions
+
+| Event prototype                                                                        | Description                                     |
+|----------------------------------------------------------------------------------------|-------------------------------------------------|
+| value(VariableName, [Comparison](#comparison), Quantity)                               | When a global variable has a specific value.    |
+
 ## Spawning units with properties
 
 Due to the way map data is structured spawning units with different properties like health and energy is not straightforward. LangUMS offers a flexible way to deal with this issue. Using the `unit` construct you can add up to 64 different unit declarations in your code. A unit declaration that sets the unit's health to 50% is shown below.
@@ -489,9 +496,9 @@ fn spawn_units(qty) {
 
 The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type can and should be passed as a template argument.
 
-## Template event declarations
+## Repeat templates
 
-Sometimes you wish to create an event handler for all players but still know exactly which player triggered it. You can of course copy & paste the same event several times and change the player in each one but that would be pretty ugly and unmaintainable. For example say you have a shop in your map and want every human player to be able to use it. You could do it like this:
+Sometimes you wish to create an event handler for all players but still know exactly which player triggered it or you wish to run the same code multiple times but with slightly different parameters. For example say you have a shop in your map and want every human player to be able to use it. You could do it like this:
 
 ```c
 accumulate(Player1, AtLeast, 10, Minerals),
@@ -518,7 +525,7 @@ bring(Player3, AtLeast, 1, AllUnits, BuyMarines) => {
 ... etc for all human players in your map ...
 ```
 
-Or you could use a template event declarations like the example below.
+Or you could use a repeat template like in the example below.
 
 ```c
 for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
@@ -531,8 +538,16 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 }
 ```
 
-The result is the same but it helps to not repeat the same code. You can use almost anything as an event template list like players, locations, units, resource types, etc.
-At the moment nested template event declarations are not supported but it's a planned feature for the near future.
+The result is the same but it helps keep your code cleaner and more maintainable. You can use almost anything as a template list like players, locations, units, resource types, strings, etc.
+Here is another example of a repeat template but this time used from inside a function:
+
+```c
+fn spawn_bonus_items() {
+  for <Loc> in (BonusLocation1, BonusLocation2, BonusLocation3) {
+    spawn(PowerupKhalisCrystal, Player8, 1, Loc);    
+  }
+}
+```
 
 ## Examples
 
@@ -627,7 +642,7 @@ No, but thanks for asking.
 
 ## Limitations
 
-- The player selected with `--triggers-owner` (player 8 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
+- The player selected with `--triggers-owner` (player 1 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
 - Multiplication only works with numbers up to the value set by `--copy-batch-size` (8192 by default).
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 8192 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 - Division is implemented suboptimally at the moment and can take many cycles to complete. This will change soon.

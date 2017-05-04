@@ -1,7 +1,10 @@
 #include <iostream>
+#include <fstream>
 #include <experimental/filesystem>
 
 #include "log.h"
+#include "log_interface_stdout.h"
+
 #include "cxxopts.h"
 #include "stringutil.h"
 #include "libchk/chk.h"
@@ -17,11 +20,13 @@
 #include "mpq_wrapper.h"
 #include "debugger/debugger.h"
 #include "debugger/debugger_cli.h"
+#include "debugger/debugger_vscode.h"
+#include "debugger/log_interface_vscode.h"
 
 #undef min
 #undef max
 
-#define VERSION "v0.1.0"
+#define VERSION "v0.1.3"
 
 using namespace Langums;
 using namespace CHK;
@@ -50,13 +55,28 @@ int main(int argc, char* argv[])
         ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
         ("debug", "Attaches the debugger after compiling the map. (experimental!)", cxxopts::value<bool>())
         ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
+        ("debug-vscode", "Internal. Used by the VS Code debugger extension to communicate with LangUMS.", cxxopts::value<bool>())
         ;
     opts.parse(argc, argv);
+
+    std::unique_ptr<DebuggerVSCode> vsCodeDebugger;
+
+    if (opts.count("debug-vscode") > 0)
+    {
+        vsCodeDebugger = std::make_unique<DebuggerVSCode>();
+        auto logInterface = new LogInterfaceVSCode();
+        Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(logInterface));
+        vsCodeDebugger->SetLogInterface(logInterface);
+    }
+    else
+    {
+        Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()));
+    }
 
     if (opts.count("help") > 0)
     {
         LOG_F("%", opts.help());
-        Log::Log::Instance()->Destroy();
+        Log::Instance()->Destroy();
         return 0;
     }
 
@@ -418,7 +438,9 @@ int main(int argc, char* argv[])
 
     LOG_F("\nEmitted % instructions.\n", instructions.size());
 
-    Compiler compiler(opts.count("debug") > 0);
+    auto debug = opts.count("debug") > 0 || opts.count("debug-vscode") > 0;
+
+    Compiler compiler(debug);
 
     auto triggersOwner = 8; // player 8 owns the triggers by default
 
@@ -589,17 +611,17 @@ int main(int argc, char* argv[])
         LOG_F("Written to: %", dstPath.generic_u8string());
     }
 
+    std::string processName = DEFAULT_PROCESS_NAME;
+    if (opts.count("debug-process") > 0)
+    {
+        processName = opts["debug-process"].as<std::string>();
+    }
+
     if (opts.count("debug") > 0)
     {
         LOG_F("\nStarting a debug session.");
 
-        std::string processName = DEFAULT_PROCESS_NAME;
-        if (opts.count("debug-process") > 0)
-        {
-            processName = opts["debug-process"].as<std::string>();
-        }
-
-        Debugger debugger(instructions, source);
+        Debugger debugger(instructions, source, ast);
         if (!debugger.Attach(processName))
         {
             LOG_F("\n(!) Failed to attach to process.");
@@ -607,7 +629,22 @@ int main(int argc, char* argv[])
         }
 
         DebuggerCli cli(&debugger);
-        return cli.Repl();
+        cli.Repl();
+        return 0;
+    }
+
+    if (opts.count("debug-vscode") > 0)
+    { 
+        Debugger debugger(instructions, source, ast);
+        if (!debugger.Attach(processName))
+        {
+            LOG_F("\n(!) Failed to attach to process.");
+            return 1;
+        }
+
+        vsCodeDebugger->SetDebugger(&debugger);
+        vsCodeDebugger->Run();
+        return 0;
     }
 
     LOG_DEINIT();

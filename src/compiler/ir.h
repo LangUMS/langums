@@ -15,130 +15,13 @@
 
 #include "ir_constants.h"
 #include "ir_instructions.h"
+#include "ir_exceptions.h"
+#include "reg_aliases.h"
 
 namespace Langums
 {
 
     using namespace CHK;
-
-    class IRCompilerException : public std::exception
-    {
-        public:
-        IRCompilerException(const char* error, IASTNode* node) : m_Node(node), std::exception(error) {}
-        IRCompilerException(const std::string& error, IASTNode* node) : m_Node(node), std::exception(error.c_str()) {}
-
-        IASTNode* GetASTNode() const
-        {
-            return m_Node;
-        }
-
-        private:
-        IASTNode* m_Node;
-    };
-
-    class RegisterAliases
-    {
-        public:
-        RegisterAliases() {}
-
-        bool HasAlias(const std::string& name, unsigned int index) const
-        {
-            auto it = m_Aliases.find(name);
-            if (it == m_Aliases.end())
-            {
-                return false;
-            }
-
-            auto& registers = (*it).second;
-            if (index >= registers.size())
-            {
-                if (registers.size() == 1)
-                {
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        int GetAlias(const std::string& name, unsigned int index, IASTNode* node) const
-        {
-            auto it = m_Aliases.find(name);
-            if (it == m_Aliases.end())
-            {
-                throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), node);
-            }
-
-            auto& registers = (*it).second;
-            if (index >= registers.size())
-            {
-                if (registers.size() == 1)
-                {
-                    throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), node);
-                }
-                else
-                {
-                    throw IRCompilerException(SafePrintf("Array access out of bounds for \"%[%]\"", name, index), node);
-                }
-            }
-
-            return Reg_ReservedEnd + registers[index];
-        }
-
-        void Allocate(const std::string& name, unsigned int count)
-        {
-            auto& registers = m_Aliases[name];
-
-            for (auto& id : registers)
-            {
-                m_FreeIds.push_back(id);
-            }
-
-            registers.clear();
-
-            for (auto i = 0u; i < count; i++)
-            {
-                registers.push_back(GetNextFreeId());
-            }
-        }
-
-        void Deallocate(const std::string& name)
-        {
-            auto& registers = m_Aliases[name];
-            for (auto id : registers)
-            {
-                m_FreeIds.push_back(id);
-            }
-
-            m_Aliases.erase(name);
-        }
-
-        const std::unordered_map<std::string, std::vector<unsigned int>>& GetAliases() const
-        {
-            return m_Aliases;
-        }
-
-        private:
-        unsigned int GetNextFreeId()
-        {
-            if (m_FreeIds.size() > 0)
-            {
-                auto next = m_FreeIds.back();
-                m_FreeIds.pop_back();
-                return next;
-            }
-
-            return m_NextFreeId++;
-        }
-
-        std::unordered_map<std::string, std::vector<unsigned int>> m_Aliases;
-        std::vector<unsigned int> m_FreeIds;
-        unsigned int m_NextFreeId = 0;
-    };
 
     class IRCompiler
     {
@@ -151,27 +34,7 @@ namespace Langums
             return m_Instructions;
         }
 
-        std::string DumpInstructions(bool lineNumbers) const
-        {
-            std::string dump;
-
-            for (auto i = 0u; i < m_Instructions.size(); i++)
-            {
-                if (lineNumbers)
-                {
-                    dump += SafePrintf("%. ", i);
-                }
-
-                dump += m_Instructions[i]->DebugDump();
-
-                if (i < m_Instructions.size() - 1)
-                {
-                    dump += '\n';
-                }
-            }
-
-            return dump;
-        }
+        std::string DumpInstructions(bool lineNumbers) const;
 
         const std::set<std::string>& GetWavFilenames() const
         {
@@ -179,20 +42,7 @@ namespace Langums
         }
 
         private:
-        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node, RegisterAliases& aliases)
-        {
-            instruction->SetASTNode(node);
-
-            std::unordered_map<unsigned int, std::string> registerNames;
-            for (auto& alias : aliases.GetAliases())
-            {
-                registerNames.insert(std::make_pair((unsigned int)Reg_ReservedEnd + alias.second.back(), alias.first));
-            }
-
-            instruction->SetDebugRegisterNames(registerNames);
-
-            instructions.push_back(std::unique_ptr<IIRInstruction>(instruction));
-        }
+        void EmitInstruction(IIRInstruction* instruction, std::vector<std::unique_ptr<IIRInstruction>>& instructions, IASTNode* node, RegisterAliases& aliases);
 
         void EmitFunctionCall(ASTFunctionCall* fnCall, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool ignoreReturnValue);
         void EmitBinaryExpression(ASTBinaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
@@ -214,13 +64,13 @@ namespace Langums
         uint8_t ParseUnitTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         uint32_t ParseAIScriptArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         std::string ParseLocationArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
-        CHK::ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
-        CHK::ScoreType ParseScoreTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        ResourceType ParseResourceTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        ScoreType ParseScoreTypeArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         LeaderboardType ParseLeaderboardType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         AllianceStatus ParseAllianceStatusArgument(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         EndGameType ParseEndGameCondition(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
-        CHK::TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
-        CHK::TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        TriggerActionState ParseOrderType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
+        TriggerActionState ParseToggleState(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         ModifyType ParseModifyType(const std::shared_ptr<IASTNode>& node, const std::string& fnName, unsigned int argIndex);
         UnitPropType ParseUnitPropType(const std::string& propName, IASTNode* node);
 
@@ -230,15 +80,15 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>> m_Instructions;
         std::unordered_map<std::string, ASTFunctionDeclaration*> m_FunctionDeclarations;
         std::unordered_map<ASTFunctionDeclaration*, unsigned int> m_FunctionIndices;
-
         std::unordered_map<std::string, unsigned int> m_UnitProperties;
 
         RegisterAliases m_GlobalAliases;
 
-        std::vector<std::unique_ptr<IIRInstruction>> m_PollEventsInstructions;
-
         unsigned int m_EventCount = 0;
         std::set<std::string> m_WavFilenames;
+
+        std::vector<std::shared_ptr<StackFrame>> m_DebugStackFrames;
+        IASTNode* m_Unit;
     };
 
 }

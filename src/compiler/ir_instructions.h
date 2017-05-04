@@ -79,6 +79,7 @@ namespace Langums
         Transmission,   // combined display msg, unit portrait and play wav
 
         Event,          // conditions
+        RegCond,        // Register value condition
         BringCond,      // Bring trigger condition
         AccumCond,      // Accumulate trigger condition
         LeastResCond,   // Player has the least quantity of a resource 
@@ -132,14 +133,14 @@ namespace Langums
             m_Id = id;
         }
 
-        void SetDebugRegisterNames(const std::unordered_map<unsigned int, std::string>& names)
+        void SetDebugStackFrames(const std::vector<std::shared_ptr<StackFrame>>& frames)
         {
-            m_DebugRegisterNames = names;
+            m_DebugStackFrames = frames;
         }
 
-        const std::unordered_map<unsigned int, std::string>& GetDebugRegisterNames() const
+        const std::vector<std::shared_ptr<StackFrame>>& GetDebugStackFrames() const
         {
-            return m_DebugRegisterNames;
+            return m_DebugStackFrames;
         }
 
         IRInstructionType GetType () const
@@ -153,7 +154,8 @@ namespace Langums
         IASTNode* m_ASTNode = nullptr;
         IRInstructionType m_Type = IRInstructionType::Nop;
         unsigned int m_Id = 0;
-        std::unordered_map<unsigned int, std::string> m_DebugRegisterNames;
+
+        std::vector<std::shared_ptr<StackFrame>> m_DebugStackFrames;
     };
 
     class IRNopInstruction : public IIRInstruction
@@ -467,7 +469,7 @@ namespace Langums
                 return SafePrintf ("MSG \"%\" [ALL]", msg);
             }
 
-            return SafePrintf ("MSG \"%\" %", msg, m_PlayerId);
+            return SafePrintf ("MSG \"%\" %", msg, CHK::PlayersByName[m_PlayerId]);
         }
 
         private:
@@ -2717,6 +2719,39 @@ namespace Langums
         private:
         unsigned int m_ConditionsCount;
         unsigned int m_SwitchId;
+    };
+
+    class IRRegCondInstruction : public IIRInstruction
+    {
+        public:
+        IRRegCondInstruction (unsigned int regId, ConditionComparison comparison, uint32_t quantity) :
+            m_RegisterId (regId), m_Comparison (comparison), m_Quantity (quantity), IIRInstruction (IRInstructionType::RegCond)
+        {}
+
+        std::string DebugDump () const
+        {
+            return SafePrintf ("REG % % %", RegisterIdToString(m_RegisterId), (int)m_Comparison, (int)m_Quantity);
+        }
+
+        unsigned int GetRegisterId() const
+        {
+            return m_RegisterId;
+        }
+
+        ConditionComparison GetComparison () const
+        {
+            return m_Comparison;
+        }
+
+        uint32_t GetQuantity () const
+        {
+            return m_Quantity;
+        }
+
+        private:
+        unsigned int m_RegisterId;
+        ConditionComparison m_Comparison;
+        uint32_t m_Quantity;
     };
 
     class IRBringCondInstruction : public IIRInstruction

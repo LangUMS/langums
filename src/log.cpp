@@ -1,21 +1,12 @@
-#include <vector>
-#include <iostream>
-
 #include "log.h"
 
-namespace Log
+namespace Langums
 {
     
     std::unique_ptr<Log> Log::m_Instance = nullptr;
 
     Log::Log()
     {
-        m_LogFile = std::make_unique<std::ofstream>(Langums::SafePrintf("langums_log.txt"));
-        if (!m_LogFile->is_open())
-        {
-            m_LogFile = nullptr;
-        }
-
         m_ShutdownThread = 0;
         m_LogThread = std::make_unique<std::thread>(std::bind(&Log::LogThread, this));
     }
@@ -62,15 +53,9 @@ namespace Log
 
             for (auto& message : m_Messages)
             {
-                if (!m_Quiet)
+                for (auto& interface : m_Interfaces)
                 {
-                    std::cout << message << std::endl;
-                }
-
-                if (m_LogFile != nullptr)
-                {
-                    (*m_LogFile) << message << std::endl;
-                    m_LogFile->flush();
+                    interface->LogMessage(message);
                 }
             }
 

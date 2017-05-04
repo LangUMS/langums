@@ -1,24 +1,32 @@
 #ifndef __LOG_H
 #define __LOG_H
 
-#define LOG(s) ::Log::Log::Instance()->LogMessage(s)
-#define LOG_F(s, ...) ::Log::Log::Instance()->LogMessage(SafePrintf(s, __VA_ARGS__))
-#define LOG_DEINIT() ::Log::Log::Instance()->Destroy()
-#define LOG_EXITERR(s, ...) LOG_F(s, __VA_ARGS__); ::Log::Log::Instance()->Destroy()
+#define LOG(s) ::Langums::Log::Instance()->LogMessage(s)
+#define LOG_F(s, ...) ::Langums::Log::Instance()->LogMessage(SafePrintf(s, __VA_ARGS__))
+#define LOG_DEINIT() ::Langums::Log::Instance()->Destroy()
+#define LOG_EXITERR(s, ...) LOG_F(s, __VA_ARGS__); ::Langums::Log::Instance()->Destroy()
 
 #include <mutex>
 #include <thread>
 #include <atomic>
 #include <condition_variable>
 #include <string>
-#include <sstream>
-#include <fstream>
 #include <vector>
+#include <memory>
 
 #include "stringutil.h"
 
-namespace Log
+namespace Langums
 {
+
+    class ILogInterface
+    {
+        public:
+        virtual ~ILogInterface()
+        {}
+
+        virtual void LogMessage(const std::string& message) = 0;
+    };
 
     class Log
     {
@@ -43,12 +51,12 @@ namespace Log
 
         void Destroy();
 
-        void LogMessage(const std::string& message);
-
-        void SetQuiet(bool quiet)
+        void AddInterface(std::unique_ptr<ILogInterface> interface)
         {
-            m_Quiet = quiet;
+            m_Interfaces.push_back(std::move(interface));
         }
+
+        void LogMessage(const std::string& message);
 
         private:
         void LogThread();
@@ -60,8 +68,7 @@ namespace Log
         static std::unique_ptr<Log> m_Instance;
         std::vector<std::string> m_Messages;
 
-        std::unique_ptr<std::ofstream> m_LogFile;
-        bool m_Quiet = false; // if true will print only to the log file but not to stdout
+        std::vector<std::unique_ptr<ILogInterface>> m_Interfaces;
     };
 
 }

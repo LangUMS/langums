@@ -46,7 +46,7 @@ namespace Langums
         VariableDeclaration,
         EventCondition,
         EventDeclaration,
-        EventTemplateBlock,
+        RepeatTemplate,
         UnitProperties,
         UnitProperty
     };
@@ -91,8 +91,8 @@ namespace Langums
                 return "EventCondition";
             case ASTNodeType::EventDeclaration:
                 return "EventDeclaration";
-            case ASTNodeType::EventTemplateBlock:
-                return "EventTemplateBlock";
+            case ASTNodeType::RepeatTemplate:
+                return "RepeatTemplate";
             case ASTNodeType::UnitProperties:
                 return "UnitProperties";
             case ASTNodeType::UnitProperty:
@@ -137,11 +137,6 @@ namespace Langums
 
         void RemoveChildren()
         {
-            for (auto& child : m_Children)
-            {
-                child->m_Parent = nullptr;
-            }
-
             m_Children.clear();
         }
 
@@ -539,11 +534,11 @@ namespace Langums
         }
     };
 
-    class ASTEventTemplateBlock : public IASTNode
+    class ASTRepeatTemplate : public IASTNode
     {
         public:
-        ASTEventTemplateBlock(const std::string& iteratorName, const std::vector<std::string>& list, unsigned int charIndex) :
-            m_IteratorName(iteratorName), m_List(list), IASTNode(charIndex, ASTNodeType::EventTemplateBlock)
+        ASTRepeatTemplate(const std::string& iteratorName, unsigned int charIndex) :
+            m_IteratorName(iteratorName), IASTNode(charIndex, ASTNodeType::RepeatTemplate)
         {}
 
         const std::string& GetIteratorName() const
@@ -551,14 +546,19 @@ namespace Langums
             return m_IteratorName;
         }
 
-        const std::vector<std::string>& GetList() const
+        const std::vector<std::shared_ptr<IASTNode>>& GetList() const
         {
             return m_List;
         }
 
+        void AddListItem(const std::shared_ptr<IASTNode>& node)
+        {
+            m_List.push_back(node);
+        }
+
         private:
         std::string m_IteratorName;
-        std::vector<std::string> m_List;
+        std::vector<std::shared_ptr<IASTNode>> m_List;
     };
 
     class ASTUnitProperties : public IASTNode

@@ -53,6 +53,9 @@
     <Filter Include="debugger">
       <UniqueIdentifier>{4e7cc1d2-ef87-4861-a59e-ca811b3e06a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="debugger\rapidjson">
+      <UniqueIdentifier>{e1f6a4fd-c19a-44fa-ac68-884a2136b0da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -856,6 +859,12 @@
     <ClCompile Include="..\src\debugger\debugger_cli.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\debugger\debugger_vscode.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\log_interface_vscode.cpp">
+      <Filter>debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1120,6 +1129,84 @@
       <Filter>debugger</Filter>
     </ClInclude>
     <ClInclude Include="..\src\debugger\debugger_cli.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_vscode.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\reg_aliases.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\ir_exceptions.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log_interface_stdout.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\log_interface_vscode.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\allocators.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\document.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\encodedstream.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\encodings.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\filereadstream.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\filewritestream.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\fwd.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\istreamwrapper.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\memorybuffer.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\memorystream.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\ostreamwrapper.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\pointer.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\prettywriter.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\rapidjson.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\reader.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\schema.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\stream.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\stringbuffer.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\rapidjson\writer.h">
+      <Filter>debugger\rapidjson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_protocol.h">
+      <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\debugger_util.h">
       <Filter>debugger</Filter>
     </ClInclude>
   </ItemGroup>

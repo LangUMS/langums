@@ -29,6 +29,8 @@ namespace Langums
         IIRInstruction* m_Instruction = nullptr;
     };
 
+    using namespace CHK;
+
     class Compiler
     {
         public:
@@ -49,40 +51,26 @@ namespace Langums
             g_RegisterMap = defs;
         }
 
-        bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, CHK::File& chk, bool preserveTriggers);
+        bool Compile(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, File& chk, bool preserveTriggers);
 
         private:
-        void Cond_Always(CHK::TriggerCondition& retCondition);
+        void Cond_Always(TriggerCondition& retCondition);
 
         unsigned int CodeGen_CopyReg(unsigned int dstRegId, unsigned int srcRegId, unsigned int& nextAddress, unsigned int retAddress, IIRInstruction* instruction);
-        void Action_PreserveTrigger(CHK::TriggerAction& retAction);
-        void Action_Wait(unsigned int milliseconds, CHK::TriggerAction& retAction);
-        void Action_JumpTo(unsigned int address, CHK::TriggerAction& retAction);
+        void Action_PreserveTrigger(TriggerAction& retAction);
+        void Action_Wait(unsigned int milliseconds, TriggerAction& retAction);
+        void Action_JumpTo(unsigned int address, TriggerAction& retAction);
 
         void DoIndirectJump(TriggerBuilder& trigger);
         void EmitIndirectJumpCode(unsigned int& nextAddress);
         void EmitMulInstructionCode(unsigned int& nextAddress);
 
         unsigned int GetLocationIdByName(const std::string& name, IIRInstruction* instruction);
+        int GetLastTriggerActionId(const Trigger& trigger);
 
-        int GetLastTriggerActionId(const CHK::Trigger& trigger);
+        void PushTriggers(const std::vector<Trigger>& triggers, IIRInstruction* jmpTarget = nullptr);
 
-        void PushTriggers(const std::vector<CHK::Trigger>& triggers, IIRInstruction* jmpTarget = nullptr)
-        {
-            m_Triggers.reserve(m_Triggers.size() + triggers.size());
-
-            for (auto& trigger : triggers)
-            {
-                m_Triggers.push_back(trigger);
-                if (jmpTarget != nullptr)
-                {
-                    auto ptr = &m_Triggers.back();
-                    m_JmpPatchups.insert(std::make_pair(ptr, jmpTarget));
-                }
-            }
-        }
-
-        std::vector<CHK::Trigger> m_Triggers;
+        std::vector<Trigger> m_Triggers;
         std::unordered_map<Trigger*, IIRInstruction*> m_JmpPatchups;
         std::set<IIRInstruction*> m_JumpTargets;
         std::unordered_map<IIRInstruction*, unsigned int> m_JumpAddresses;
@@ -91,11 +79,11 @@ namespace Langums
         uint32_t m_HyperTriggerCount = 5;
         uint8_t m_TriggersOwner = 1;
 
-        CHK::File* m_File = nullptr;
-        CHK::CHKStringsChunk* m_StringsChunk = nullptr;
-        CHK::CHKLocationsChunk* m_LocationsChunk = nullptr;
-        CHK::CHKCuwpChunk* m_CuwpChunk = nullptr;
-        CHK::CHKCuwpUsedChunk* m_CuwpUsedChunk = nullptr;
+        File* m_File = nullptr;
+        CHKStringsChunk* m_StringsChunk = nullptr;
+        CHKLocationsChunk* m_LocationsChunk = nullptr;
+        CHKCuwpChunk* m_CuwpChunk = nullptr;
+        CHKCuwpUsedChunk* m_CuwpUsedChunk = nullptr;
 
         unsigned int m_StackPointer;
         unsigned int m_MultiplyAddress;

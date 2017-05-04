@@ -1,3 +1,3 @@
 fn main() {
-    print("<07>test <03>- <06>foo bar <05>1234");
+  set_deaths(Player1, TerranMarine, 0xB4DF00D);
 }

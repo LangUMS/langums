@@ -36,6 +36,11 @@ namespace Langums
         m_HasChanges = false;
     }
 
+    void TriggerBuilder::AssociateInstruction(IIRInstruction* instruction)
+    {
+        g_AddressToInstructionMap[m_Address].insert(instruction);
+    }
+
     void TriggerBuilder::SetOwner(uint8_t playerId)
     {
         for (auto i = 0; i < 28; i++)

@@ -8,7 +8,6 @@
 #include <tlhelp32.h>
 
 #include "process_util.h"
-#include "../log.h"
 
 #pragma comment(lib, "psapi.lib")
 

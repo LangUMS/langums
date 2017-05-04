@@ -69,6 +69,28 @@ namespace Langums
         void ProcessCommand(std::unique_ptr<IDebuggerCmd> cmd);
         IIRInstruction* AddressToInstruction(unsigned int address) const;
 
+        void Suspend()
+        {
+            if (m_Suspended)
+            {
+                return;
+            }
+
+            Process::Suspend(m_Process);
+        }
+
+        void Resume()
+        {
+            if (!m_Suspended)
+            {
+                return;
+            }
+
+            Process::Resume(m_Process);
+        }
+
+        bool m_Suspended = false;
+
         std::atomic<DebuggerThreadState> m_State = DebuggerThreadState::NotRunning;
 
         std::deque<std::unique_ptr<IDebuggerCmd>> m_CommandQueue;
@@ -86,7 +108,7 @@ namespace Langums
         Process::ProcessHandle m_Process;
         void* m_BaseAddress = nullptr;
 
-        unsigned int m_PollRate = 240; // poll the game for changes N times per second
+        unsigned int m_PollRate = 1000; // poll the game for changes N times per second
 
         std::unordered_map<unsigned int, DebuggerBreakpoint> m_Breakpoints;
         std::atomic<unsigned int> m_CurrentBreakpoint = 0;

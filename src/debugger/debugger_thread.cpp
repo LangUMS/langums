@@ -4,6 +4,9 @@
 
 #include "../compiler/compiler.h"
 #include "debugger_thread.h"
+#include "memsearch.h"
+
+#define DEATH_TABLE_OFFSET 0x87A8AC
 
 namespace Langums
 {
@@ -17,7 +20,7 @@ namespace Langums
     {
         if (m_Process != nullptr)
         {
-            Process::Resume(m_Process);
+            Resume();
             Process::Close(m_Process);
         }
 
@@ -60,10 +63,24 @@ namespace Langums
             }
         }
 
+        void* deathTable = nullptr;
+        LOG_F("Debugger: Waiting for the map to start.");
+
+        while (!deathTable)
+        {
+            deathTable = FindAddressOf32BitValue(m_Process, 0xB4DF00D, m_BaseAddress);
+            std::this_thread::sleep_for(milliseconds(500));
+        }
+
+        auto zero = 0u;
+        size_t bytesWritten;
+        WriteMemory(m_Process, deathTable, sizeof(unsigned int), &zero, bytesWritten);
+
+        LOG_F("Debugger: Debugging started.");
+
         m_State = DebuggerThreadState::Attached;
 
-        m_Registers = std::make_unique<RegTable>(m_Process, m_BaseAddress);
-        LOG_F("Debugger: Attached to process.");
+        m_Registers = std::make_unique<RegTable>(m_Process, deathTable);
 
         auto updateRate = 1.0 / (double)m_PollRate;
         before = high_resolution_clock::now();
@@ -109,6 +126,11 @@ namespace Langums
                     return;
                 }
 
+                if (m_State == DebuggerThreadState::WaitingAtBreakpoint)
+                {
+                    continue;
+                }
+
                 {
                     auto oldInstructionCounter = (unsigned int)m_InstructionCounter;
 
@@ -117,34 +139,36 @@ namespace Langums
 
                     auto& icDef = g_RegisterMap[Reg_InstructionCounter];
                     m_InstructionCounter = m_Registers->Get(icDef.m_PlayerId, icDef.m_Index);
+                }
 
-                    auto instruction = AddressToInstruction(m_InstructionCounter);
-                    if (m_InstructionCounter != m_LastBreakAddress && instruction && instruction->GetType() == IRInstructionType::DebugBrk)
-                    {
-                        m_LastBreakAddress = m_InstructionCounter;
-                        Process::Suspend(m_Process);
-                        m_State = DebuggerThreadState::WaitingAtBreakpoint;
-                        continue;
-                    }
+                auto instruction = AddressToInstruction(m_InstructionCounter);
+                if (m_InstructionCounter != m_LastBreakAddress && instruction && instruction->GetType() == IRInstructionType::DebugBrk)
+                {
+                    m_LastBreakAddress = m_InstructionCounter;
+                    Suspend();
+                    m_State = DebuggerThreadState::WaitingAtBreakpoint;
+                    continue;
+                }
 
-                    if (m_SuspendOnAddress != -1 && m_SuspendOnAddress != m_InstructionCounter)
-                    {
-                        Process::Suspend(m_Process);
-                        m_SuspendOnAddress = -1;
-                        m_LastBreakAddress = m_InstructionCounter;
-                        m_State = DebuggerThreadState::WaitingAtBreakpoint;
-                        continue;
-                    }
+                if (m_SuspendOnAddress != -1 && m_SuspendOnAddress != m_InstructionCounter)
+                {
+                    Suspend();
+                    m_SuspendOnAddress = -1;
+                    m_LastBreakAddress = m_InstructionCounter;
+                    m_State = DebuggerThreadState::WaitingAtBreakpoint;
+                    continue;
                 }
 
                 for (auto& pair : m_Breakpoints)
                 {
                     auto& breakpoint = pair.second;
-                    if (breakpoint.m_Address == m_InstructionCounter)
+                    if (m_InstructionCounter != m_LastBreakAddress && breakpoint.m_Address == m_InstructionCounter)
                     {
-                        Process::Suspend(m_Process);
+                        m_LastBreakAddress = m_InstructionCounter;
+                        Suspend();
                         m_CurrentBreakpoint = pair.first;
                         m_State = DebuggerThreadState::WaitingAtBreakpoint;
+                        break;
                     }
                 }
 
@@ -169,12 +193,12 @@ namespace Langums
     {
         if (cmd->GetType() == DebuggerCmdType::Suspend)
         {
-            Process::Suspend(m_Process);
+            Suspend();
             m_State = DebuggerThreadState::Suspended;
         }
         else if (cmd->GetType() == DebuggerCmdType::Resume)
         {
-            Process::Resume(m_Process);
+            Resume();
             m_State = DebuggerThreadState::Attached;
             m_CurrentBreakpoint = 0;
         }
@@ -199,7 +223,7 @@ namespace Langums
         }
         else if (cmd->GetType() == DebuggerCmdType::ContinueToNext)
         {
-            Process::Resume(m_Process);
+            Resume();
             m_SuspendOnAddress = m_InstructionCounter;
         }
     }

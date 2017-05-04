@@ -19,6 +19,7 @@ namespace Langums
     {
         public:
         TriggerBuilder(int address, IIRInstruction* instruction, uint8_t playerId);
+        void AssociateInstruction(IIRInstruction* instruction);
 
         void SetOwner(uint8_t playerId);
         void SetExecuteForAllPlayers();
