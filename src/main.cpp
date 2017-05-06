@@ -26,7 +26,7 @@
 #undef min
 #undef max
 
-#define VERSION "v0.1.3"
+#define VERSION "v0.1.4"
 
 using namespace Langums;
 using namespace CHK;
@@ -40,10 +40,11 @@ int main(int argc, char* argv[])
     cxxopts::Options opts("LangUMS " VERSION, "LangUMS compiler");
 
     opts.add_options()
-        ("h,help", "Prints this help message", cxxopts::value<bool>())
-        ("s,src", "Source .scx map file", cxxopts::value<std::string>())
-        ("d,dst", "Destination .scx map file", cxxopts::value<std::string>())
-        ("l,lang", "Source .l source file", cxxopts::value<std::string>())
+        ("h,help", "Prints this help message.", cxxopts::value<bool>())
+        ("v,version", "Prints the current version of the compiler.", cxxopts::value<bool>())
+        ("s,src", "Path to source .scx map file.", cxxopts::value<std::string>())
+        ("d,dst", "Path to destination .scx map file.", cxxopts::value<std::string>())
+        ("l,lang", "Path to source .l source file.", cxxopts::value<std::string>())
         ("r,reg", "Available registers map file", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
         ("preserve-triggers", "Preserves already existing triggers in the map (use with caution!).", cxxopts::value<bool>())
@@ -57,7 +58,32 @@ int main(int argc, char* argv[])
         ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
         ("debug-vscode", "Internal. Used by the VS Code debugger extension to communicate with LangUMS.", cxxopts::value<bool>())
         ;
-    opts.parse(argc, argv);
+
+    try
+    {
+        opts.parse(argc, argv);
+    }
+    catch (...)
+    {
+        LOG_F("Invalid arguments.", opts.help());
+
+        LOG_F("%", opts.help());
+        Log::Instance()->Destroy();
+        return 1;
+    }
+
+    if (opts.count("help") > 0)
+    {
+        LOG_F("%", opts.help());
+        Log::Instance()->Destroy();
+        return 0;
+    }
+
+    if (opts.count("version") > 0)
+    {
+        LOG_F("LangUMS %", VERSION);
+        return 0;
+    }
 
     std::unique_ptr<DebuggerVSCode> vsCodeDebugger;
 
@@ -71,13 +97,6 @@ int main(int argc, char* argv[])
     else
     {
         Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()));
-    }
-
-    if (opts.count("help") > 0)
-    {
-        LOG_F("%", opts.help());
-        Log::Instance()->Destroy();
-        return 0;
     }
 
     if (opts.count("lang") != 1)
