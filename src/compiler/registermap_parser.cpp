@@ -2,7 +2,7 @@
 #include <fstream>
 #include <streambuf>
 
-#include "../libchk/enums.h"
+#include "../libchk/src/enums.h"
 #include "registermap_parser.h"
 
 namespace Langums

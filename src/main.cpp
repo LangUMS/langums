@@ -7,7 +7,7 @@
 
 #include "cxxopts.h"
 #include "stringutil.h"
-#include "libchk/chk.h"
+#include "libchk/src/chk.h"
 #include "parser/preprocessor.h"
 #include "parser/parser.h"
 #include "parser/template_instantiator.h"

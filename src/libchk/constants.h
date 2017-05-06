@@ -1,6 +1,0 @@
-#ifndef __LIBCHK_CONSTANTS_H
-#define __LIBCHK_CONSTANTS_H
-
-#define CHK_LATEST_MAP_VERSION 205
-
-#endif

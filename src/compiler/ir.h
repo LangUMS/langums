@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "../ast/ast.h"
-#include "../libchk/chk.h"
+#include "../libchk/src/chk.h"
 #include "../stringutil.h"
 
 #define MAX_EVENT_CONDITIONS 63

@@ -1,0 +1,6 @@
+[submodule "src/libchk"]
+	path = src/libchk
+	url = https://github.com/langums/libchk
+[submodule "src/stormlib"]
+	path = src/stormlib
+	url = https://github.com/langums/stormlib

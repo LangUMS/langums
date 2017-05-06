@@ -1,5 +1,4 @@
 #src defend_the_probe.scx
-#dst defend_the_probe_release.scx
 
 // Defend the Probe
 
@@ -10,7 +9,7 @@
 #define MARINE_COST 50
 #define MEDIC_COST 75
 #define VULTURE_COST 100
-#define FIREBAT_COST 150
+#define FIREBAT_COST 130
 #define TANK_COST 250
 #define SCV_COST 35
 //
@@ -175,17 +174,17 @@ deaths(Player8, AtLeast, 2, ZergZergling) => {
 
 deaths(Player8, AtLeast, 1, ZergHydralisk) => {
   remove_deaths(Player8, ZergHydralisk, 1);
-  add_resource(AllPlayers, Minerals, 1);
+  add_resource(AllPlayers, Minerals, 3);
 }
 
 deaths(Player8, AtLeast, 1, ZergUltralisk) => {
   remove_deaths(Player8, ZergUltralisk, 1);
-  add_resource(AllPlayers, Minerals, 2);
+  add_resource(AllPlayers, Minerals, 4);
 }
 
 deaths(Player8, AtLeast, 3, ZergInfestedTerran) => {
   remove_deaths(Player8, ZergInfestedTerran, 3);
-  add_resource(AllPlayers, Minerals, 1);
+  add_resource(AllPlayers, Minerals, 2);
 }
 
 // end reward logic

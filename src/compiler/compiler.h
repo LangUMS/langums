@@ -6,7 +6,7 @@
 #include <set>
 
 #include "ir.h"
-#include "../libchk/chk.h"
+#include "../libchk/src/chk.h"
 #include "triggerbuilder.h"
 
 #define MAX_TRIGGERS_COUNT 16384

@@ -5,9 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="libchk">
-      <UniqueIdentifier>{e9c70de5-393c-4ed1-b984-bf42df57162b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ast">
       <UniqueIdentifier>{df3172f5-a728-47a2-a1f8-a206024b55f2}</UniqueIdentifier>
     </Filter>
@@ -56,6 +53,9 @@
     <Filter Include="debugger\rapidjson">
       <UniqueIdentifier>{e1f6a4fd-c19a-44fa-ac68-884a2136b0da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="libchk">
+      <UniqueIdentifier>{3c5ecc93-88b6-4e45-b5b6-0a6e98c0aa26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -63,9 +63,6 @@
     </ClCompile>
     <ClCompile Include="..\src\log.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\chk.cpp">
-      <Filter>libchk</Filter>
     </ClCompile>
     <ClCompile Include="..\src\parser\parser.cpp">
       <Filter>parser</Filter>
@@ -75,12 +72,6 @@
     </ClCompile>
     <ClCompile Include="..\src\compiler\ir.cpp">
       <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\stringschunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\locationschunk.cpp">
-      <Filter>libchk</Filter>
     </ClCompile>
     <ClCompile Include="..\src\parser\preprocessor.cpp">
       <Filter>parser</Filter>
@@ -94,20 +85,11 @@
     <ClCompile Include="..\src\parser\ast_optimizer.cpp">
       <Filter>parser</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libchk\ownrchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\dimchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\compiler\registermap_parser.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
     <ClCompile Include="..\src\parser\template_instantiator.cpp">
       <Filter>parser</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\cuwpchunk.cpp">
-      <Filter>libchk</Filter>
     </ClCompile>
     <ClCompile Include="..\src\wavinfo.cpp">
       <Filter>src</Filter>
@@ -841,9 +823,6 @@
     <ClCompile Include="..\src\stormlib\pklib\crc32_pklib.c">
       <Filter>stormlib\pklib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libchk\iownchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\debugger\process_util_win32.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
@@ -865,6 +844,27 @@
     <ClCompile Include="..\src\debugger\log_interface_vscode.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libchk\src\chk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\cuwpchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\dimchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\iownchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\locationschunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\ownrchunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libchk\src\stringschunk.cpp">
+      <Filter>libchk</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -872,27 +872,6 @@
     </ClInclude>
     <ClInclude Include="..\src\log.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\chk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\ichunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\verchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\stringschunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\triggerschunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\constants.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\enums.h">
-      <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\parser\parser.h">
       <Filter>parser</Filter>
@@ -905,9 +884,6 @@
     </ClInclude>
     <ClInclude Include="..\src\serialization.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\locationschunk.h">
-      <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\parser\preprocessor.h">
       <Filter>parser</Filter>
@@ -927,29 +903,14 @@
     <ClInclude Include="..\src\parser\ast_optimizer.h">
       <Filter>parser</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\ownrchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\dimchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\compiler\registermap_parser.h">
       <Filter>compiler</Filter>
     </ClInclude>
     <ClInclude Include="..\src\parser\template_instantiator.h">
       <Filter>parser</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\cuwpchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\cuwpusedchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\wavinfo.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\wavchunk.h">
-      <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\stormlib\FileStream.h">
       <Filter>stormlib</Filter>
@@ -1092,17 +1053,8 @@
     <ClInclude Include="..\src\compiler\ir_constants.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\tilesetchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\iownchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\pretty_errors.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\langumschunk.h">
-      <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\debugger\memsearch.h">
       <Filter>debugger</Filter>
@@ -1208,6 +1160,57 @@
     </ClInclude>
     <ClInclude Include="..\src\debugger\debugger_util.h">
       <Filter>debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\chk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\constants.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\cuwpchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\cuwpusedchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\dimchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\enums.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\ichunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\iownchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\langumschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\locationschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\ownrchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\serialization.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\stringschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\tilesetchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\triggerschunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\verchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\wavchunk.h">
+      <Filter>libchk</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
