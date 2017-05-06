@@ -21,6 +21,7 @@ Table of Contents
   * [FAQ](#faq)
   * [Limitations](#limitations)
   * [Integration with existing maps](#integration-with-existing-maps)
+  * [Using the experimental debugger](#using-the-experimental-debugger)
   * [For project contributors](#for-project-contributors)
   * [Future plans](#future-plans)
   * [Built-in constants](#built-in-constants)
@@ -57,7 +58,7 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 4. Now you can run `my_map_final.scx` directly in the game or open it with an editor.
 
-There is [a wonderful extension for VS Code](https://marketplace.visualstudio.com/items?itemName=glenstorm.langums) by Matthew Burton (aka Glenstorm) if you like your code neatly formatted and highlighted. It also has automated code completion.
+5. Get the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=langums.langums). It has syntax highlighting, code completion and support for the experimental debugger.
 
 ## Language features
 
@@ -76,6 +77,7 @@ There is [a wonderful extension for VS Code](https://marketplace.visualstudio.co
 - `while` loop
 - Event handlers
 - Metaprogramming facilities
+- Experimental debugger
 
 ## Language basics
 
@@ -692,6 +694,29 @@ set_deaths(Player5, TerranMarine, foo);
 ```
 
 will set the death counter for Player5's marines to the value of variable `foo`.
+
+## Using the experimental debugger
+
+Since recently LangUMS features an experimental debugger which allows you to place breakpoints and watch variables in your code while the game is running. To use it you must have Visual Studio Code and [the LangUMS extension](https://marketplace.visualstudio.com/items?itemName=langums.langums) installed. To launch a debugging session open the workspace folder where your source files are and pick the `LangUMS Debugger` from the list of available debuggers. If this is the first time you're launching a debugging session you'll be asked to configure your `launch.json` file.
+
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "langums",
+            "request": "launch",
+            "name": "LangUMS Debug",
+            "langums": "${workspaceRoot}/langums.exe",
+            "map": "${workspaceRoot}/my_map.scx",
+            "lang": "${workspaceRoot}/my_map.l",
+            "dst": "${workspaceRoot}/my_map_debug.scx"
+        }
+    ]
+}
+```
+
+You have you give the debugger the paths to langums.exe, your source files and the destination .scx. After you launch the debugger it wil compile your source and say `Waiting for starcraft.exe`. This is when you should start the game and launch your debug map. Keep in mind that maps compiled in debug mode are special and cannot run without the debugger. You should not distribute these maps until you recompile them normally without the debugger.
 
 ## For project contributors
 
