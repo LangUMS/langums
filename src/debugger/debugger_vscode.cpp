@@ -95,9 +95,8 @@ namespace Langums
 
         if (typeString == "set-breakpoints")
         {
-            auto requestId = doc["id"].GetInt();
             auto& breakpoints = doc["breakpoints"].GetArray();
-            auto event = std::make_unique<DebuggerProtocol::BreakpointsSet>(requestId);
+            auto event = std::make_unique<DebuggerProtocol::BreakpointsSet>();
 
             m_Debugger->RemoveAllBreakpoints();
 

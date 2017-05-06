@@ -65,6 +65,24 @@ namespace Langums
 
                 return ReadIncludeFile(path.generic_u8string());
             }
+            else if (cmd == "#src")
+            {
+                trimmed = trim(trimmed.substr(space));
+                auto path = filesystem::path(m_RootFolder);
+                path.append(trimmed);
+                m_HasMapName = true;
+                m_MapName = path.generic_u8string();
+                return "";
+            }
+            else if (cmd == "#dst")
+            {
+                trimmed = trim(trimmed.substr(space));
+                auto path = filesystem::path(m_RootFolder);
+                path.append(trimmed);
+                m_HasOutMapName = true;
+                m_OutMapName = path.generic_u8string();
+                return "";
+            }
         }
 
         auto outLine = line;

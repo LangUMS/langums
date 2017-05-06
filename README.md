@@ -467,6 +467,8 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 - `#define KEY VALUE` will add a new macro definition, all further occurences of `KEY` will be replaced with `VALUE`. You can override previous definitions by calling `#define` again.
 - `#undef KEY` will remove an already existing macro definition
 - `#include filename` will fetch the contents of `filename` and copy/ paste them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
+- `#src filename` will set the input .scx filename for this code file. This allows you to skip passing the `--src` option to the compiler.
+- `#dst filename` will set the output .scx filename for this code file. This allows you to skip passing the `--dst` option to the compiler.
 
 ## Template functions
 

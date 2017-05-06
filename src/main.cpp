@@ -80,20 +80,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    if (opts.count("src") != 1)
-    {
-        LOG_F("%", opts.help());
-        LOG_EXITERR("\n(!) Arguments must contain exactly one --src file");
-        return 1;
-    }
-
-    if (opts.count("dst") != 1)
-    {
-        LOG_F("%", opts.help());
-        LOG_EXITERR("\n(!) Arguments must contain exactly one --dst file");
-        return 1;
-    }
-
     if (opts.count("lang") != 1)
     {
         LOG_F("%", opts.help());
@@ -109,20 +95,92 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto srcPath = filesystem::path(opts["src"].as<std::string>());
-    if (!srcPath.has_filename())
+    LOG_F("Code source: %", langPath);
+
+    std::ifstream sourceFile(langPath.generic_u8string());
+    if (!sourceFile.is_open())
     {
-        LOG_F("%", opts.help());
-        LOG_EXITERR("\n(!) --src path must be a valid .scx file.");
+        LOG_EXITERR("\n(!) Failed to open \"%\" for reading.", langPath.generic_u8string());
         return 1;
     }
 
-    auto dstPath = filesystem::path(opts["dst"].as<std::string>());
-
-    if (srcPath == dstPath)
+    std::string str;
+    std::string source;
+    while (std::getline(sourceFile, str))
     {
-        LOG_EXITERR("\n(!) Fatal error, --src and --dst path are the same. Bailing out.");
+        source += str;
+        source.push_back('\n');
+    }
+
+    source.push_back('\n');
+
+    Preprocessor preprocessor(langPath.relative_path().remove_filename().generic_u8string());
+
+    try
+    {
+        source = preprocessor.Process(source);
+    }
+    catch (const PreprocessorException& ex)
+    {
+        PrintPreprocessorException(source, ex);
+        LOG_EXITERR("");
         return 1;
+    }
+
+    auto hasSrcPath = false;
+    filesystem::path srcPath;
+
+    auto hasDstPath = false;
+    filesystem::path dstPath;
+
+    if (preprocessor.HasMapName())
+    {
+        srcPath = preprocessor.GetMapName();
+        hasSrcPath = true;
+        LOG_F("Map file specified with #src in source code.");
+    }
+
+    if (preprocessor.HasOutMapName())
+    {
+        dstPath = preprocessor.GetOutMapName();
+        hasDstPath = true;
+        LOG_F("Destination map file specified with #dst in source code.");
+    }
+
+    if (!hasSrcPath)
+    {
+        if (opts.count("src") != 1)
+        {
+            LOG_F("%", opts.help());
+            LOG_EXITERR("\n(!) Arguments must contain exactly one --src file");
+            return 1;
+        }
+
+        srcPath = filesystem::path(opts["src"].as<std::string>());
+        if (!srcPath.has_filename())
+        {
+            LOG_F("%", opts.help());
+            LOG_EXITERR("\n(!) --src path must be a valid .scx file.");
+            return 1;
+        }
+    }
+
+    if (!hasDstPath)
+    {
+        if (opts.count("dst") != 1)
+        {
+            LOG_F("%", opts.help());
+            LOG_EXITERR("\n(!) Arguments must contain exactly one --dst file");
+            return 1;
+        }
+
+        dstPath = filesystem::path(opts["dst"].as<std::string>());
+
+        if (srcPath == dstPath)
+        {
+            LOG_EXITERR("\n(!) Fatal error, source and destination path are the same. Bailing out.");
+            return 1;
+        }
     }
 
     if (filesystem::is_directory(dstPath))
@@ -131,7 +189,6 @@ int main(int argc, char* argv[])
     }
 
     LOG_F("Source map: %", srcPath);
-    LOG_F("Code source: %", langPath);
     LOG_F("Destination map: %", dstPath);
     LOG_F("");
 
@@ -255,36 +312,6 @@ int main(int argc, char* argv[])
     LOG_F("");
 
     LOG_F("Compiling source \"%\"", langPath.generic_u8string());
-
-    std::ifstream sourceFile(langPath.generic_u8string());
-    if (!sourceFile.is_open())
-    {
-        LOG_EXITERR("\n(!) Failed to open \"%\" for reading.", langPath.generic_u8string());
-        return 1;
-    }
-
-    std::string str;
-    std::string source;
-    while (std::getline(sourceFile, str))
-    {
-        source += str;
-        source.push_back('\n');
-    }
-
-    source.push_back('\n');
-    
-    Preprocessor preprocessor(langPath.relative_path().remove_filename().generic_u8string());
-
-    try
-    {
-        source = preprocessor.Process(source);
-    }
-    catch (const PreprocessorException& ex)
-    {
-        PrintPreprocessorException(source, ex);
-        LOG_EXITERR("");
-        return 1;
-    } 
 
     auto disableOptimization = opts.count("disable-optimization") > 0;
 

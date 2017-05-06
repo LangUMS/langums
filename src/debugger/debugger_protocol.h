@@ -19,7 +19,7 @@ namespace Langums
         class IDebuggerEvent
         {
             public:
-            IDebuggerEvent(const std::string& type, unsigned int requestId = 0) : m_Type(type), m_RequestId(requestId)
+            IDebuggerEvent(const std::string& type) : m_Type(type)
             {}
 
             void Serialize(Writer<StringBuffer>& writer)
@@ -27,9 +27,6 @@ namespace Langums
                 writer.StartObject();
                 writer.Key("type");
                 writer.String(m_Type.c_str());
-
-                writer.Key("requestId");
-                writer.Int(m_RequestId);
 
                 writer.Key("data");
                 writer.StartObject();
@@ -44,7 +41,6 @@ namespace Langums
 
             private:
             std::string m_Type;
-            unsigned int m_RequestId = 0;
         };
 
         class Initialized : public IDebuggerEvent
@@ -73,7 +69,7 @@ namespace Langums
         class BreakpointsSet : public IDebuggerEvent
         {
             public:
-            BreakpointsSet(unsigned int requestId) : IDebuggerEvent("breakpoints-set", requestId)
+            BreakpointsSet() : IDebuggerEvent("breakpoints-set")
             {}
 
             void AddBreakpoint(unsigned int line, bool valid)

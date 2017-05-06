@@ -1,8 +1,10 @@
+#src defend_the_probe.scx
+#dst defend_the_probe_release.scx
+
 // Defend the Probe
-// map file: defend_the_probe.scx
 
 #define DEBUG false
-#define FOUR_SECONDS 4000
+#define THREE_SECONDS 4000
 
 // prices
 #define MARINE_COST 50
@@ -34,7 +36,7 @@ fn main() {
 
   if (!DEBUG)
   {
-    sleep(FOUR_SECONDS);
+    sleep(THREE_SECONDS);
     print("Buy units from the beacons.");
     ping(AllPlayers, BuyMarines);
     ping(AllPlayers, BuySCV);
@@ -42,11 +44,11 @@ fn main() {
     ping(AllPlayers, BuyFirebats);
     ping(AllPlayers, BuySiegeTanks);
     ping(AllPlayers, BuyVultures);
-    sleep(FOUR_SECONDS);
+    sleep(THREE_SECONDS);
     ping(AllPlayers, Upgrades);
     center_view(AllPlayers, Upgrades);
     print("Buy upgrades from here.");
-    sleep(FOUR_SECONDS);
+    sleep(THREE_SECONDS);
   }
 
   center_view(AllPlayers, MapCenter);
@@ -73,12 +75,19 @@ fn main() {
   probe_spawned = true;
 
   while (true) {
-    modify(AllUnits, Force1, 10, Health, 100, HealStation);
-    modify(AllUnits, Force1, 10, Energy, 100, HealStation);
     move(TerranEngineeringBay, AllPlayers, 1, AnyLocation, Upgrades);
     poll_events();
   }
 }
+
+// heal station
+
+bring(Player8, Exactly, 0, AllUnits, HealStation) => {
+  modify(AllUnits, Force1, 10, Health, 100, HealStation);
+  modify(AllUnits, Force1, 10, Energy, 100, HealStation);
+}
+
+//
 
 // spawn objective pickups
 
@@ -281,6 +290,7 @@ for <TargetLoc> in (ProbeTarget1, ProbeTarget2, ProbeTarget3, ProbeTarget4) {
   }
 
   bring(Player7, AtLeast, 1, ProtossProbe, TargetLoc) => {
+    sleep(500);
     order(AllUnits, Player7, Move, TargetLoc, Delivery);
   }
 }
