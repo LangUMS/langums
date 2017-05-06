@@ -46,11 +46,6 @@ namespace Langums
                 return !m_Messages.empty() || m_ShutdownThread;
             });
 
-            if (m_ShutdownThread == 1)
-            {
-                break;
-            }
-
             for (auto& message : m_Messages)
             {
                 for (auto& interface : m_Interfaces)
@@ -60,6 +55,11 @@ namespace Langums
             }
 
             m_Messages.clear();
+
+            if (m_ShutdownThread == 1)
+            {
+                break;
+            }
         }
 
         m_ShutdownThread = 0;

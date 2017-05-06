@@ -882,9 +882,6 @@
     <ClInclude Include="..\src\compiler\ir.h">
       <Filter>compiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\serialization.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\parser\preprocessor.h">
       <Filter>parser</Filter>
     </ClInclude>

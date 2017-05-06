@@ -465,7 +465,6 @@
     <ClInclude Include="..\src\parser\preprocessor.h" />
     <ClInclude Include="..\src\parser\template_instantiator.h" />
     <ClInclude Include="..\src\pretty_errors.h" />
-    <ClInclude Include="..\src\serialization.h" />
     <ClInclude Include="..\src\stormlib\adpcm\adpcm.h" />
     <ClInclude Include="..\src\stormlib\bzip2\bzlib.h" />
     <ClInclude Include="..\src\stormlib\bzip2\bzlib_private.h" />

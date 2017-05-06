@@ -26,7 +26,7 @@
 #undef min
 #undef max
 
-#define VERSION "v0.1.3"
+#define VERSION "v0.1.4"
 
 using namespace Langums;
 using namespace CHK;
@@ -40,11 +40,12 @@ int main(int argc, char* argv[])
     cxxopts::Options opts("LangUMS " VERSION, "LangUMS compiler");
 
     opts.add_options()
-        ("h,help", "Prints this help message", cxxopts::value<bool>())
-        ("s,src", "Source .scx map file", cxxopts::value<std::string>())
-        ("d,dst", "Destination .scx map file", cxxopts::value<std::string>())
-        ("l,lang", "Source .l source file", cxxopts::value<std::string>())
-        ("r,reg", "Available registers map file", cxxopts::value<std::string>())
+        ("h,help", "Prints this help message.", cxxopts::value<bool>())
+        ("v,version", "Prints the current version of the compiler.", cxxopts::value<bool>())
+        ("s,src", "Path to source .scx map file.", cxxopts::value<std::string>())
+        ("d,dst", "Path to destination .scx map file.", cxxopts::value<std::string>())
+        ("l,lang", "Path to source .l source file.", cxxopts::value<std::string>())
+        ("r,reg", "Optional registers file.", cxxopts::value<std::string>())
         ("strip", "Strips unnecessary data from the resulting .scx. Will make the file unopenable in editors.", cxxopts::value<bool>())
         ("preserve-triggers", "Preserves already existing triggers in the map (use with caution!).", cxxopts::value<bool>())
         ("copy-batch-size", "Maximum number value that can be copied in one cycle. Must be a power of 2. Higher values will increase the amount of emitted triggers (default: 8192).", cxxopts::value<unsigned int>())
@@ -57,7 +58,32 @@ int main(int argc, char* argv[])
         ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
         ("debug-vscode", "Internal. Used by the VS Code debugger extension to communicate with LangUMS.", cxxopts::value<bool>())
         ;
-    opts.parse(argc, argv);
+
+    try
+    {
+        opts.parse(argc, argv);
+    }
+    catch (...)
+    {
+        LOG_F("Invalid arguments.", opts.help());
+
+        LOG_F("%", opts.help());
+        Log::Instance()->Destroy();
+        return 1;
+    }
+
+    if (opts.count("help") > 0)
+    {
+        LOG_F("%", opts.help());
+        Log::Instance()->Destroy();
+        return 0;
+    }
+
+    if (opts.count("version") > 0)
+    {
+        std::cout << "LangUMS " << VERSION << std::endl;
+        return 0;
+    }
 
     std::unique_ptr<DebuggerVSCode> vsCodeDebugger;
 
@@ -71,13 +97,6 @@ int main(int argc, char* argv[])
     else
     {
         Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()));
-    }
-
-    if (opts.count("help") > 0)
-    {
-        LOG_F("%", opts.help());
-        Log::Instance()->Destroy();
-        return 0;
     }
 
     if (opts.count("lang") != 1)
@@ -284,18 +303,7 @@ int main(int argc, char* argv[])
     }
 
     auto triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
-
     auto stringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
-
-    if (!chk.HasChunk(ChunkType::WavChunk))
-    {
-        std::vector<char> data;
-        data.resize(512 * sizeof(uint32_t));
-
-        chk.AddChunk(std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
-    }
-
-    auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
 
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
@@ -378,6 +386,13 @@ int main(int argc, char* argv[])
     if (wavFilenames.size() > 0)
     {
         LOG_F("\nWill import % .wav %.", wavFilenames.size(), wavFilenames.size() == 1 ? "file" : "files");
+
+        if (!chk.HasChunk(ChunkType::WavChunk))
+        {
+            std::vector<char> data;
+            data.resize(512 * sizeof(uint32_t));
+            chk.AddChunk(std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
+        }
     }
 
     for (auto& filename : wavFilenames)
@@ -424,6 +439,8 @@ int main(int argc, char* argv[])
             auto& name = playWav->GetWavName();
 
             auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
+
+            auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
             auto wavStringId = wavChunk->FindFreeIndex();
             wavChunk->Set(wavStringId, stringId + 1);
             playWav->SetWavStringId(wavStringId);
@@ -448,6 +465,8 @@ int main(int argc, char* argv[])
             }
 
             auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
+
+            auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
             auto wavStringId = wavChunk->FindFreeIndex();
             wavChunk->Set(wavStringId, stringId + 1);
             transmission->SetWavStringId(wavStringId);
@@ -469,7 +488,7 @@ int main(int argc, char* argv[])
 
     Compiler compiler(debug);
 
-    auto triggersOwner = 8; // player 8 owns the triggers by default
+    auto triggersOwner = 1; // player 1 owns the triggers by default
 
     if (opts.count("triggers-owner") > 0)
     {
@@ -480,7 +499,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        LOG_F("(!) Triggers owner set to % from command-line", CHK::PlayersByName[triggerOwner - 1]);
+        LOG_F("(!) Triggers owner set to % from the command-line", CHK::PlayersByName[triggerOwner - 1]);
     }
 
     LOG_F("Player % owns the LangUMS triggers.", triggersOwner);

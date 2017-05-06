@@ -555,7 +555,7 @@ fn spawn_bonus_items() {
 
 ## Examples
 
-[Look at the examples/ folder here for examples.](https://github.com/LangUMS/langums/tree/master/examples)
+You can find LangUMS example maps here - https://github.com/LangUMS/langums-examples
 Feel free to contribute your own.
 
 ## FAQ
@@ -682,7 +682,7 @@ You can pass this file to the compiler with the `--reg` option e.g.
 langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_registers.txt
 ```
 
-A sample file with the default mappings [is available here](https://github.com/LangUMS/langums/blob/master/registermap.txt?raw=true).
+A sample file with the default mappings [is available here](https://github.com/LangUMS/langums/blob/master/misc/registermap.txt?raw=true).
 [Here you can find](https://github.com/LangUMS/langums#unit) a list of all unit types.
 
 #### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
@@ -727,9 +727,10 @@ You have you give the debugger the paths to langums.exe, your source files and t
 git clone https://github.com/LangUMS/langums
 ```
 
-2. Initialize the submodules
+2. Fetch the submodules
 ```
 git submodules init
+git submodules update
 ```
 
 ### Compiling the code
