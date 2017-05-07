@@ -844,27 +844,6 @@
     <ClCompile Include="..\src\debugger\log_interface_vscode.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libchk\src\chk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\cuwpchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\dimchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\iownchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\locationschunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\ownrchunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libchk\src\stringschunk.cpp">
-      <Filter>libchk</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1164,16 +1143,13 @@
     <ClInclude Include="..\src\libchk\src\constants.h">
       <Filter>libchk</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\src\cuwpchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\src\cuwpusedchunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libchk\src\dimchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\src\enums.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\erachunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\src\ichunk.h">
@@ -1182,10 +1158,7 @@
     <ClInclude Include="..\src\libchk\src\iownchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\src\langumschunk.h">
-      <Filter>libchk</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libchk\src\locationschunk.h">
+    <ClInclude Include="..\src\libchk\src\mrgnchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\src\ownrchunk.h">
@@ -1194,13 +1167,19 @@
     <ClInclude Include="..\src\libchk\src\serialization.h">
       <Filter>libchk</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\src\stringschunk.h">
+    <ClInclude Include="..\src\libchk\src\sprpchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\src\tilesetchunk.h">
+    <ClInclude Include="..\src\libchk\src\strchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libchk\src\triggerschunk.h">
+    <ClInclude Include="..\src\libchk\src\trigchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\uprpchunk.h">
+      <Filter>libchk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libchk\src\upuschunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libchk\src\verchunk.h">

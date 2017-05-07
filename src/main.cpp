@@ -110,7 +110,13 @@ int main(int argc, char* argv[])
     if (!langPath.has_filename())
     {
         LOG_F("%", opts.help());
-        LOG_EXITERR("\n(!) --lang path must be a valid .l file.");
+        LOG_EXITERR("\n(!) --lang path must be a valid LangUMS source file.");
+        return 1;
+    }
+
+    if (!filesystem::exists(langPath))
+    {
+        LOG_EXITERR("\n(!) Fatal error, source file \"%\" does not exist. Bailing out.", langPath.generic_u8string());
         return 1;
     }
 
@@ -155,6 +161,14 @@ int main(int argc, char* argv[])
     if (preprocessor.HasMapName())
     {
         srcPath = preprocessor.GetMapName();
+        if (!srcPath.is_absolute())
+        {
+            auto langRoot = langPath;
+            langRoot.remove_filename();
+            srcPath = langRoot;
+            srcPath.append(preprocessor.GetMapName());
+        }
+
         hasSrcPath = true;
         LOG_F("Map file specified with #src in source code.");
     }
@@ -162,6 +176,15 @@ int main(int argc, char* argv[])
     if (preprocessor.HasOutMapName())
     {
         dstPath = preprocessor.GetOutMapName();
+
+        if (!dstPath.is_absolute())
+        {
+            auto langRoot = langPath;
+            langRoot.remove_filename();
+            dstPath = langRoot;
+            dstPath.append(preprocessor.GetOutMapName());
+        }
+
         hasDstPath = true;
         LOG_F("Destination map file specified with #dst in source code.");
     }
@@ -202,6 +225,12 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (!filesystem::exists(srcPath))
+    {
+        LOG_EXITERR("\n(!) Fatal error, source map file \"%\" does not exist. Bailing out.", srcPath.generic_u8string());
+        return 1;
+    }
+
     if (filesystem::is_directory(dstPath))
     {
         dstPath += srcPath.filename();
@@ -212,10 +241,14 @@ int main(int argc, char* argv[])
     LOG_F("");
 
     auto filename = srcPath.filename();
+    
+    srand((unsigned int)time(nullptr));
 
     auto tempPath = filesystem::temp_directory_path();
     tempPath += "langums_";
+    tempPath += SafePrintf("%_", rand());
     tempPath += filename.c_str();
+
     std::error_code ec;
 
     if (!filesystem::copy_file(srcPath, tempPath, filesystem::copy_options::overwrite_existing, ec))
@@ -271,13 +304,13 @@ int main(int argc, char* argv[])
 
     LOG_F("Discovered chunks: %", chunkTypesString);
 
-    if (!chk.HasChunk(ChunkType::VerChunk))
+    if (!chk.HasChunk(ChunkType::VER))
     {
         LOG_EXITERR("\n(!) VER chunk not found in scenario.chk. Map file is corrupted.");
         return 1;
     }
 
-    auto versionChunk = chk.GetFirstChunk<CHKVerChunk>(ChunkType::VerChunk);
+    auto versionChunk = chk.GetFirstChunk<VERChunk>(ChunkType::VER);
     auto version = versionChunk->GetVersion();
     if (version != CHK_LATEST_MAP_VERSION)
     {
@@ -285,37 +318,32 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!chk.HasChunk(ChunkType::TriggersChunk))
+    if (!chk.HasChunk(ChunkType::TRIG))
     {
         std::vector<char> bytes;
-        chk.AddChunk(std::unique_ptr<IChunk>(new CHKTriggersChunk(bytes, "TRIG")));
+        chk.AddChunk(std::unique_ptr<IChunk>(new TRIGChunk(bytes, "TRIG")));
     }
 
-    if (!chk.HasChunk(ChunkType::DimChunk))
+    if (!chk.HasChunk(ChunkType::DIM))
     {
         LOG_EXITERR("\n(!) DIM chunk not found in scenario.chk. Map file is corrupted.");
         return 1;
     }
-    
-    if (!chk.HasChunk(ChunkType::LangumsChunk))
-    {
-        chk.AddChunk(std::unique_ptr<IChunk>(new CHKLangChunk(LangChunkData(), "LANG")));
-    }
 
-    auto triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
-    auto stringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
+    auto triggersChunk = chk.GetFirstChunk<TRIGChunk>(ChunkType::TRIG);
+    auto stringsChunk = chk.GetFirstChunk<STRChunk>(ChunkType::STR);
 
     auto preserveTriggers = opts.count("preserve-triggers") > 0;
 
     LOG_F("Existing trigger count: % (%)", triggersChunk->GetTriggersCount(), preserveTriggers ? "preserved" : "not preserved");
 
-    auto dimChunk = chk.GetFirstChunk<CHKDimChunk>(ChunkType::DimChunk);
+    auto dimChunk = chk.GetFirstChunk<DIMChunk>(ChunkType::DIM);
     LOG_F("Map size: %x%", dimChunk->GetWidth(), dimChunk->GetHeight());
     
-    auto tilesetChunk = chk.GetFirstChunk<CHKTilesetChunk>(ChunkType::TilesetsChunk);
+    auto tilesetChunk = chk.GetFirstChunk<ERAChunk>(ChunkType::ERA);
     LOG_F("Tileset: %", tilesetChunk->GetTilesetTypeString());
 
-    auto ownrChunk = chk.GetFirstChunk<CHKOwnrChunk>(ChunkType::OwnrChunk);
+    auto ownrChunk = chk.GetFirstChunk<OWNRChunk>(ChunkType::OWNR);
 
     LOG_F("");
 
@@ -387,11 +415,11 @@ int main(int argc, char* argv[])
     {
         LOG_F("\nWill import % .wav %.", wavFilenames.size(), wavFilenames.size() == 1 ? "file" : "files");
 
-        if (!chk.HasChunk(ChunkType::WavChunk))
+        if (!chk.HasChunk(ChunkType::WAV))
         {
             std::vector<char> data;
             data.resize(512 * sizeof(uint32_t));
-            chk.AddChunk(std::unique_ptr<IChunk>(new CHKWavChunk(data, "WAV ")));
+            chk.AddChunk(std::unique_ptr<IChunk>(new WAVChunk(data, "WAV ")));
         }
     }
 
@@ -440,7 +468,7 @@ int main(int argc, char* argv[])
 
             auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
 
-            auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
+            auto wavChunk = chk.GetFirstChunk<WAVChunk>(ChunkType::WAV);
             auto wavStringId = wavChunk->FindFreeIndex();
             wavChunk->Set(wavStringId, stringId + 1);
             playWav->SetWavStringId(wavStringId);
@@ -466,7 +494,7 @@ int main(int argc, char* argv[])
 
             auto stringId = stringsChunk->InsertString(SafePrintf("staredit\\wav\\%", name));
 
-            auto wavChunk = chk.GetFirstChunk<CHKWavChunk>(ChunkType::WavChunk);
+            auto wavChunk = chk.GetFirstChunk<WAVChunk>(ChunkType::WAV);
             auto wavStringId = wavChunk->FindFreeIndex();
             wavChunk->Set(wavStringId, stringId + 1);
             transmission->SetWavStringId(wavStringId);
@@ -488,7 +516,7 @@ int main(int argc, char* argv[])
 
     Compiler compiler(debug);
 
-    auto triggersOwner = 1; // player 1 owns the triggers by default
+    auto triggersOwner = 8; // player 1 owns the triggers by default
 
     if (opts.count("triggers-owner") > 0)
     {
@@ -517,9 +545,9 @@ int main(int argc, char* argv[])
             LOG_F("(!) If you wish to override this decision call langums.exe again with the --force option.\n");
             ownrChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
 
-            if (chk.HasChunk(ChunkType::IOwnChunk))
+            if (chk.HasChunk(ChunkType::IOWN))
             {
-                auto iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+                auto iownChunk = chk.GetFirstChunk<IOWNChunk>(ChunkType::IOWN);
                 iownChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
             }
         }
@@ -529,9 +557,9 @@ int main(int argc, char* argv[])
         LOG_F("(!) Setting player % to a Computer player because he's the triggers owner. Use --triggers-owner to override.", triggersOwner);
 
         ownrChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
-        if (chk.HasChunk(ChunkType::IOwnChunk))
+        if (chk.HasChunk(ChunkType::IOWN))
         {
-            auto iownChunk = chk.GetFirstChunk<CHKIOwnChunk>(ChunkType::IOwnChunk);
+            auto iownChunk = chk.GetFirstChunk<IOWNChunk>(ChunkType::IOWN);
             iownChunk->SetPlayerType(triggersOwner - 1, PlayerType::Computer);
         }
     }

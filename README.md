@@ -646,7 +646,7 @@ No, but thanks for asking.
 
 ## Limitations
 
-- The player selected with `--triggers-owner` (player 1 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
+- The player selected with `--triggers-owner` (player 8 by default) must always be in the game (preferably a CPU player). The triggers owner leaving the game leads to undefined behavior. 
 - Multiplication only works with numbers up to the value set by `--copy-batch-size` (8192 by default).
 - Avoid using huge numbers in general. Additions and subtractions with numbers up to 8192 will always complete in one cycle with the default settings. See the FAQ answer on `--copy-batch-size` for further info.
 - Division is implemented suboptimally at the moment and can take many cycles to complete. This will change soon.
@@ -756,14 +756,6 @@ A Visual Studio 2017 project is provided in the [langums/](https://github.com/La
 
 - [Codegen](https://github.com/LangUMS/langums/blob/master/src/compiler/compiler.cpp)
 - [TriggerBuilder](https://github.com/LangUMS/langums/blob/master/src/compiler/triggerbuilder.cpp)
-
-## Future plans
-
-- else-if statement
-- for loop
-- Improved AST/ IR optimization
-- Live debugger
-- Multiple execution threads
 
 ## Built-in constants
 

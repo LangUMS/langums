@@ -80,10 +80,10 @@ namespace Langums
         uint8_t m_TriggersOwner = 1;
 
         File* m_File = nullptr;
-        CHKStringsChunk* m_StringsChunk = nullptr;
-        CHKLocationsChunk* m_LocationsChunk = nullptr;
-        CHKCuwpChunk* m_CuwpChunk = nullptr;
-        CHKCuwpUsedChunk* m_CuwpUsedChunk = nullptr;
+        STRChunk* m_StringsChunk = nullptr;
+        MRGNChunk* m_LocationsChunk = nullptr;
+        UPRPChunk* m_CuwpChunk = nullptr;
+        UPUSChunk* m_CuwpUsedChunk = nullptr;
 
         unsigned int m_StackPointer;
         unsigned int m_MultiplyAddress;

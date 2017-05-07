@@ -48,25 +48,25 @@ namespace Langums
         m_JmpPatchups.clear();
 
         m_File = &chk;
-        m_StringsChunk = chk.GetFirstChunk<CHKStringsChunk>(ChunkType::StringsChunk);
+        m_StringsChunk = chk.GetFirstChunk<STRChunk>(ChunkType::STR);
         if (m_StringsChunk == nullptr)
         {
             throw CompilerException("No strings chunk found in scenario file", nullptr);
         }
          
-        m_LocationsChunk = chk.GetFirstChunk<CHKLocationsChunk>(ChunkType::LocationsChunk);
+        m_LocationsChunk = chk.GetFirstChunk<MRGNChunk>(ChunkType::MRGN);
         if (m_LocationsChunk == nullptr)
         {
             throw CompilerException("No locations chunk found in scenario file", nullptr);
         }
 
-        m_CuwpChunk = chk.GetFirstChunk<CHKCuwpChunk>(ChunkType::CuwpChunk);
+        m_CuwpChunk = chk.GetFirstChunk<UPRPChunk>(ChunkType::UPRP);
         if (m_CuwpChunk == nullptr)
         {
             throw CompilerException("No CUWP slots chunk found in scenario file", nullptr);
         }
 
-        m_CuwpUsedChunk = chk.GetFirstChunk<CHKCuwpUsedChunk>(ChunkType::CuwpUsedChunk);
+        m_CuwpUsedChunk = chk.GetFirstChunk<UPUSChunk>(ChunkType::UPUS);
 
         auto nextCuwpSlot = 0;
 
@@ -2593,7 +2593,7 @@ namespace Langums
             m_Triggers.push_back(hyperTrigger);
         }
 
-        auto triggersChunk = chk.GetFirstChunk<CHKTriggersChunk>(ChunkType::TriggersChunk);
+        auto triggersChunk = chk.GetFirstChunk<TRIGChunk>(ChunkType::TRIG);
         auto oldBytes = triggersChunk->GetBytes();
         auto triggerCount = m_Triggers.size();
         if (preserveTriggers)
