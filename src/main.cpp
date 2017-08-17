@@ -26,7 +26,7 @@
 #undef min
 #undef max
 
-#define VERSION "v0.1.4"
+#define VERSION "v0.1.5"
 
 using namespace Langums;
 using namespace CHK;
@@ -165,7 +165,15 @@ int main(int argc, char* argv[])
         {
             auto langRoot = langPath;
             langRoot.remove_filename();
-            srcPath = langRoot;
+            if (filesystem::is_regular_file(langRoot))
+            {
+                srcPath = "./";
+            }
+            else
+            {
+                srcPath = langRoot;
+            }
+            
             srcPath.append(preprocessor.GetMapName());
         }
 
