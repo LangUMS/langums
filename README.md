@@ -794,8 +794,8 @@ Patrol
 ### UnitMod
 
 ```
-Health,
-Energy,
+Health
+Energy
 Shields
 Hangar
 ```
