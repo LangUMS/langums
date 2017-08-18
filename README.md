@@ -735,7 +735,7 @@ git submodules update
 
 ### Compiling the code
 
-A Visual Studio 2017 project is provided in the [langums/](https://github.com/LangUMS/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
+A Visual Studio 2015 project is provided in the [langums/](https://github.com/LangUMS/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
 
 ### Parts of LangUMS
 
