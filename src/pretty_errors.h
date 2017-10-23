@@ -92,13 +92,21 @@ namespace Langums
     inline void PrintIRCompilerException(const std::string& src, const IRCompilerException& ex)
     {
         auto astNode = ex.GetASTNode();
-        auto astNodeType = astNode->GetTypeName();
 
-        auto charIndex = astNode->GetCharIndex();
-        auto lineNumber = GetLineNumber(src, charIndex);
+        if (astNode != nullptr)
+        {
+            auto astNodeType = astNode->GetTypeName();
 
-        LOG_F("\n(!) Compilation error: % in type \"%\" on line %", ex.what(), astNodeType, lineNumber);
-        PrintCodeContext(src, charIndex);
+            auto charIndex = astNode->GetCharIndex();
+            auto lineNumber = GetLineNumber(src, charIndex);
+
+            LOG_F("\n(!) Compilation error: % in type \"%\" on line %", ex.what(), astNodeType, lineNumber);
+            PrintCodeContext(src, charIndex);
+        }
+        else
+        {
+            LOG_F("\n(!) Compilation error: %", ex.what());
+        }
     }
 
     inline void PrintCompilerException(const std::string& src, const CompilerException& ex)
