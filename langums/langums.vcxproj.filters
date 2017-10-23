@@ -1188,5 +1188,8 @@
     <ClInclude Include="..\src\libchk\src\wavchunk.h">
       <Filter>libchk</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\log_interface_file.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

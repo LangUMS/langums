@@ -19,6 +19,12 @@
 namespace Langums
 {
 
+    class LogInterfaceException : public std::exception
+    {
+        public:
+        LogInterfaceException(const std::string& error) : std::exception(error.c_str()) {}
+    };
+
     class ILogInterface
     {
         public:

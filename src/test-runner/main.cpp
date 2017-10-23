@@ -15,7 +15,7 @@ using namespace std::experimental;
 // using system() is bad. TODO: portable wrapper for CreateProcess
 bool Compile(const std::string& langPath, const std::string& dstPath, const std::string& irPath)
 {
-    auto cmd = SafePrintf("langums.exe --lang % --dst % --ir %", langPath, dstPath, irPath);
+    auto cmd = SafePrintf("langums.exe --lang % --dst % --ir % --quiet", langPath, dstPath, irPath);
     return system(cmd.c_str()) == 0;
 }
 

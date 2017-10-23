@@ -403,6 +403,7 @@
     <ClInclude Include="..\src\libchk\src\verchunk.h" />
     <ClInclude Include="..\src\libchk\src\wavchunk.h" />
     <ClInclude Include="..\src\log.h" />
+    <ClInclude Include="..\src\log_interface_file.h" />
     <ClInclude Include="..\src\log_interface_stdout.h" />
     <ClInclude Include="..\src\mpq_wrapper.h" />
     <ClInclude Include="..\src\parser\ast_optimizer.h" />

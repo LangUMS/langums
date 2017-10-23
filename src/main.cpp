@@ -4,6 +4,7 @@
 
 #include "log.h"
 #include "log_interface_stdout.h"
+#include "log_interface_file.h"
 
 #include "cxxopts.h"
 #include "stringutil.h"
@@ -54,11 +55,23 @@ int main(int argc, char* argv[])
         ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes but you can open the map in StarEdit.", cxxopts::value<bool>())
         ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
         ("ir", "Dumps the intermediate representation to a file.", cxxopts::value<std::string>())
-        ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
+        ("f,force", "Forces the compiler to do things it shouldn't.", cxxopts::value<bool>())
+        ("q,quiet", "Disables all console output", cxxopts::value<bool>())
+        ("log-file", "Path to log file", cxxopts::value<std::string>())
         ("debug", "Attaches the debugger after compiling the map. (experimental!)", cxxopts::value<bool>())
         ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
         ("debug-vscode", "Internal. Used by the VS Code debugger extension to communicate with LangUMS.", cxxopts::value<bool>())
         ;
+
+    try
+    {
+        opts.parse(argc, argv);
+    }
+    catch (...)
+    {
+        std::cout << "Invalid arguments. " << opts.help() << std::endl;
+        return 1;
+    }
 
     std::unique_ptr<DebuggerVSCode> vsCodeDebugger;
 
@@ -71,18 +84,26 @@ int main(int argc, char* argv[])
     }
     else
     {
-        Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()));
-    }
+        if (opts.count("quiet") == 0)
+        {
+            LOG_ADD_STDOUT_IFACE();
+        }
 
-	try
-	{
-		opts.parse(argc, argv);
-	}
-	catch (...)
-	{
-		LOG_EXITERR("Invalid arguments. %", opts.help());
-		return 1;
-	}
+        if (opts.count("log-file") > 0)
+        {
+            auto logPath = filesystem::path(opts["lang"].as<std::string>());
+
+            try
+            {
+                LOG_ADD_FILE_IFACE(logPath.generic_u8string());
+            }
+            catch (LogInterfaceException& ex)
+            {
+                LOG_F("(!) LogFileInterface error: %", ex.what());
+                return 1;
+            }
+        }
+    }
 
 	if (opts.count("help") > 0)
 	{

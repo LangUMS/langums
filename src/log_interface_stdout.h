@@ -5,6 +5,8 @@
 
 #include "log.h"
 
+#define LOG_ADD_STDOUT_IFACE() Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()))
+
 namespace Langums
 {
 

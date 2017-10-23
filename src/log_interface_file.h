@@ -6,13 +6,21 @@
 
 #include "log.h"
 
+#define LOG_ADD_FILE_IFACE(PATH) Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceFile(PATH)))
+
 namespace Langums
 {
 
     class LogInterfaceFile : public ILogInterface
     {
         public:
-        LogInterfaceFile(const std::string& path) : m_File(path) {}
+        LogInterfaceFile(const std::string& path) : m_File(path)
+        {
+            if (!m_File.is_open())
+            {
+                throw LogInterfaceException(SafePrintf("Failed to open \"%\" for writing.", path));
+            }
+        }
 
         void LogMessage(const std::string& message)
         {
