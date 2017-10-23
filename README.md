@@ -557,9 +557,9 @@ Repeat templates can have more than one template argument (and argument list). F
 
 ```c
 fn test() {
-	for <PlayerId, Msg> in (Player1, Player2, Player3), ("Foo", "Bar", "Baz") {
-		print("Hello, " + Msg, PlayerId);
-	}
+  for <PlayerId, Msg> in (Player1, Player2, Player3), ("Foo", "Bar", "Baz") {
+    print("Hello, " + Msg, PlayerId);
+  }
 }
 ```
 
