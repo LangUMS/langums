@@ -11,7 +11,9 @@ namespace Langums
         for (auto i = 0u; i < childCount; i++)
         {
             auto& child = m_Root->GetChild(i);
-            m_Root->SetChild(i, CalculateConstantExpressions(child));
+            auto newChild = CalculateConstantExpressions(child);
+            newChild = ConcatenateStrings(newChild);
+            m_Root->SetChild(i, newChild);
         }
 
         return std::move(m_Root);
@@ -39,37 +41,6 @@ namespace Langums
                 auto result = CalculateConstantBinaryExpression(lhsNumber->GetValue(), rhsNumber->GetValue(), expression->GetOperator());
                 return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result, node->GetCharIndex()));
             }
-
-            /*if (expression->GetOperator() == OperatorType::Multiply &&
-                (lhs->GetType() == ASTNodeType::NumberLiteral || rhs->GetType() == ASTNodeType::NumberLiteral))
-            {
-                // turn multiplication by a constant to repeated additions
-
-                ASTNumberLiteral* numberLiteral = (ASTNumberLiteral*)((lhs->GetType() == ASTNodeType::NumberLiteral) ? lhs.get() : rhs.get());
-                auto other = (lhs->GetType() == ASTNodeType::NumberLiteral) ? rhs : lhs;
-
-                auto number = numberLiteral->GetValue();
-                if (number == 0)
-                {
-                    return std::shared_ptr<IASTNode>(new ASTNumberLiteral(0));
-                }
-
-                auto root = std::shared_ptr<IASTNode>(new ASTBinaryExpression(OperatorType::Add));
-                auto current = root;
-
-                while (number > 2)
-                {
-                    current->AddChild(other);
-                    current->AddChild(std::unique_ptr<IASTNode>(new ASTBinaryExpression(OperatorType::Add)));
-                    current = current->GetChild(1);
-                    number--;
-                }
-
-                current->AddChild(other);
-                current->AddChild(other);
-
-                return std::shared_ptr<IASTNode>(root);
-            }*/
         }
         else if (node->GetType() == ASTNodeType::UnaryExpression)
         {
@@ -82,6 +53,33 @@ namespace Langums
                 auto valueNumber = (ASTNumberLiteral*)value.get();
                 auto result = valueNumber->GetValue() > 0 ? 0 : 1;
                 return std::shared_ptr<IASTNode>(new ASTNumberLiteral(result, node->GetCharIndex()));
+            }
+        }
+
+        return node;
+    }
+
+    std::shared_ptr<IASTNode> ASTOptimizer::ConcatenateStrings(const std::shared_ptr<IASTNode>& node)
+    {
+        auto childCount = node->GetChildCount();
+        for (auto i = 0u; i < childCount; i++)
+        {
+            auto& child = node->GetChild(i);
+            node->SetChild(i, ConcatenateStrings(child));
+        }
+
+        if (node->GetType() == ASTNodeType::BinaryExpression)
+        {
+            auto expression = (ASTBinaryExpression*)node.get();
+            auto& lhs = expression->GetLHSValue();
+            auto& rhs = expression->GetRHSValue();
+
+            if (lhs->GetType() == ASTNodeType::StringLiteral && rhs->GetType() == ASTNodeType::StringLiteral)
+            {
+                auto lhsString = (ASTStringLiteral*)lhs.get();
+                auto rhsString = (ASTStringLiteral*)rhs.get();
+                auto result = rhsString->GetValue() + lhsString->GetValue();
+                return std::shared_ptr<IASTNode>(new ASTStringLiteral(result, node->GetCharIndex()));
             }
         }
 

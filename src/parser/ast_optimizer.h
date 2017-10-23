@@ -13,6 +13,7 @@ namespace Langums
 
         private:
         std::shared_ptr<IASTNode> CalculateConstantExpressions(const std::shared_ptr<IASTNode>& node);
+        std::shared_ptr<IASTNode> ConcatenateStrings(const std::shared_ptr<IASTNode>& node);
 
         int CalculateConstantBinaryExpression(int left, int right, OperatorType op);
 
