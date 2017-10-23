@@ -143,6 +143,12 @@ namespace Langums
                     auto number = (ASTNumberLiteral*)callArg.get();
                     genFnName += SafePrintf("%_", number->GetValue());
                 }
+				else if (callArg->GetType() == ASTNodeType::StringLiteral)
+				{
+					auto string = (ASTStringLiteral*)callArg.get();
+					auto hash = std::hash<std::string>()(string->GetValue());
+					genFnName += SafePrintf("[%]_", string->GetValue());
+				}
                 else
                 {
                     throw TemplateInstantiatorException(SafePrintf("Invalid template instantiation of \"%\" argument %, template arguments must be either identifiers or number literals", fnName, i), functionCall);
@@ -212,44 +218,6 @@ namespace Langums
 
         return nodes;
     }
-    /*
-    void TemplateInstantiator::InstantiateEventTemplateBlock(ASTEventTemplateBlock* eventBlock)
-    {
-        auto& iterator = eventBlock->GetIteratorName();
-        auto& list = eventBlock->GetList();
-
-        for (auto& item : list)
-        {
-            auto& eventDeclarations = eventBlock->GetChildren();
-            for (auto& declaration : eventDeclarations)
-            {
-                auto newDeclaration = CloneNode(declaration.get());
-                InstantiateEventTemplate(newDeclaration.get(), iterator, item);
-
-                m_Unit->AddChild(std::move(newDeclaration));
-            }
-        }
-    }
-
-    void TemplateInstantiator::InstantiateEventTemplate(IASTNode* node, const std::string& token, const std::string& replacement)
-    {
-        if (node->GetType() == ASTNodeType::Identifier)
-        {
-            auto identifier = (ASTIdentifier*)node;
-            if (identifier->GetName() == token)
-            {
-                identifier->SetName(replacement);
-            }
-        }
-        else
-        {
-            auto& children = node->GetChildren();
-            for (auto& child : children)
-            {
-                InstantiateEventTemplate(child.get(), token, replacement);
-            }
-        }
-    }*/
 
     void TemplateInstantiator::ReplaceIdentifier(IASTNode* node, const std::string& identifierName, const std::shared_ptr<IASTNode>& replaceWith)
     {
@@ -349,19 +317,6 @@ namespace Langums
         for (auto& child : children)
         {
             newNode->AddChild(CloneNode(child.get()));
-        }
-
-        if (newNode->GetType() == ASTNodeType::IfStatement)
-        {
-            if (newNode->GetChild(1) == nullptr)
-            {
-                int q = 5;
-            }
-
-            if (newNode->GetChild(1)->GetChildCount() == 0)
-            {
-                int q = 5;
-            }
         }
 
         return std::unique_ptr<IASTNode>(newNode);
