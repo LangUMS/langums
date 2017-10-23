@@ -2,7 +2,7 @@
 
 LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: Brood War and the 2017 StarCraft: Remastered edition.
 
-It supercedes the trigger functionality in editors such as SCMDraft 2 and the official StarEdit.
+It supersedes the trigger functionality in editors such as SCMDraft 2 and the official StarEdit.
 You will still want to use an editor to make the actual map, place locations and units but the triggers are done by LangUMS.
 
 Table of Contents
@@ -83,7 +83,7 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 ## Language basics
 
-You can try out all of the examples below using the [test.scx map from here](https://github.com/LangUMS/langums/blob/master/test/test.scx?raw=true).
+You can try out all the examples below using the [test.scx map from here](https://github.com/LangUMS/langums/blob/master/test/test.scx?raw=true).
 
 Every program must contain a `main()` function which is the entry point where the code starts executing immediately after the map starts.
 The "hello world" program for LangUMS would look like:
@@ -446,7 +446,7 @@ show_leaderboard_goal("My Leaderboard", Resources, Quantity, ResourceType);
 show_leaderboard_goal("My Leaderboard", Greed, Quantity);
 ```
 
-Example usage of all of the above:
+Example usage of all the above:
 
 ```c
 show_leaderboard("My Leaderboard", Control, TerranMarine);
@@ -476,7 +476,7 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 
 ## Template functions
 
-Some built-in functions take special kinds of values like player names, unit names or locations. Those can't be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
+Some built-in functions take special kinds of values like player names, unit names or locations. Those cannot be stored within LangUMS primitive values. Template functions allow you to "template" one or more of their arguments so you can call them with these special values. Take a look at the example below.
 
 ```c
 fn spawn_units<T, L>(T, L, qty) {
@@ -490,7 +490,7 @@ fn main() {
 }
 ```
 
-`fn spawn_units<T, L>(T, L, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated in a different way. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
+`fn spawn_units<T, L>(T, L, qty)` declares a template function called `spawn_units` that takes three arguments `T`, `L` and `qty`. The `<T, L>` part lets the compiler know that the T and L "variables" should be treated specially. Later on when `spawn_units(TerranMarine, "TestLocation", 5);` gets called an actual non-templated function will be instantiated and called instead. In this example the instantiated function would look like:
 
 ```c
 fn spawn_units(qty) {
@@ -728,7 +728,7 @@ Since recently LangUMS features an experimental debugger which allows you to pla
 }
 ```
 
-You have you give the debugger the paths to langums.exe, your source files and the destination .scx. After you launch the debugger it wil compile your source and say `Waiting for starcraft.exe`. This is when you should start the game and launch your debug map. Keep in mind that maps compiled in debug mode are special and cannot run without the debugger. You should not distribute these maps until you recompile them normally without the debugger.
+You have you give the debugger the paths to langums.exe, your source files and the destination .scx. After you launch the debugger it will compile your source and say `Waiting for starcraft.exe`. This is when you should start the game and launch your debug map. Keep in mind that maps compiled in debug mode are special and cannot run without the debugger. You should not distribute these maps until you recompile them normally without the debugger.
 
 ## For project contributors
 
