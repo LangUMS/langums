@@ -2022,7 +2022,6 @@ namespace Langums
                     throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()), expression);
                 }
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
                 EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
@@ -2031,7 +2030,6 @@ namespace Langums
                 auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
                 EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else
@@ -2050,7 +2048,6 @@ namespace Langums
                     throw IRCompilerException(SafePrintf("Invalid name \"%\"", identifier->GetName()), expression);
                 }
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
                 EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
@@ -2059,7 +2056,6 @@ namespace Langums
                 auto arrayIndex = ParseArrayExpression(arrayExpression->GetIndex());
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
-                EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
                 EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
             }
             else
