@@ -68,19 +68,26 @@ namespace Langums
             node->SetChild(i, ConcatenateStrings(child));
         }
 
-        if (node->GetType() == ASTNodeType::BinaryExpression)
+        if (node->GetType() != ASTNodeType::BinaryExpression)
         {
-            auto expression = (ASTBinaryExpression*)node.get();
-            auto& lhs = expression->GetLHSValue();
-            auto& rhs = expression->GetRHSValue();
+            return node;
+        }
 
-            if (lhs->GetType() == ASTNodeType::StringLiteral && rhs->GetType() == ASTNodeType::StringLiteral)
-            {
-                auto lhsString = (ASTStringLiteral*)lhs.get();
-                auto rhsString = (ASTStringLiteral*)rhs.get();
-                auto result = rhsString->GetValue() + lhsString->GetValue();
-                return std::shared_ptr<IASTNode>(new ASTStringLiteral(result, node->GetCharIndex()));
-            }
+        auto expression = (ASTBinaryExpression*)node.get();
+        if (expression->GetOperator() != OperatorType::Add)
+        {
+            return node;
+        }
+            
+        auto& lhs = expression->GetLHSValue();
+        auto& rhs = expression->GetRHSValue();
+
+        if (lhs->GetType() == ASTNodeType::StringLiteral && rhs->GetType() == ASTNodeType::StringLiteral)
+        {
+            auto lhsString = (ASTStringLiteral*)lhs.get();
+            auto rhsString = (ASTStringLiteral*)rhs.get();
+            auto result = rhsString->GetValue() + lhsString->GetValue();
+            return std::shared_ptr<IASTNode>(new ASTStringLiteral(result, node->GetCharIndex()));
         }
 
         return node;

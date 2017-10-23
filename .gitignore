@@ -28,3 +28,4 @@ ldb.exe
 ldb/Release/
 ldb/Debug/
 .vscode/
+test_results/
