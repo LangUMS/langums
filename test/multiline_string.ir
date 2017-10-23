@@ -1,0 +1,10 @@
+CHKPLAYERS
+SETOBJ Hello world! This is a multi-line string [ALL]
+SPAWN Player1 TerranMarine 1 TestLocation 
+SPAWN Player2 TerranMarine 1 TestLocation 
+SETALLY Player1 Player2 [ALLY]
+SETALLY Player2 Player1 [ALLY]
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 6

@@ -1,0 +1,17 @@
+CHKPLAYERS
+MSG "hello world" [ALL]
+ISPRESENT Player1
+JEQ [STACK 0] 0 +2
+MSG "Player 1 is here." [ALL]
+ISPRESENT Player6
+JEQ [STACK 0] 0 +2
+MSG "Player 6 is here." [ALL]
+ISPRESENT Player1 Player2
+JEQ [STACK 0] 0 +2
+MSG "Players 1 and 2 are here." [ALL]
+ISPRESENT Player1 Player2 Player3 Player4 Player5 Player6 Player7 Player8
+POP r8
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 13

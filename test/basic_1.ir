@@ -1,0 +1,13 @@
+UNIT 1
+PROP Invincible 1
+EVNT [SWITCH 19] 1
+BRING Player1 TerranMarine TestLocation 1 0
+CHKPLAYERS
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+JSNS [SWITCH 19] +3
+REMOVE Player1 TerranMarine 1 
+SPAWN Player1 TerranMarine 1 TestLocation [SLOT 0]
+SETSW [SWITCH 19] 0
+SETSW [SWITCH 1] 0
+JMP 5

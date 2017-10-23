@@ -1,0 +1,9 @@
+CHKPLAYERS
+TALK Player1 TerranMarine 5000
+SPAWN Player1 TerranMarine 1 TestLocation 
+MODIFY Player1 TerranMarine 1 HitPoints 50 TestLocation
+ORDER Player1 TerranMarine Move TestLocation TestLocation2
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 5

@@ -23,9 +23,11 @@ langums_log.txt
 *.tmp
 langums/.vs/
 langums/langums.vcxproj.user
+langums/test-runner.vcxproj.user
 ldb_d.exe
 ldb.exe
 ldb/Release/
 ldb/Debug/
 .vscode/
 test_results/
+test-runner.log

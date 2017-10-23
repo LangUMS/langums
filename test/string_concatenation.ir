@@ -1,0 +1,3 @@
+CHKPLAYERS
+MSG "hello world foo" [ALL]
+JMP 1

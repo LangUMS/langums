@@ -1,0 +1,44 @@
+CHKPLAYERS
+MSG "hello world" [ALL]
+SET r8 0
+PUSH r8
+MULCONST 5
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +3
+MSG "0. correct result" [ALL]
+JMP +2
+MSG "0. incorrect result" [ALL]
+SET r9 3
+PUSH r9
+PUSH 0
+CPY [STACK 0] [STACK 1]
+ADD
+POP r10
+JEQ r10 6 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +3
+MSG "1. correct result" [ALL]
+JMP +2
+MSG "1. incorrect result :(" [ALL]
+PUSH r10
+MULCONST 8
+POP r11
+JEQ r11 48 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +3
+MSG "2. correct result" [ALL]
+JMP +2
+MSG "2. incorrect result :(" [ALL]
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 40

@@ -1,0 +1,8 @@
+CHKPLAYERS
+SPAWN Player2 TerranMarine 1 TestLocation 
+SPAWN Player2 TerranDropship 1 TestLocation 
+AISCRIPT Player2 EnTr TestLocation
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 4

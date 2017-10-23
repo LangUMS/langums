@@ -1,0 +1,31 @@
+EVNT [SWITCH 19] 1
+CMDLEAST Player3 TerranMarine TestLocation
+EVNT [SWITCH 20] 1
+MOSTKILLS Player4 ZergQueen
+EVNT [SWITCH 21] 1
+MOSTRES Player5 Minerals
+EVNT [SWITCH 22] 1
+OPPONENTS Player1 0 1
+CHKPLAYERS
+PUSH 5
+POP r8
+TALK Player1 TerranMarine 5000
+PUSH r8
+SPAWN Player1 TerranMarine [STACK 0] TestLocation 
+ORDER Player1 TerranMarine Move TestLocation TestLocation2
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+JSNS [SWITCH 19] +2
+MSG "you have the most marines" Player3
+SETSW [SWITCH 19] 0
+JSNS [SWITCH 20] +2
+MSG "Player 4 has killed the most queens" [ALL]
+SETSW [SWITCH 20] 0
+JSNS [SWITCH 21] +2
+MSG "Player5 has the most minerals." [ALL]
+SETSW [SWITCH 21] 0
+JSNS [SWITCH 22] +2
+MSG "i have at least one opponent" [ALL]
+SETSW [SWITCH 22] 0
+SETSW [SWITCH 1] 0
+JMP 15

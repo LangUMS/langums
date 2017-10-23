@@ -1,0 +1,8 @@
+CHKPLAYERS
+MSG "hello world" Player1
+MSG "hello world" Player2
+MSG "hello world" Player3
+MSG "foo" Player1
+MSG "bar" Player2
+MSG "baz" Player3
+JMP 1

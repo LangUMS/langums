@@ -1,0 +1,9 @@
+UNIT 2
+PROP HitPoints 10
+PROP Burrowed 1
+CHKPLAYERS
+SPAWN Player1 ZergLurker 1 TestLocation [SLOT 0]
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+SETSW [SWITCH 1] 0
+JMP 5
