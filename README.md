@@ -3,7 +3,7 @@
 LangUMS is an imperative programming language with C-like syntax for creating custom maps for the game StarCraft: Brood War and the 2017 StarCraft: Remastered edition.
 
 It supersedes the trigger functionality in editors such as SCMDraft 2 and the official StarEdit.
-You will still want to use an editor to make the actual map, place locations and units but the triggers are done by LangUMS.
+You still have to use a map editor to make the actual map, place locations and units but the game logic (triggers) is done by LangUMS.
 
 Table of Contents
 =================
@@ -39,8 +39,6 @@ Table of Contents
     * [AIScript](#aiscript)
 
 ### Bugs, issues and feature requests should go to [the issues section](https://github.com/LangUMS/langums/issues).
-### I accept and merge [pull requests](https://github.com/LangUMS/langums/pulls) (please follow the code style of the project).
-### Guides and tutorials go [in the wiki](https://github.com/LangUMS/langums/wiki).
 ### [Discord channel](https://discord.gg/TNehfve) for support and discussion.
 
 ## Usage
