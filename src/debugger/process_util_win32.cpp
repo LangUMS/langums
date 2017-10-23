@@ -73,7 +73,7 @@ namespace Langums
 
     bool Process::Close(ProcessHandle process)
     {
-        return CloseHandle(process);
+        return (bool)CloseHandle(process);
     }
 
     bool Process::ReadMemory(ProcessHandle process, void* address, size_t size, void* dstBuffer, size_t& retBytesRead)

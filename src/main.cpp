@@ -59,32 +59,6 @@ int main(int argc, char* argv[])
         ("debug-vscode", "Internal. Used by the VS Code debugger extension to communicate with LangUMS.", cxxopts::value<bool>())
         ;
 
-    try
-    {
-        opts.parse(argc, argv);
-    }
-    catch (...)
-    {
-        LOG_F("Invalid arguments.", opts.help());
-
-        LOG_F("%", opts.help());
-        Log::Instance()->Destroy();
-        return 1;
-    }
-
-    if (opts.count("help") > 0)
-    {
-        LOG_F("%", opts.help());
-        Log::Instance()->Destroy();
-        return 0;
-    }
-
-    if (opts.count("version") > 0)
-    {
-        std::cout << "LangUMS " << VERSION << std::endl;
-        return 0;
-    }
-
     std::unique_ptr<DebuggerVSCode> vsCodeDebugger;
 
     if (opts.count("debug-vscode") > 0)
@@ -99,11 +73,33 @@ int main(int argc, char* argv[])
         Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceStdout()));
     }
 
+	try
+	{
+		opts.parse(argc, argv);
+	}
+	catch (...)
+	{
+		LOG_EXITERR("Invalid arguments. %", opts.help());
+		return 1;
+	}
+
+	if (opts.count("help") > 0)
+	{
+		LOG_EXITERR("%", opts.help());
+		return 0;
+	}
+
+	if (opts.count("version") > 0)
+	{
+		LOG_F("LangUMS %", VERSION);
+		return 0;
+	}
+
     if (opts.count("lang") != 1)
     {
         LOG_F("%", opts.help());
-        LOG_EXITERR("\n(!) Arguments must contain exactly one --lang file");
-        return 1;
+		LOG_EXITERR("\n(!) Arguments must contain exactly one --lang file");
+		return 1;
     }
 
     auto langPath = filesystem::path(opts["lang"].as<std::string>());
