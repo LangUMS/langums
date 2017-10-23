@@ -1989,7 +1989,7 @@ namespace Langums
         }
     }
 
-    void IRCompiler::EmitUnaryExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
+    void IRCompiler::EmitNotExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
     {
         auto& lhs = expression->GetValue();
 
@@ -2002,7 +2002,18 @@ namespace Langums
             EmitInstruction(new IRJmpInstruction(2), instructions, expression, aliases);
             EmitInstruction(new IRSetRegInstruction(Reg_StackTop, 1), instructions, expression, aliases);
         }
-        else if (op == OperatorType::PostfixIncrement)
+        else
+        {
+            throw IRCompilerException("Unsupported operator", expression);
+        }
+    }
+
+    void IRCompiler::EmitPostfixExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool pushToStack)
+    {
+        auto& lhs = expression->GetValue();
+        auto op = expression->GetOperator();
+
+        if (op == OperatorType::PostfixIncrement)
         {
             if (lhs->GetType() == ASTNodeType::Identifier)
             {
@@ -2014,6 +2025,11 @@ namespace Langums
                 }
 
                 EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
+
+                if (pushToStack)
+                {
+                    EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                }
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
@@ -2022,6 +2038,11 @@ namespace Langums
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
                 EmitInstruction(new IRIncRegInstruction(regId, 1), instructions, expression, aliases);
+
+                if (pushToStack)
+                {
+                    EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                }
             }
             else
             {
@@ -2040,6 +2061,11 @@ namespace Langums
                 }
 
                 EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
+
+                if (pushToStack)
+                {
+                    EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                }
             }
             else if (lhs->GetType() == ASTNodeType::ArrayExpression)
             {
@@ -2048,6 +2074,11 @@ namespace Langums
                 auto regId = RegisterNameToIndex(arrayExpression->GetIdentifier(), arrayIndex, aliases, expression);
 
                 EmitInstruction(new IRDecRegInstruction(regId, 1), instructions, expression, aliases);
+
+                if (pushToStack)
+                {
+                    EmitInstruction(new IRPushInstruction(regId), instructions, expression, aliases);
+                }
             }
             else
             {
@@ -2079,7 +2110,15 @@ namespace Langums
         }
         else if (expression->GetType() == ASTNodeType::UnaryExpression)
         {
-            EmitUnaryExpression((ASTUnaryExpression*)expression, instructions, aliases);
+            auto unaryExpression = (ASTUnaryExpression*)expression;
+            if (unaryExpression->GetOperator() == OperatorType::Not)
+            {
+                EmitNotExpression(unaryExpression, instructions, aliases);
+            }
+            else
+            {
+                EmitPostfixExpression(unaryExpression, instructions, aliases, true);
+            }
         }
         else if (expression->GetType() == ASTNodeType::ArrayExpression)
         {
@@ -2231,7 +2270,15 @@ namespace Langums
             }
             else if (statement->GetType() == ASTNodeType::UnaryExpression)
             {
-                EmitUnaryExpression((ASTUnaryExpression*)statement.get(), instructions, aliases);
+                auto unaryExpression = (ASTUnaryExpression*)statement.get();
+                if (unaryExpression->GetOperator() == OperatorType::Not)
+                {
+                    EmitNotExpression(unaryExpression, instructions, aliases);
+                }
+                else
+                {
+                    EmitPostfixExpression(unaryExpression, instructions, aliases, false);
+                }
             }
             else if (statement->GetType() == ASTNodeType::FunctionCall)
             {
@@ -2390,7 +2437,15 @@ namespace Langums
                 else if (expression->GetType() == ASTNodeType::UnaryExpression)
                 {
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
-                    EmitUnaryExpression(unaryExpression, instructions, aliases);
+
+                    if (unaryExpression->GetOperator() == OperatorType::Not)
+                    {
+                        EmitNotExpression(unaryExpression, instructions, aliases);
+                    }
+                    else
+                    {
+                        EmitPostfixExpression(unaryExpression, instructions, aliases, true);
+                    }
 
                     auto offset = 1;
                     if (elseBodyInstructions.size() > 0)
@@ -2526,7 +2581,15 @@ namespace Langums
 
                     auto loopStart = instructions.size();
                     auto unaryExpression = (ASTUnaryExpression*)expression.get();
-                    EmitUnaryExpression(unaryExpression, instructions, aliases);
+                    if (unaryExpression->GetOperator() == OperatorType::Not)
+                    {
+                        EmitNotExpression(unaryExpression, instructions, aliases);
+                    }
+                    else
+                    {
+                        EmitPostfixExpression(unaryExpression, instructions, aliases, true);
+                    }
+
                     EmitInstruction(new IRJmpIfEqInstruction(Reg_StackTop, 0, bodyInstructions.size() + 2), instructions, expression.get(), aliases);
 
                     for (auto& instruction : bodyInstructions)
@@ -2577,7 +2640,7 @@ namespace Langums
         return startIndex;
     }
 
-    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
+    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases)
     {
         auto frame = std::make_shared<StackFrame>();
         frame->m_ASTNode = fn;

@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
             auto dstPath = (tmpPath / filename.path().filename().replace_extension("scx")).generic_u8string();
             auto tmp = filename.path();
             auto irPath = tmp.replace_extension("ir").generic_u8string();
-            auto logPath = tmp.replace_extension("log").generic_u8string();
+            auto logPath = (tmpPath / filename.path().filename().replace_extension("log")).generic_u8string();
 
             if (!Compile(langPath, dstPath, irPath, logPath))
             {
