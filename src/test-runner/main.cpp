@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include <iostream>
 #include <filesystem>
 
@@ -13,9 +14,9 @@ using namespace Langums;
 using namespace std::experimental;
 
 // using system() is bad. TODO: portable wrapper for CreateProcess
-bool Compile(const std::string& langPath, const std::string& dstPath, const std::string& irPath)
+bool Compile(const std::string& langPath, const std::string& dstPath, const std::string& irPath, const std::string& logPath)
 {
-    auto cmd = SafePrintf("langums.exe --lang % --dst % --ir % --quiet", langPath, dstPath, irPath);
+    auto cmd = SafePrintf("langums.exe --lang % --dst % --ir % --log-file % --quiet --dump-ir", langPath, dstPath, irPath, logPath);
     return system(cmd.c_str()) == 0;
 }
 
@@ -80,8 +81,9 @@ int main(int argc, char* argv[])
             auto dstPath = (tmpPath / filename.path().filename().replace_extension("scx")).generic_u8string();
             auto tmp = filename.path();
             auto irPath = tmp.replace_extension("ir").generic_u8string();
+            auto logPath = tmp.replace_extension("log").generic_u8string();
 
-            if (!Compile(langPath, dstPath, irPath))
+            if (!Compile(langPath, dstPath, irPath, logPath))
             {
                 LOG_F("Compilation failed for \"%\"", filename);
                 return 1;
@@ -111,6 +113,7 @@ int main(int argc, char* argv[])
 
     std::vector<std::string> tested;
     std::vector<std::string> failed;
+    std::unordered_map<std::string, std::string> logs;
 
     for (auto& filename : filesystem::directory_iterator(testsPath))
     {
@@ -119,7 +122,7 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        auto testName = filename.path().generic_u8string();
+        auto testName = filename.path().stem().generic_u8string();
 
         LOG_F("- Testing \"%\"", filename);
         tested.push_back(testName);
@@ -145,12 +148,21 @@ int main(int argc, char* argv[])
         }
 
         auto langPath = filename.path().generic_u8string();
+
         auto dstPath = (tmpPath / filename.path().filename().replace_extension("scx")).generic_u8string();
         auto dstIrPath = (tmpPath / filename.path().filename().replace_extension("ir")).generic_u8string();
+        auto logPath = (tmpPath / filename.path().filename().replace_extension("log")).generic_u8string();
 
-        if (!Compile(langPath, dstPath, dstIrPath))
+        if (!Compile(langPath, dstPath, dstIrPath, logPath))
         {
             LOG_F("Compilation failed for \"%\"", filename);
+            failed.push_back(testName);
+            continue;
+        }
+
+        if (!ReadTextFile(logPath, logs[testName]))
+        {
+            LOG_F("Failed to read from \"%\"", logPath);
             failed.push_back(testName);
             continue;
         }
@@ -197,16 +209,25 @@ int main(int argc, char* argv[])
 
     LOG_F("");
     LOG_F("***************************");
-    LOG_F("* RAN % TESTS", tested.size());
-    LOG_F("* % FAILED", failed.size());
+    LOG_F("RAN % TESTS", tested.size());
+    LOG_F("SUCCESSFUL: %", tested.size() - failed.size());
+    LOG_F("FAILED: %", failed.size());
     LOG_F("***************************");
 
     if (!failed.empty())
     {
         LOG_F("Failing tests:");
-        for (auto& filename : failed)
+
+        for (auto& testName : failed)
         {
-            LOG_F("- %", filename);
+            auto logPath = SafePrintf("%.compiler.log", testName);
+
+            if (!WriteTextFile(logPath, logs[testName]))
+            {
+                LOG_F("(!) Failed to write to \"%\"", logPath);
+            }
+
+            LOG_F("- % - compiler output: %", testName, logPath);
         }
     }
 

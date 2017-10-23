@@ -23,7 +23,6 @@ Table of Contents
   * [Integration with existing maps](#integration-with-existing-maps)
   * [Using the experimental debugger](#using-the-experimental-debugger)
   * [For project contributors](#for-project-contributors)
-  * [Future plans](#future-plans)
   * [Built-in constants](#built-in-constants)
     * [EndCondition](#endcondition)
     * [ResourceType](#resourcetype)

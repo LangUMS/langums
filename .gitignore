@@ -31,3 +31,4 @@ ldb/Debug/
 .vscode/
 test_results/
 test-runner.log
+*.log

@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 
         if (opts.count("log-file") > 0)
         {
-            auto logPath = filesystem::path(opts["lang"].as<std::string>());
+            auto logPath = filesystem::path(opts["log-file"].as<std::string>());
 
             try
             {
