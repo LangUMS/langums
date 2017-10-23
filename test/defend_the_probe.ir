@@ -1,0 +1,755 @@
+SET r8 0
+SET r9 0
+EVNT [SWITCH 19] 1
+BRING Player8 AllUnits HealStation 10 0
+EVNT [SWITCH 20] 1
+BRING Player7 PowerupDataDisk ProbeTarget1 10 0
+EVNT [SWITCH 21] 1
+BRING Player7 PowerupDataDisk ProbeTarget2 10 0
+EVNT [SWITCH 22] 1
+BRING Player7 PowerupDataDisk ProbeTarget3 10 0
+EVNT [SWITCH 23] 1
+BRING Player7 PowerupDataDisk ProbeTarget4 10 0
+EVNT [SWITCH 24] 1
+CMDS Player1 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 25] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 26] 1
+CMDS Player2 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 27] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 28] 1
+CMDS Player3 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 29] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 30] 1
+CMDS Player4 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 31] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 32] 1
+CMDS Player5 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 33] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 34] 1
+CMDS Player6 HeroJimRaynorMarine 10 0
+EVNT [SWITCH 35] 1
+SCORE Player7 7 0 32
+EVNT [SWITCH 36] 2
+BRING Player1 AllUnits BuyMarines 0 1
+ACCUM Player1 Minerals 0 50
+EVNT [SWITCH 37] 2
+BRING Player1 AllUnits BuyMedics 0 1
+ACCUM Player1 Minerals 0 75
+EVNT [SWITCH 38] 2
+BRING Player1 AllUnits BuyVultures 0 1
+ACCUM Player1 Minerals 0 100
+EVNT [SWITCH 39] 2
+BRING Player1 AllUnits BuyFirebats 0 1
+ACCUM Player1 Minerals 0 130
+EVNT [SWITCH 40] 2
+BRING Player1 AllUnits BuySiegeTanks 0 1
+ACCUM Player1 Minerals 0 250
+EVNT [SWITCH 41] 2
+BRING Player1 AllUnits BuySCV 0 1
+ACCUM Player1 Minerals 0 35
+EVNT [SWITCH 42] 2
+BRING Player2 AllUnits BuyMarines 0 1
+ACCUM Player2 Minerals 0 50
+EVNT [SWITCH 43] 2
+BRING Player2 AllUnits BuyMedics 0 1
+ACCUM Player2 Minerals 0 75
+EVNT [SWITCH 44] 2
+BRING Player2 AllUnits BuyVultures 0 1
+ACCUM Player2 Minerals 0 100
+EVNT [SWITCH 45] 2
+BRING Player2 AllUnits BuyFirebats 0 1
+ACCUM Player2 Minerals 0 130
+EVNT [SWITCH 46] 2
+BRING Player2 AllUnits BuySiegeTanks 0 1
+ACCUM Player2 Minerals 0 250
+EVNT [SWITCH 47] 2
+BRING Player2 AllUnits BuySCV 0 1
+ACCUM Player2 Minerals 0 35
+EVNT [SWITCH 48] 2
+BRING Player3 AllUnits BuyMarines 0 1
+ACCUM Player3 Minerals 0 50
+EVNT [SWITCH 49] 2
+BRING Player3 AllUnits BuyMedics 0 1
+ACCUM Player3 Minerals 0 75
+EVNT [SWITCH 50] 2
+BRING Player3 AllUnits BuyVultures 0 1
+ACCUM Player3 Minerals 0 100
+EVNT [SWITCH 51] 2
+BRING Player3 AllUnits BuyFirebats 0 1
+ACCUM Player3 Minerals 0 130
+EVNT [SWITCH 52] 2
+BRING Player3 AllUnits BuySiegeTanks 0 1
+ACCUM Player3 Minerals 0 250
+EVNT [SWITCH 53] 2
+BRING Player3 AllUnits BuySCV 0 1
+ACCUM Player3 Minerals 0 35
+EVNT [SWITCH 54] 2
+BRING Player4 AllUnits BuyMarines 0 1
+ACCUM Player4 Minerals 0 50
+EVNT [SWITCH 55] 2
+BRING Player4 AllUnits BuyMedics 0 1
+ACCUM Player4 Minerals 0 75
+EVNT [SWITCH 56] 2
+BRING Player4 AllUnits BuyVultures 0 1
+ACCUM Player4 Minerals 0 100
+EVNT [SWITCH 57] 2
+BRING Player4 AllUnits BuyFirebats 0 1
+ACCUM Player4 Minerals 0 130
+EVNT [SWITCH 58] 2
+BRING Player4 AllUnits BuySiegeTanks 0 1
+ACCUM Player4 Minerals 0 250
+EVNT [SWITCH 59] 2
+BRING Player4 AllUnits BuySCV 0 1
+ACCUM Player4 Minerals 0 35
+EVNT [SWITCH 60] 2
+BRING Player5 AllUnits BuyMarines 0 1
+ACCUM Player5 Minerals 0 50
+EVNT [SWITCH 61] 2
+BRING Player5 AllUnits BuyMedics 0 1
+ACCUM Player5 Minerals 0 75
+EVNT [SWITCH 62] 2
+BRING Player5 AllUnits BuyVultures 0 1
+ACCUM Player5 Minerals 0 100
+EVNT [SWITCH 63] 2
+BRING Player5 AllUnits BuyFirebats 0 1
+ACCUM Player5 Minerals 0 130
+EVNT [SWITCH 64] 2
+BRING Player5 AllUnits BuySiegeTanks 0 1
+ACCUM Player5 Minerals 0 250
+EVNT [SWITCH 65] 2
+BRING Player5 AllUnits BuySCV 0 1
+ACCUM Player5 Minerals 0 35
+EVNT [SWITCH 66] 2
+BRING Player6 AllUnits BuyMarines 0 1
+ACCUM Player6 Minerals 0 50
+EVNT [SWITCH 67] 2
+BRING Player6 AllUnits BuyMedics 0 1
+ACCUM Player6 Minerals 0 75
+EVNT [SWITCH 68] 2
+BRING Player6 AllUnits BuyVultures 0 1
+ACCUM Player6 Minerals 0 100
+EVNT [SWITCH 69] 2
+BRING Player6 AllUnits BuyFirebats 0 1
+ACCUM Player6 Minerals 0 130
+EVNT [SWITCH 70] 2
+BRING Player6 AllUnits BuySiegeTanks 0 1
+ACCUM Player6 Minerals 0 250
+EVNT [SWITCH 71] 2
+BRING Player6 AllUnits BuySCV 0 1
+ACCUM Player6 Minerals 0 35
+EVNT [SWITCH 72] 1
+DEATHS Player8 ZergZergling 0 2
+EVNT [SWITCH 73] 1
+DEATHS Player8 ZergHydralisk 0 1
+EVNT [SWITCH 74] 1
+DEATHS Player8 ZergUltralisk 0 1
+EVNT [SWITCH 75] 1
+DEATHS Player8 ZergInfestedTerran 0 3
+EVNT [SWITCH 76] 1
+CNTDWN 10 1
+EVNT [SWITCH 77] 1
+BRING Player8 AllUnits ProbeTarget1 0 1
+EVNT [SWITCH 78] 1
+BRING Player7 ProtossProbe ProbeTarget1 0 1
+EVNT [SWITCH 79] 1
+BRING Player8 AllUnits ProbeTarget2 0 1
+EVNT [SWITCH 80] 1
+BRING Player7 ProtossProbe ProbeTarget2 0 1
+EVNT [SWITCH 81] 1
+BRING Player8 AllUnits ProbeTarget3 0 1
+EVNT [SWITCH 82] 1
+BRING Player7 ProtossProbe ProbeTarget3 0 1
+EVNT [SWITCH 83] 1
+BRING Player8 AllUnits ProbeTarget4 0 1
+EVNT [SWITCH 84] 1
+BRING Player7 ProtossProbe ProbeTarget4 0 1
+EVNT [SWITCH 85] 1
+BRING Player7 ProtossProbe Delivery 0 1
+EVNT [SWITCH 86] 1
+BRING Player7 PowerupDataDisk Delivery 0 1
+CHKPLAYERS
+SETALLY AllPlayers Player7 [ALLY]
+SETALLY Player7 AllPlayers [ALLY]
+SETALLY Player7 Player8 [ENEMY]
+SETALLY Player8 Player7 [ENEMY]
+AISCRIPT Player1 +Vi6 AnyLocation
+AISCRIPT Player2 +Vi6 AnyLocation
+AISCRIPT Player3 +Vi6 AnyLocation
+AISCRIPT Player4 +Vi6 AnyLocation
+AISCRIPT Player5 +Vi6 AnyLocation
+AISCRIPT Player6 +Vi6 AnyLocation
+CNTRVIEW AllPlayers MapCenter
+ISPRESENT Player1
+JEQ [STACK 0] 0 +3
+SPAWN Player1 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player1 AllUnits DisableClick 5
+ISPRESENT Player2
+JEQ [STACK 0] 0 +3
+SPAWN Player2 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player2 AllUnits DisableClick 5
+ISPRESENT Player3
+JEQ [STACK 0] 0 +3
+SPAWN Player3 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player3 AllUnits DisableClick 5
+ISPRESENT Player4
+JEQ [STACK 0] 0 +3
+SPAWN Player4 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player4 AllUnits DisableClick 5
+ISPRESENT Player5
+JEQ [STACK 0] 0 +3
+SPAWN Player5 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player5 AllUnits DisableClick 5
+ISPRESENT Player6
+JEQ [STACK 0] 0 +3
+SPAWN Player6 HeroJimRaynorMarine 1 MapCenter 
+SETDOODAD Player6 AllUnits DisableClick 5
+CNTRVIEW AllPlayers MapCenter
+SETOBJ - Don't let the probes die until they deliver the cargo.' - You can buy units at the beacons. - Upgrade your units with gas you get from deliveries.    [ALL]
+LDRBOARD "deliveries left to make" Points [GOAL 32]
+LDRBOARDCPU 5
+WAIT 4000
+MSG "Buy units from the beacons." [ALL]
+PING AllPlayers BuyMarines
+PING AllPlayers BuySCV
+PING AllPlayers BuyMedics
+PING AllPlayers BuyFirebats
+PING AllPlayers BuySiegeTanks
+PING AllPlayers BuyVultures
+WAIT 4000
+PING AllPlayers Upgrades
+CNTRVIEW AllPlayers Upgrades
+MSG "Buy upgrades from here." [ALL]
+WAIT 4000
+CNTRVIEW AllPlayers MapCenter
+PING AllPlayers MapCenter
+MSG "Stop the probes from getting killed before making a delivery to earn gas." [ALL]
+WAIT 3000
+MSG "Probes take cargo from these four beacons..." [ALL]
+PING AllPlayers ProbeTarget1
+PING AllPlayers ProbeTarget2
+PING AllPlayers ProbeTarget3
+PING AllPlayers ProbeTarget4
+WAIT 2000
+PING AllPlayers Delivery
+MSG "...and deliver it here." [ALL]
+WAIT 1000
+INCRSRC AllPlayers Minerals 100
+INCRSRC AllPlayers Gas 50
+SETCNDWN 20
+SETSW [SWITCH 8] 0
+SETSW [SWITCH 9] 0
+SETSW [SWITCH 10] 0
+SETSW [SWITCH 11] 0
+SETSW [SWITCH 12] 0
+SETSW [SWITCH 13] 0
+SETSW [SWITCH 14] 0
+SETSW [SWITCH 15] 0
+SETSW [SWITCH 16] 0
+SETSW [SWITCH 17] 0
+SETSW [SWITCH 18] 0
+SETSW [SWITCH 19] 0
+SETSW [SWITCH 20] 0
+SETSW [SWITCH 21] 0
+SETSW [SWITCH 22] 0
+SETSW [SWITCH 23] 0
+SETSW [SWITCH 24] 0
+SETSW [SWITCH 25] 0
+SETSW [SWITCH 26] 0
+SETSW [SWITCH 27] 0
+SETSW [SWITCH 28] 0
+SETSW [SWITCH 29] 0
+SETSW [SWITCH 30] 0
+SETSW [SWITCH 31] 0
+SETSW [SWITCH 32] 0
+SETSW [SWITCH 33] 0
+SETSW [SWITCH 34] 0
+SETSW [SWITCH 35] 0
+SETSW [SWITCH 36] 0
+SETSW [SWITCH 37] 0
+SETSW [SWITCH 38] 0
+SETSW [SWITCH 39] 0
+SETSW [SWITCH 40] 0
+SETSW [SWITCH 41] 0
+SETSW [SWITCH 42] 0
+SETSW [SWITCH 43] 0
+SETSW [SWITCH 44] 0
+SETSW [SWITCH 45] 0
+SETSW [SWITCH 46] 0
+SETSW [SWITCH 47] 0
+SETSW [SWITCH 48] 0
+SETSW [SWITCH 49] 0
+SETSW [SWITCH 50] 0
+SETSW [SWITCH 51] 0
+SETSW [SWITCH 52] 0
+SETSW [SWITCH 53] 0
+SETSW [SWITCH 54] 0
+SETSW [SWITCH 55] 0
+SETSW [SWITCH 56] 0
+SETSW [SWITCH 57] 0
+SETSW [SWITCH 58] 0
+SETSW [SWITCH 59] 0
+SETSW [SWITCH 60] 0
+SETSW [SWITCH 61] 0
+SETSW [SWITCH 62] 0
+SETSW [SWITCH 63] 0
+SETSW [SWITCH 64] 0
+SETSW [SWITCH 65] 0
+SETSW [SWITCH 66] 0
+SETSW [SWITCH 67] 0
+SETSW [SWITCH 68] 0
+SETSW [SWITCH 69] 0
+SETSW [SWITCH 70] 0
+SETSW [SWITCH 71] 0
+SETSW [SWITCH 72] 0
+SETSW [SWITCH 73] 0
+SETSW [SWITCH 74] 0
+SETSW [SWITCH 75] 0
+SET r9 1
+MOVE AllPlayers TerranEngineeringBay 1 AnyLocation Upgrades
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+JSNS [SWITCH 19] +3
+MODIFY Force1 AllUnits 10 HitPoints 100 HealStation
+MODIFY Force1 AllUnits 10 Energy 100 HealStation
+SETSW [SWITCH 19] 0
+JSNS [SWITCH 20] +2
+SPAWN Player7 PowerupDataDisk 1 ProbeTarget1 
+SETSW [SWITCH 20] 0
+JSNS [SWITCH 21] +2
+SPAWN Player7 PowerupDataDisk 1 ProbeTarget2 
+SETSW [SWITCH 21] 0
+JSNS [SWITCH 22] +2
+SPAWN Player7 PowerupDataDisk 1 ProbeTarget3 
+SETSW [SWITCH 22] 0
+JSNS [SWITCH 23] +2
+SPAWN Player7 PowerupDataDisk 1 ProbeTarget4 
+SETSW [SWITCH 23] 0
+JSNS [SWITCH 24] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player1
+END Player1 [DEFEAT]
+SETSW [SWITCH 24] 0
+JSNS [SWITCH 25] +2
+END Player1 [VICTORY]
+SETSW [SWITCH 25] 0
+JSNS [SWITCH 26] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player2
+END Player2 [DEFEAT]
+SETSW [SWITCH 26] 0
+JSNS [SWITCH 27] +2
+END Player2 [VICTORY]
+SETSW [SWITCH 27] 0
+JSNS [SWITCH 28] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player3
+END Player3 [DEFEAT]
+SETSW [SWITCH 28] 0
+JSNS [SWITCH 29] +2
+END Player3 [VICTORY]
+SETSW [SWITCH 29] 0
+JSNS [SWITCH 30] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player4
+END Player4 [DEFEAT]
+SETSW [SWITCH 30] 0
+JSNS [SWITCH 31] +2
+END Player4 [VICTORY]
+SETSW [SWITCH 31] 0
+JSNS [SWITCH 32] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player5
+END Player5 [DEFEAT]
+SETSW [SWITCH 32] 0
+JSNS [SWITCH 33] +2
+END Player5 [VICTORY]
+SETSW [SWITCH 33] 0
+JSNS [SWITCH 34] +10
+PUSH r9
+JEQ [STACK 0] 0 +3
+SET [STACK 0] 0
+JMP +2
+SET [STACK 0] 1
+JEQ [STACK 0] 0 +2
+JMP +3
+MSG "You have died a glorious death. o7" Player6
+END Player6 [DEFEAT]
+SETSW [SWITCH 34] 0
+JSNS [SWITCH 35] +2
+END Player6 [VICTORY]
+SETSW [SWITCH 35] 0
+JSNS [SWITCH 36] +4
+DECRSRC Player1 Minerals 50
+SPAWN Player1 TerranMarine 1 MapCenter 
+MOVE Player1 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 36] 0
+JSNS [SWITCH 37] +4
+DECRSRC Player1 Minerals 75
+SPAWN Player1 TerranMedic 1 MapCenter 
+MOVE Player1 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 37] 0
+JSNS [SWITCH 38] +4
+DECRSRC Player1 Minerals 100
+SPAWN Player1 TerranVulture 1 MapCenter 
+MOVE Player1 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 38] 0
+JSNS [SWITCH 39] +4
+DECRSRC Player1 Minerals 130
+SPAWN Player1 TerranFirebat 1 MapCenter 
+MOVE Player1 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 39] 0
+JSNS [SWITCH 40] +4
+DECRSRC Player1 Minerals 250
+SPAWN Player1 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player1 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 40] 0
+JSNS [SWITCH 41] +4
+DECRSRC Player1 Minerals 35
+SPAWN Player1 TerranSCV 1 MapCenter 
+MOVE Player1 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 41] 0
+JSNS [SWITCH 42] +4
+DECRSRC Player2 Minerals 50
+SPAWN Player2 TerranMarine 1 MapCenter 
+MOVE Player2 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 42] 0
+JSNS [SWITCH 43] +4
+DECRSRC Player2 Minerals 75
+SPAWN Player2 TerranMedic 1 MapCenter 
+MOVE Player2 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 43] 0
+JSNS [SWITCH 44] +4
+DECRSRC Player2 Minerals 100
+SPAWN Player2 TerranVulture 1 MapCenter 
+MOVE Player2 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 44] 0
+JSNS [SWITCH 45] +4
+DECRSRC Player2 Minerals 130
+SPAWN Player2 TerranFirebat 1 MapCenter 
+MOVE Player2 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 45] 0
+JSNS [SWITCH 46] +4
+DECRSRC Player2 Minerals 250
+SPAWN Player2 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player2 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 46] 0
+JSNS [SWITCH 47] +4
+DECRSRC Player2 Minerals 35
+SPAWN Player2 TerranSCV 1 MapCenter 
+MOVE Player2 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 47] 0
+JSNS [SWITCH 48] +4
+DECRSRC Player3 Minerals 50
+SPAWN Player3 TerranMarine 1 MapCenter 
+MOVE Player3 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 48] 0
+JSNS [SWITCH 49] +4
+DECRSRC Player3 Minerals 75
+SPAWN Player3 TerranMedic 1 MapCenter 
+MOVE Player3 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 49] 0
+JSNS [SWITCH 50] +4
+DECRSRC Player3 Minerals 100
+SPAWN Player3 TerranVulture 1 MapCenter 
+MOVE Player3 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 50] 0
+JSNS [SWITCH 51] +4
+DECRSRC Player3 Minerals 130
+SPAWN Player3 TerranFirebat 1 MapCenter 
+MOVE Player3 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 51] 0
+JSNS [SWITCH 52] +4
+DECRSRC Player3 Minerals 250
+SPAWN Player3 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player3 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 52] 0
+JSNS [SWITCH 53] +4
+DECRSRC Player3 Minerals 35
+SPAWN Player3 TerranSCV 1 MapCenter 
+MOVE Player3 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 53] 0
+JSNS [SWITCH 54] +4
+DECRSRC Player4 Minerals 50
+SPAWN Player4 TerranMarine 1 MapCenter 
+MOVE Player4 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 54] 0
+JSNS [SWITCH 55] +4
+DECRSRC Player4 Minerals 75
+SPAWN Player4 TerranMedic 1 MapCenter 
+MOVE Player4 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 55] 0
+JSNS [SWITCH 56] +4
+DECRSRC Player4 Minerals 100
+SPAWN Player4 TerranVulture 1 MapCenter 
+MOVE Player4 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 56] 0
+JSNS [SWITCH 57] +4
+DECRSRC Player4 Minerals 130
+SPAWN Player4 TerranFirebat 1 MapCenter 
+MOVE Player4 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 57] 0
+JSNS [SWITCH 58] +4
+DECRSRC Player4 Minerals 250
+SPAWN Player4 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player4 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 58] 0
+JSNS [SWITCH 59] +4
+DECRSRC Player4 Minerals 35
+SPAWN Player4 TerranSCV 1 MapCenter 
+MOVE Player4 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 59] 0
+JSNS [SWITCH 60] +4
+DECRSRC Player5 Minerals 50
+SPAWN Player5 TerranMarine 1 MapCenter 
+MOVE Player5 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 60] 0
+JSNS [SWITCH 61] +4
+DECRSRC Player5 Minerals 75
+SPAWN Player5 TerranMedic 1 MapCenter 
+MOVE Player5 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 61] 0
+JSNS [SWITCH 62] +4
+DECRSRC Player5 Minerals 100
+SPAWN Player5 TerranVulture 1 MapCenter 
+MOVE Player5 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 62] 0
+JSNS [SWITCH 63] +4
+DECRSRC Player5 Minerals 130
+SPAWN Player5 TerranFirebat 1 MapCenter 
+MOVE Player5 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 63] 0
+JSNS [SWITCH 64] +4
+DECRSRC Player5 Minerals 250
+SPAWN Player5 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player5 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 64] 0
+JSNS [SWITCH 65] +4
+DECRSRC Player5 Minerals 35
+SPAWN Player5 TerranSCV 1 MapCenter 
+MOVE Player5 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 65] 0
+JSNS [SWITCH 66] +4
+DECRSRC Player6 Minerals 50
+SPAWN Player6 TerranMarine 1 MapCenter 
+MOVE Player6 AllUnits 100 BuyMarines BuyMarinesReturn
+SETSW [SWITCH 66] 0
+JSNS [SWITCH 67] +4
+DECRSRC Player6 Minerals 75
+SPAWN Player6 TerranMedic 1 MapCenter 
+MOVE Player6 AllUnits 100 BuyMedics BuyMedicsReturn
+SETSW [SWITCH 67] 0
+JSNS [SWITCH 68] +4
+DECRSRC Player6 Minerals 100
+SPAWN Player6 TerranVulture 1 MapCenter 
+MOVE Player6 AllUnits 100 BuyVultures BuyVulturesReturn
+SETSW [SWITCH 68] 0
+JSNS [SWITCH 69] +4
+DECRSRC Player6 Minerals 130
+SPAWN Player6 TerranFirebat 1 MapCenter 
+MOVE Player6 AllUnits 100 BuyFirebats BuyFirebatsReturn
+SETSW [SWITCH 69] 0
+JSNS [SWITCH 70] +4
+DECRSRC Player6 Minerals 250
+SPAWN Player6 TerranSiegeTankTankMode 1 MapCenter 
+MOVE Player6 AllUnits 100 BuySiegeTanks BuySiegeTanksReturn
+SETSW [SWITCH 70] 0
+JSNS [SWITCH 71] +4
+DECRSRC Player6 Minerals 35
+SPAWN Player6 TerranSCV 1 MapCenter 
+MOVE Player6 AllUnits 100 BuySCV BuySCVReturn
+SETSW [SWITCH 71] 0
+JSNS [SWITCH 72] +3
+INCDEATHS Player8 ZergZergling 2
+INCRSRC AllPlayers Minerals 1
+SETSW [SWITCH 72] 0
+JSNS [SWITCH 73] +3
+INCDEATHS Player8 ZergHydralisk 1
+INCRSRC AllPlayers Minerals 3
+SETSW [SWITCH 73] 0
+JSNS [SWITCH 74] +3
+INCDEATHS Player8 ZergUltralisk 1
+INCRSRC AllPlayers Minerals 4
+SETSW [SWITCH 74] 0
+JSNS [SWITCH 75] +3
+INCDEATHS Player8 ZergInfestedTerran 3
+INCRSRC AllPlayers Minerals 2
+SETSW [SWITCH 75] 0
+JSNS [SWITCH 76] +105
+SETCNDWN 26
+INC r8
+SPAWN Player8 ZergZergling 12 EnemySpawn1 
+SPAWN Player8 ZergZergling 12 EnemySpawn2 
+JLE r8 8 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +2
+JMP +38
+SPAWN Player8 ZergZergling 8 EnemySpawn2 
+SPAWN Player8 ZergHydralisk 6 EnemySpawn1 
+JLE r8 15 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +2
+JMP +29
+SPAWN Player8 ZergZergling 6 EnemySpawn2 
+SPAWN Player8 ZergHydralisk 3 EnemySpawn2 
+SPAWN Player8 ZergUltralisk 3 EnemySpawn2 
+JLE r8 25 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +2
+JMP +19
+SPAWN Player8 ZergHydralisk 3 EnemySpawn1 
+SPAWN Player8 ZergInfestedTerran 8 EnemySpawn2 
+JLE r8 30 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +2
+JMP +10
+SPAWN Player8 ZergDefiler 2 EnemySpawn1 
+SPAWN Player8 ZergDefiler 2 EnemySpawn2 
+JGE r8 35 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +2
+SET r8 34
+SPAWN Player7 ProtossProbe 1 MapCenter 
+PING AllPlayers MapCenter
+MSG "A probe has spawned in the center and is heading for a cargo beacon, protect it!" [ALL]
+WAIT 500
+RND256
+POP r10
+JLE r10 65 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PING AllPlayers ProbeTarget1
+ORDER Player7 ProtossProbe Move MapCenter ProbeTarget1
+JMP +21
+JLE r10 130 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PING AllPlayers ProbeTarget2
+ORDER Player7 ProtossProbe Move MapCenter ProbeTarget2
+JMP +12
+JLE r10 195 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PING AllPlayers ProbeTarget3
+ORDER Player7 ProtossProbe Move MapCenter ProbeTarget3
+JMP +3
+PING AllPlayers ProbeTarget4
+ORDER Player7 ProtossProbe Move MapCenter ProbeTarget4
+RND256
+POP r10
+JLT r10 100 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+ORDER Player8 AllUnits Patrol EnemySpawn1 ProbeTarget3
+ORDER Player8 AllUnits Patrol EnemySpawn2 ProbeTarget4
+JMP +11
+JLT r10 200 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+ORDER Player8 AllUnits Patrol EnemySpawn1 ProbeTarget1
+ORDER Player8 AllUnits Patrol EnemySpawn2 ProbeTarget2
+JMP +2
+ORDER Player8 AllUnits Patrol AnyLocation MapCenter
+SETSW [SWITCH 76] 0
+JSNS [SWITCH 77] +2
+ORDER Player8 AllUnits Patrol ProbeTarget1 MapCenter
+SETSW [SWITCH 77] 0
+JSNS [SWITCH 78] +3
+WAIT 500
+ORDER Player7 AllUnits Move ProbeTarget1 Delivery
+SETSW [SWITCH 78] 0
+JSNS [SWITCH 79] +2
+ORDER Player8 AllUnits Patrol ProbeTarget2 MapCenter
+SETSW [SWITCH 79] 0
+JSNS [SWITCH 80] +3
+WAIT 500
+ORDER Player7 AllUnits Move ProbeTarget2 Delivery
+SETSW [SWITCH 80] 0
+JSNS [SWITCH 81] +2
+ORDER Player8 AllUnits Patrol ProbeTarget3 MapCenter
+SETSW [SWITCH 81] 0
+JSNS [SWITCH 82] +3
+WAIT 500
+ORDER Player7 AllUnits Move ProbeTarget3 Delivery
+SETSW [SWITCH 82] 0
+JSNS [SWITCH 83] +2
+ORDER Player8 AllUnits Patrol ProbeTarget4 MapCenter
+SETSW [SWITCH 83] 0
+JSNS [SWITCH 84] +3
+WAIT 500
+ORDER Player7 AllUnits Move ProbeTarget4 Delivery
+SETSW [SWITCH 84] 0
+JSNS [SWITCH 85] +2
+KILL Player7 ProtossProbe 1 Delivery
+SETSW [SWITCH 85] 0
+JSNS [SWITCH 86] +4
+KILL Player7 PowerupDataDisk 1 Delivery
+INCSCORE AllPlayers 7 1
+INCRSRC AllPlayers Gas 8
+SETSW [SWITCH 86] 0
+SETSW [SWITCH 1] 0
+JMP 312
