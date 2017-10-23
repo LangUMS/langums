@@ -1004,7 +1004,22 @@ namespace Langums
             }
             else
             {
-                condition->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+                auto identifier = Identifier();
+
+                if (Peek() == '[')
+                {
+                    Symbol('[');
+                    auto arrayIndex = NumberLiteral();
+                    Symbol(']');
+
+                    auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
+                    arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(arrayIndex, m_CurrentChar)));
+                    condition->AddChild(std::shared_ptr<IASTNode>(arrayExpression));
+                }
+                else
+                {
+                    condition->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier, m_CurrentChar)));
+                }
             }
             
             Whitespace();
