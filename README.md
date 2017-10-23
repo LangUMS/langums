@@ -60,6 +60,8 @@ langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx
 
 5. Get the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=langums.langums). It has syntax highlighting, code completion and support for the experimental debugger.
 
+6. Read the rest of this document and run `langums.exe --help` to see the available command-line arguments.
+
 ## Language features
 
 - C-like syntax
@@ -257,11 +259,11 @@ fn main() {
 
 Notes:
 
-* Arguments named `Expression` can be either numeric constants e.g. `42` or expressions like `x * 3`.
+* Arguments named `Expression` may either be numeric constants e.g. `42` or expressions like `x * 3`.
 * Text arguments must be passed in `"` quotes e.g. `"This is some text"`.
-* Location arguments can be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
-* The special value `AnyLocation` can be passed to `Location` type arguments.
-* The special value `All` can be passed to `Quantity` and `QuantityExpression` arguments involving unity quantities e.g. `kill(Player1, TerranMarine, All)`.
+* Location arguments may be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
+* The special value `AnyLocation` may be passed to `Location` type arguments.
+* The special value `All` may be passed to `Quantity` and `QuantityExpression` arguments involving unity quantities e.g. `kill(Player1, TerranMarine, All)`.
 
 ### Unit functions
 
@@ -569,7 +571,8 @@ Also note that the length of the argument lists must be equal.
 ## Examples
 
 You can find LangUMS example maps here - https://github.com/LangUMS/langums-examples
-Feel free to contribute your own.
+
+Contributions to the example map pool are very welcome.
 
 ## FAQ
 
@@ -635,7 +638,7 @@ You can call `is_present()` for both cases. To check if a player or players are 
 
 ```c
 if (is_present(Player1, Player2)) {
-  print("Player 1 and player 2 are in the game");
+  print("Player1 and Player2 are in the game");
 }
 ```
 
@@ -647,15 +650,11 @@ var playerCount = is_present();
 
 #### Can you put non-ASCII strings in the Text arguments?
 
-Yes. Make sure to save your code source file as UTF-8 and non-ASCII characters should display properly in the game. It is currently unknown if this applies to patches before 1.18 which added unicode support to the game.
+Yes. Make sure to save your code source file as UTF-8 and unicode characters should display properly in the game. (1.18+ and Remastered only)
 
 #### How do you make colored text?
 
-Use the same syntax as SCMDraft. You put the hex color name in `<>` e.g. `"<07>This text is green"`.
-
-#### Do you plan to rewrite this in Rust?
-
-No, but thanks for asking.
+Use the same syntax as SCMDraft. Put the hex color name in `<>` e.g. `"<07>This text is green"`. [Click here for a list of available colors](https://web.archive.org/web/20081122131350/http://www.staredit.net/wiki/Colors_list).
 
 ## Limitations
 
