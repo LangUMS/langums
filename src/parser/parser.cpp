@@ -536,7 +536,14 @@ namespace Langums
             Symbol('[');
             Whitespace();
 
-            arrayIndex = Expression();
+            if (std::isdigit(Peek()))
+            {
+                arrayIndex = std::unique_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar));
+            }
+            else
+            {
+                arrayIndex = std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar));
+            }
 
             Whitespace();
             Symbol(']');

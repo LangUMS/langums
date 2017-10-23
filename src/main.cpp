@@ -53,6 +53,7 @@ int main(int argc, char* argv[])
         ("disable-optimization", "Disables all forms of compiler optimization (useful to debug compiler issues).", cxxopts::value<bool>())
         ("disable-compression", "Disables compression of the resulting map file. Results in much larger file sizes but you can open the map in StarEdit.", cxxopts::value<bool>())
         ("dump-ir", "Dumps the intermediate representation during compilation.", cxxopts::value<bool>())
+        ("ir", "Dumps the intermediate representation to a file.", cxxopts::value<std::string>())
         ("force", "Forces the compiler to do thing it shouldn't.", cxxopts::value<bool>())
         ("debug", "Attaches the debugger after compiling the map. (experimental!)", cxxopts::value<bool>())
         ("debug-process", "Sets the StarCraft process name for debugging (default: starcraft.exe).", cxxopts::value<std::string>())
@@ -512,6 +513,23 @@ int main(int argc, char* argv[])
         LOG_F("\n----------- IR DUMP -----------");
         LOG_F("%", ir.DumpInstructions(true));
         LOG_F("-------------------------------");
+    }
+
+    if (opts.count("ir") > 0)
+    {
+        auto irPath = filesystem::path(opts["ir"].as<std::string>());
+        std::ofstream irFile(irPath);
+        if (!irFile.is_open())
+        {
+            LOG_EXITERR("(!) Failed to open \"%\" for writing.", irPath);
+            return 1;
+        }
+
+        irFile << ir.DumpInstructions(false) << '\n';
+        irFile.flush();
+        irFile.close();
+
+        LOG_F("IR representation written to \"%\"", irPath);
     }
 
     LOG_F("\nEmitted % instructions.\n", instructions.size());

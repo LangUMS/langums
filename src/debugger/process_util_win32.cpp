@@ -71,9 +71,10 @@ namespace Langums
         return handle;
     }
 
+#pragma warning(disable: 4800)
     bool Process::Close(ProcessHandle process)
     {
-        return (bool)CloseHandle(process);
+        return CloseHandle(process);
     }
 
     bool Process::ReadMemory(ProcessHandle process, void* address, size_t size, void* dstBuffer, size_t& retBytesRead)
