@@ -147,7 +147,7 @@ namespace Langums
 				{
 					auto string = (ASTStringLiteral*)callArg.get();
 					auto hash = std::hash<std::string>()(string->GetValue());
-					genFnName += SafePrintf("[%]_", string->GetValue());
+					genFnName += SafePrintf("[%]_", hash);
 				}
                 else
                 {

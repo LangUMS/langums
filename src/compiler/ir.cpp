@@ -3305,7 +3305,9 @@ namespace Langums
             }
             else
             {
-                throw IRCompilerException(SafePrintf("Invalid argument value for argument % in call to \"%\", expected quantity expression", argIndex, fnName), node.get());
+				EmitExpression(node.get(), instructions, aliases);
+				isLiteral = false;
+				regId = Reg_StackTop;
             }
         }
         else if (node->GetType() == ASTNodeType::NumberLiteral)
