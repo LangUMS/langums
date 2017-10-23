@@ -553,6 +553,19 @@ fn spawn_bonus_items() {
 }
 ```
 
+Repeat templates can have more than one template argument (and argument list). For example:
+
+```c
+fn test() {
+	for <PlayerId, Msg> in (Player1, Player2, Player3), ("Foo", "Bar", "Baz") {
+		print("Hello, " + Msg, PlayerId);
+	}
+}
+```
+
+Note that string expressions like `"Hello, " + Msg` are evaluated at compile-time and will take up as many string slots as the number of items in the repeat template.
+Also note that the length of the argument lists must be equal.
+
 ## Examples
 
 You can find LangUMS example maps here - https://github.com/LangUMS/langums-examples

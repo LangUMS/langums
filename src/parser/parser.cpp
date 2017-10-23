@@ -1077,7 +1077,21 @@ namespace Langums
         Symbol('<');
         Whitespace();
 
-        auto iteratorName = Identifier();
+        std::vector<std::string> iterators;
+
+        while (true)
+        {
+            iterators.push_back(Identifier());
+            Whitespace();
+
+            if (Peek() == '>')
+            {
+                break;
+            }
+
+            Symbol(',');
+            Whitespace();
+        }
 
         Whitespace();
         Symbol('>');
@@ -1086,52 +1100,49 @@ namespace Langums
         Keyword("in");
         Whitespace();
 
-        Symbol('(');
-        Whitespace();
+        auto repeatTemplate = new ASTRepeatTemplate(iterators, m_CurrentChar);
 
-        auto repeatTemplate = new ASTRepeatTemplate(iteratorName, m_CurrentChar);
-
-        auto c = Peek();
-        if (std::isdigit(c))
+        for (auto i = 0u; i < iterators.size(); i++)
         {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
-        }
-        else if (c == '"')
-        {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
-        }
-        else
-        {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
-        }
-
-        c = Peek();
-        while (c == ',')
-        {
-            Next();
+            Symbol('(');
             Whitespace();
 
-            c = Peek();
+            auto c = Peek();
+            while (c != ')')
+            {
+                if (std::isdigit(c))
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+                }
+                else if (c == '"')
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+                }
+                else
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+                }
 
-            if (std::isdigit(c))
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
-            }
-            else if (c == '"')
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
-            }
-            else
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+                Whitespace();
+                c = Peek();
+                if (c == ',')
+                {
+                    Symbol(',');
+                    Whitespace();
+                }
             }
 
             Whitespace();
-            c = Peek();
-        }
+            Symbol(')');
+            Whitespace();
 
-        Symbol(')');
-        Whitespace();
+            if (i != iterators.size() - 1)
+            {
+                Symbol(',');
+                Whitespace();
+                c = Peek();
+            }
+        }
 
         Symbol('{');
         Whitespace();
@@ -1160,7 +1171,21 @@ namespace Langums
         Symbol('<');
         Whitespace();
 
-        auto iteratorName = Identifier();
+        std::vector<std::string> iterators;
+
+        while (true)
+        {
+            iterators.push_back(Identifier());
+            Whitespace();
+            
+            if (Peek() == '>')
+            {
+                break;
+            }
+            
+            Symbol(',');
+            Whitespace();
+        }
 
         Whitespace();
         Symbol('>');
@@ -1169,52 +1194,48 @@ namespace Langums
         Keyword("in");
         Whitespace();
 
-        Symbol('(');
-        Whitespace();
+        auto repeatTemplate = new ASTRepeatTemplate(iterators, m_CurrentChar);
 
-        auto repeatTemplate = new ASTRepeatTemplate(iteratorName, m_CurrentChar);
-
-        auto c = Peek();
-        if (std::isdigit(c))
+        for (auto i = 0u; i < iterators.size(); i++)
         {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
-        }
-        else if (c == '"')
-        {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
-        }
-        else
-        {
-            repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
-        }
-
-        c = Peek();
-        while (c == ',')
-        {
-            Next();
+            Symbol('(');
             Whitespace();
 
-            c = Peek();
+            auto c = Peek();
+            while (c != ')')
+            {
+                if (std::isdigit(c))
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+                }
+                else if (c == '"')
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
+                }
+                else
+                {
+                    repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
+                }
 
-            if (std::isdigit(c))
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTNumberLiteral(NumberLiteral(), m_CurrentChar)));
+                Whitespace();
+                c = Peek();
+                if (c == ',')
+                {
+                    Symbol(',');
+                    Whitespace();
+                    c = Peek();
+                }
             }
-            else if (c == '"')
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTStringLiteral(StringLiteral(), m_CurrentChar)));
-            }
-            else
-            {
-                repeatTemplate->AddListItem(std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
-            }
-
+            
+            Symbol(')');
             Whitespace();
-            c = Peek();
-        }
 
-        Symbol(')');
-        Whitespace();
+            if (i != iterators.size() - 1)
+            {
+                Symbol(',');
+                Whitespace();
+            }
+        }
 
         repeatTemplate->AddChild(BlockStatement());
         

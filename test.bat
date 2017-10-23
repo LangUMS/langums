@@ -19,3 +19,5 @@ langums.exe --src test/test.scx --dst test_results/test_17.scx --lang test/test1
 langums.exe --src test/test.scx --dst test_results/test_18.scx --lang test/test18.l
 langums.exe --src test/test.scx --dst test_results/test_19.scx --lang test/test19.l
 langums.exe --src test/test.scx --dst test_results/test_20.scx --lang test/test20.l
+langums.exe --src test/test.scx --dst test_results/test_21.scx --lang test/test21.l
+langums.exe --src test/test.scx --dst test_results/test_22.scx --lang test/test22.l

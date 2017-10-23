@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 namespace Langums
 {
@@ -537,28 +538,28 @@ namespace Langums
     class ASTRepeatTemplate : public IASTNode
     {
         public:
-        ASTRepeatTemplate(const std::string& iteratorName, unsigned int charIndex) :
-            m_IteratorName(iteratorName), IASTNode(charIndex, ASTNodeType::RepeatTemplate)
+        ASTRepeatTemplate(const std::vector<std::string>& iterators, unsigned int charIndex) :
+            m_Iterators(iterators), IASTNode(charIndex, ASTNodeType::RepeatTemplate)
         {}
 
-        const std::string& GetIteratorName() const
+        const std::vector<std::string>& GetIterators() const
         {
-            return m_IteratorName;
+            return m_Iterators;
         }
 
-        const std::vector<std::shared_ptr<IASTNode>>& GetList() const
+        const std::vector<std::shared_ptr<IASTNode>>& GetArgumentList(const std::string& iterator)
         {
-            return m_List;
+            return m_ArgumentLists[iterator];
         }
 
-        void AddListItem(const std::shared_ptr<IASTNode>& node)
+        void AddListItem(const std::string& iterator, const std::shared_ptr<IASTNode>& node)
         {
-            m_List.push_back(node);
+            m_ArgumentLists[iterator].push_back(node);
         }
 
         private:
-        std::string m_IteratorName;
-        std::vector<std::shared_ptr<IASTNode>> m_List;
+        std::vector<std::string> m_Iterators;
+        std::unordered_map<std::string, std::vector<std::shared_ptr<IASTNode>>> m_ArgumentLists;
     };
 
     class ASTUnitProperties : public IASTNode

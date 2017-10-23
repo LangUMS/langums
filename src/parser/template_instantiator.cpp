@@ -188,10 +188,10 @@ namespace Langums
     {
         std::vector<std::unique_ptr<IASTNode>> nodes;
 
-        auto& iterator = repeatTemplate->GetIteratorName();
-        auto& list = repeatTemplate->GetList();
+        auto& iterators = repeatTemplate->GetIterators();
+        auto itemCount = repeatTemplate->GetArgumentList(iterators[0]).size();
 
-        for (auto& item : list)
+        for (auto i = 0u; i < itemCount; i++)
         {
             auto firstChild = repeatTemplate->GetChild(0);
             if (firstChild->GetType() == ASTNodeType::BlockStatement)
@@ -200,7 +200,20 @@ namespace Langums
                 for (auto& statement : statements)
                 {
                     auto newStatement = CloneNode(statement.get());
-                    ReplaceIdentifier(newStatement.get(), iterator, item);
+
+                    for (auto& iterator : iterators)
+                    {
+                        auto& items = repeatTemplate->GetArgumentList(iterator);
+
+                        if (items.size() != itemCount)
+                        {
+                            throw TemplateInstantiatorException(SafePrintf("Argument list mismatch, expected % items but only got % for iterator \"%\"",
+                                itemCount, items.size(), iterator), repeatTemplate);
+                        }
+
+                        ReplaceIdentifier(newStatement.get(), iterator, items[i]);
+                    }
+
                     nodes.push_back(std::move(newStatement));
                 }
             }
@@ -210,7 +223,20 @@ namespace Langums
                 for (auto& eventDeclaration : eventDeclarations)
                 {
                     auto newStatement = CloneNode(eventDeclaration.get());
-                    ReplaceIdentifier(newStatement.get(), iterator, item);
+
+                    for (auto& iterator : iterators)
+                    {
+                        auto& items = repeatTemplate->GetArgumentList(iterator);
+
+                        if (items.size() != itemCount)
+                        {
+                            throw TemplateInstantiatorException(SafePrintf("Argument list mismatch, expected % items but only got % for iterator \"%\"",
+                                itemCount, items.size(), iterator), repeatTemplate);
+                        }
+
+                        ReplaceIdentifier(newStatement.get(), iterator, items[i]);
+                    }
+
                     nodes.push_back(std::move(newStatement));
                 }
             }
