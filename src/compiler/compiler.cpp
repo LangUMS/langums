@@ -53,7 +53,7 @@ namespace Langums
         {
             throw CompilerException("No strings chunk found in scenario file", nullptr);
         }
-         
+
         m_LocationsChunk = chk.GetFirstChunk<MRGNChunk>(ChunkType::MRGN);
         if (m_LocationsChunk == nullptr)
         {
@@ -426,7 +426,7 @@ namespace Langums
                 auto jmp = (IRJmpIfSwSetInstruction*)instruction.get();
                 targetIndex = jmp->IsAbsolute() ? jmp->GetOffset() : (int)i + jmp->GetOffset();
             }
-            
+
             if (targetIndex >= 0)
             {
                 if (targetIndex >= (int)instructions.size())
@@ -440,7 +440,7 @@ namespace Langums
         }
 
         auto nextAddress = 0u;
-        
+
         bool hasMulInstructions = false;
         for (auto& instruction : instructions)
         {
@@ -524,7 +524,7 @@ namespace Langums
                 else
                 {
                     auto retAddress = nextAddress++;
-                    
+
                     auto stackTop = m_StackPointer--;
                     auto copyAddress = CodeGen_CopyReg(stackTop, push->GetRegisterId(), nextAddress, retAddress, instruction.get());
 
@@ -809,7 +809,7 @@ namespace Langums
 
                 auto mulFinish = TriggerBuilder(mulAddress2, instruction.get(), m_TriggersOwner);
                 mulFinish.Cond_TestReg(Reg_MulLeft, 0, TriggerComparisonType::Exactly);
-                
+
                 auto mulAddress3 = -1;
 
                 if (!isOdd)
@@ -1268,7 +1268,7 @@ namespace Langums
                 auto unitSlot = spawn->GetPropsSlot();
 
                 auto locationId = GetLocationIdByName(spawn->GetLocationName(), instruction.get());
-                
+
                 if (spawn->IsValueLiteral())
                 {
                     current.Action_CreateUnit(spawn->GetPlayerId(), spawn->GetUnitId(), spawn->GetRegisterId(), locationId, unitSlot);
@@ -1526,7 +1526,7 @@ namespace Langums
 
                 auto srcLocationId = GetLocationIdByName(move->GetSrcLocationName(), instruction.get());
                 auto dstLocationId = GetLocationIdByName(move->GetDstLocationName(), instruction.get());
-                
+
                 current.Action_MoveLocation(move->GetPlayerId(), move->GetUnitId(), srcLocationId, dstLocationId);
             }
             else if (instruction->GetType() == IRInstructionType::EndGame)
@@ -2515,30 +2515,30 @@ namespace Langums
                 }
             }
             else if
-            (
-                instruction->GetType() == IRInstructionType::Nop ||
-                instruction->GetType() == IRInstructionType::Unit ||
-                instruction->GetType() == IRInstructionType::UnitProp ||
-                instruction->GetType() == IRInstructionType::Event ||
-                instruction->GetType() == IRInstructionType::RegCond ||
-                instruction->GetType() == IRInstructionType::BringCond ||
-                instruction->GetType() == IRInstructionType::AccumCond ||
-                instruction->GetType() == IRInstructionType::LeastResCond ||
-                instruction->GetType() == IRInstructionType::MostResCond ||
-                instruction->GetType() == IRInstructionType::ScoreCond ||
-                instruction->GetType() == IRInstructionType::HiScoreCond ||
-                instruction->GetType() == IRInstructionType::LowScoreCond ||
-                instruction->GetType() == IRInstructionType::TimeCond ||
-                instruction->GetType() == IRInstructionType::KillCond ||
-                instruction->GetType() == IRInstructionType::KillMostCond ||
-                instruction->GetType() == IRInstructionType::KillLeastCond ||
-                instruction->GetType() == IRInstructionType::DeathCond ||
-                instruction->GetType() == IRInstructionType::CmdCond ||
-                instruction->GetType() == IRInstructionType::CmdLeastCond ||
-                instruction->GetType() == IRInstructionType::CmdMostCond ||
-                instruction->GetType() == IRInstructionType::CountdownCond ||
-                instruction->GetType() == IRInstructionType::OpponentsCond
-                )
+                (
+                    instruction->GetType() == IRInstructionType::Nop ||
+                    instruction->GetType() == IRInstructionType::Unit ||
+                    instruction->GetType() == IRInstructionType::UnitProp ||
+                    instruction->GetType() == IRInstructionType::Event ||
+                    instruction->GetType() == IRInstructionType::RegCond ||
+                    instruction->GetType() == IRInstructionType::BringCond ||
+                    instruction->GetType() == IRInstructionType::AccumCond ||
+                    instruction->GetType() == IRInstructionType::LeastResCond ||
+                    instruction->GetType() == IRInstructionType::MostResCond ||
+                    instruction->GetType() == IRInstructionType::ScoreCond ||
+                    instruction->GetType() == IRInstructionType::HiScoreCond ||
+                    instruction->GetType() == IRInstructionType::LowScoreCond ||
+                    instruction->GetType() == IRInstructionType::TimeCond ||
+                    instruction->GetType() == IRInstructionType::KillCond ||
+                    instruction->GetType() == IRInstructionType::KillMostCond ||
+                    instruction->GetType() == IRInstructionType::KillLeastCond ||
+                    instruction->GetType() == IRInstructionType::DeathCond ||
+                    instruction->GetType() == IRInstructionType::CmdCond ||
+                    instruction->GetType() == IRInstructionType::CmdLeastCond ||
+                    instruction->GetType() == IRInstructionType::CmdMostCond ||
+                    instruction->GetType() == IRInstructionType::CountdownCond ||
+                    instruction->GetType() == IRInstructionType::OpponentsCond
+                    )
             {
                 continue;
             }
@@ -2584,7 +2584,7 @@ namespace Langums
 
             Cond_Always(hyperTrigger.m_Conditions[0]);
             Action_PreserveTrigger(hyperTrigger.m_Actions[0]);
-            
+
             for (auto i = 1; i < 64; i++)
             {
                 Action_Wait(0, hyperTrigger.m_Actions[i]);

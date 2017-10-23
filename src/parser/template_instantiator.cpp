@@ -143,12 +143,12 @@ namespace Langums
                     auto number = (ASTNumberLiteral*)callArg.get();
                     genFnName += SafePrintf("%_", number->GetValue());
                 }
-				else if (callArg->GetType() == ASTNodeType::StringLiteral)
-				{
-					auto string = (ASTStringLiteral*)callArg.get();
-					auto hash = std::hash<std::string>()(string->GetValue());
-					genFnName += SafePrintf("[%]_", hash);
-				}
+                else if (callArg->GetType() == ASTNodeType::StringLiteral)
+                {
+                    auto string = (ASTStringLiteral*)callArg.get();
+                    auto hash = std::hash<std::string>()(string->GetValue());
+                    genFnName += SafePrintf("[%]_", hash);
+                }
                 else
                 {
                     throw TemplateInstantiatorException(SafePrintf("Invalid template instantiation of \"%\" argument %, template arguments must be either identifiers or number literals", fnName, i), functionCall);

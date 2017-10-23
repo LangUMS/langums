@@ -106,7 +106,7 @@ namespace Langums
                 {
                     auto unitProp = (ASTUnitProperty*)unitProps->GetProperty(i).get();
                     auto propType = ParseUnitPropType(unitProp->GetName(), unitProp);
-                    
+
                     EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions, unitProp, m_GlobalAliases);
                 }
             }
@@ -172,7 +172,7 @@ namespace Langums
                             throw IRCompilerException(SafePrintf("Invalid argument type for argument 0 in call to \"%\", expected global variable name", name), condition);
                         }
 
-                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1); 
+                        auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
 
                         EmitInstruction(new IRRegCondInstruction(regId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
@@ -319,7 +319,7 @@ namespace Langums
         }
 
         EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, m_GlobalAliases);
-        
+
         auto main = m_FunctionDeclarations["main"];
         EmitFunction(main, m_Instructions, m_GlobalAliases);
         return true;
@@ -437,7 +437,7 @@ namespace Langums
 
                 m_DebugStackFrames.pop_back();
             }
-            
+
             EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, false), instructions, fnCall, aliases);
         }
         else if (fnName == "clear_buffered_events")
@@ -1131,7 +1131,7 @@ namespace Langums
 
             bool isLiteral = false;
             auto regId = ParseQuantityExpression(fnCall->GetArgument(2), fnName, 2, instructions, aliases, isLiteral);
-            
+
             std::string locName;
             if (fnCall->GetChildCount() >= 4)
             {
@@ -1309,15 +1309,6 @@ namespace Langums
 
             EmitInstruction(new IRPlayWAVInstruction(playerId, wavFilename, 0), instructions, fnCall, aliases);
         }
-        /*else if (fnName == "transmission")
-        {
-            if (!fnCall->HasChildren())
-            {
-                throw IRCompilerException(SafePrintf("%() called without arguments", fnName));
-            }
-
-            throw IRCompilerException("transmission() is not yet implemented, sorry :(");
-        }*/
         else if (m_FunctionDeclarations.find(fnName) != m_FunctionDeclarations.end())
         {
             auto declaration = m_FunctionDeclarations[fnName];
@@ -1411,7 +1402,7 @@ namespace Langums
         {
             // very suboptimal division
             // TODO implement the Div instruction
-            
+
             EmitExpression(lhs.get(), instructions, aliases);
             EmitExpression(rhs.get(), instructions, aliases);
 
@@ -2112,7 +2103,7 @@ namespace Langums
         auto startIndex = instructions.size();
 
         auto& statements = blockStatement->GetChildren();
-        
+
         std::vector<std::string> localVariables;
 
         // we want to hoist variable declarations to the top of the block
@@ -2199,7 +2190,7 @@ namespace Langums
                 {
                     throw IRCompilerException("Invalid type on left side of assignment expression, expected identifier or array expression", expression);
                 }
-                
+
                 if (lhsRegIndex == -1)
                 {
                     throw IRCompilerException("Invalid type on left side of assignment expression, expected identifier or array expression", expression);
@@ -2893,7 +2884,7 @@ namespace Langums
             auto stringLiteral = (ASTStringLiteral*)node.get();
             return stringLiteral->GetValue();
         }
-        else if(node->GetType() == ASTNodeType::Identifier)
+        else if (node->GetType() == ASTNodeType::Identifier)
         {
             auto identifier = (ASTIdentifier*)node.get();
             return identifier->GetName();
@@ -3294,7 +3285,7 @@ namespace Langums
         std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool& isLiteral)
     {
         auto regId = 0;
-        
+
         if (node->GetType() == ASTNodeType::Identifier)
         {
             auto identifier = (ASTIdentifier*)node.get();
@@ -3305,9 +3296,9 @@ namespace Langums
             }
             else
             {
-				EmitExpression(node.get(), instructions, aliases);
-				isLiteral = false;
-				regId = Reg_StackTop;
+                EmitExpression(node.get(), instructions, aliases);
+                isLiteral = false;
+                regId = Reg_StackTop;
             }
         }
         else if (node->GetType() == ASTNodeType::NumberLiteral)
