@@ -470,7 +470,7 @@ The LangUMS compiler features a simple preprocessor that functions similarly to 
 
 - `#define KEY VALUE` will add a new macro definition, all further occurences of `KEY` will be replaced with `VALUE`. You can override previous definitions by calling `#define` again.
 - `#undef KEY` will remove an already existing macro definition
-- `#include filename` will fetch the contents of `filename` and copy/ paste them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
+- `#include filename` will fetch the contents of `filename` and insert them at the `#include` point. Note that unlike C the filename is not enclosed in quotes `"`.
 - `#src filename` will set the input .scx filename for this code file. This allows you to skip passing the `--src` option to the compiler.
 - `#dst filename` will set the output .scx filename for this code file. This allows you to skip passing the `--dst` option to the compiler.
 
@@ -500,7 +500,7 @@ fn spawn_units(qty) {
 }
 ````
 
-The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type can and should be passed as a template argument.
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type or numeric constants should be passed as a template argument.
 
 ## Repeat templates
 
