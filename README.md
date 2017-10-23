@@ -174,12 +174,11 @@ Notes:
 
 Any useful LangUMS program will need to execute code in response to in-game events. The facility for this is called event handlers.
 
-An event handler is somewhat like a function that takes no arguments and returns no values. Instead it specifies one or more conditions separated by commas and a block of code to execute.
+An event handler is somewhat like a function that takes no arguments and returns no values. Instead it specifies one or more conditions and a block of code to execute.
 
-Whenever all the specified conditions for the handler are true the code in its body will be executed. At this point it acts like a normal function i.e. you can call
-other functions from it, set global variables, call built-ins.
+Whenever all specified conditions for the handler are met its associated body of code will be executed.
 
-Here is an event handler that executes whenever Player1 brings 5 marines to the location named `BringMarinesHere` and has at least 25 gas:
+Here is an event handler that runs whenever Player 1 brings five marines to the location named `BringMarinesHere` and has at least 25 gas:
 
 ```c
 bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere"),
@@ -188,7 +187,7 @@ accumulate(Player1, AtLeast, 25, Gas) => {
 }
 ```
 
-Once we have our handlers setup we need to call the built-in function `poll_events()` at regular intervals. The whole program demonstrating the event above would look like:
+Once we have our handlers setup we need to call the built-in function `poll_events()` at regular intervals. A complete example demonstrating this:
 
 ```c
 bring(Player1, Exactly, 5, TerranMarine, "BringMarinesHere"),
@@ -395,7 +394,7 @@ unit MyUnitProps {
 }
 ```
 
-You can mix any properties from the [UnitProperty](#unitproperty) constants. Here is a unit declaration that sets the unit's energy to 0% and makes it invincible.
+You can mix any properties from the [UnitProperty](#unitproperty) constants. Below is a unit declaration that sets the unit's energy to 0% and makes it invincible.
 
 ```c
 unit MyInvincibleUnit {
@@ -497,7 +496,7 @@ fn spawn_units(qty) {
 }
 ````
 
-The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type or numeric constants should be passed as a template argument.
+The template argument is gone and all instances of it have been replaced with its value. You can have as many templated arguments on a function as you need. Any built-in function argument that is not of `Expression` type should be passed as a template argument. Numeric constants should also be passed as templated arguments whenever possible for performance reasons.
 
 ## Repeat templates
 
@@ -535,7 +534,8 @@ for <PlayerId> in (Player1, Player2, Player3, Player4, Player5, Player6) {
 ```
 
 The result is the same but it helps keep your code cleaner and more maintainable. You can use almost anything as a template list like players, locations, units, resource types, strings, etc.
-Here is another example of a repeat template but this time used from inside a function:
+
+Another example of a repeat template but this time used from inside a function:
 
 ```c
 fn spawn_bonus_items() {
@@ -545,14 +545,20 @@ fn spawn_bonus_items() {
 }
 ```
 
-Repeat templates can have more than one template argument (and argument list). For example:
+Repeat templates can have more than one template argument (and argument list). For example
 
 ```c
-fn test() {
-  for <PlayerId, Msg> in (Player1, Player2, Player3), ("Foo", "Bar", "Baz") {
-    print("Hello, " + Msg, PlayerId);
-  }
+for <PlayerId, Msg> in (Player1, Player2, Player3), ("Foo", "Bar", "Baz") {
+  print("Hello, " + Msg, PlayerId);
 }
+```
+
+results in
+
+```c
+print("Hello, Foo", Player1);
+print("Hello, Bar", Player2);
+print("Hello, Baz", Player3);
 ```
 
 Note that string expressions like `"Hello, " + Msg` are evaluated at compile-time and will take up as many string slots as the number of items in the repeat template.
@@ -799,7 +805,7 @@ Both (or OreAndGas)
 ```
 AtLeast (or LessOrEquals)
 AtMost (or GreaterOrEquals)
-Exactly or (Equals)
+Exactly (or Equals)
 ```
 
 ### Order
