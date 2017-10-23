@@ -1005,12 +1005,16 @@ namespace Langums
             else
             {
                 auto identifier = Identifier();
+                Whitespace();
 
                 if (Peek() == '[')
                 {
                     Symbol('[');
+                    Whitespace();
                     auto arrayIndex = NumberLiteral();
+                    Whitespace();
                     Symbol(']');
+                    Whitespace();
 
                     auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
                     arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(arrayIndex, m_CurrentChar)));
