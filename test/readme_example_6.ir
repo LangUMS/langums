@@ -1,0 +1,8 @@
+CHKPLAYERS
+PUSH 5
+POP r8
+TALK Player1 TerranMarine 5000
+PUSH r8
+SPAWN Player1 TerranMarine [STACK 0] TestLocation 
+ORDER Player1 TerranMarine Move TestLocation TestLocation2
+JMP 1

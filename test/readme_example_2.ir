@@ -1,0 +1,41 @@
+CHKPLAYERS
+SET r8 2
+PUSH r8
+POP r8
+PUSH r8
+MULCONST 5
+PUSH 10
+ADD
+JMP +1
+POP r9
+PUSH r9
+PUSH r8
+POP r9
+POP r8
+JEQ r8 1 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PUSH r9
+SPAWN Player1 TerranMarine [STACK 0] TestLocation 
+JMP +19
+JEQ r8 2 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PUSH r9
+SPAWN Player1 ProtossZealot [STACK 0] TestLocation 
+JMP +10
+JEQ r8 3 +4
+PUSH 0
+JMP +3
+POP
+PUSH 1
+JEQ [STACK 0] 0 +4
+PUSH r9
+SPAWN Player1 ZergZergling [STACK 0] TestLocation 
+JMP +1

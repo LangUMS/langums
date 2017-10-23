@@ -1,0 +1,11 @@
+EVNT [SWITCH 19] 2
+BRING Player1 TerranMarine TestLocation 10 5
+ACCUM Player1 Gas 0 25
+CHKPLAYERS
+CHKPLAYERS
+SETSW [SWITCH 1] 1
+JSNS [SWITCH 19] +2
+MSG "The marines have arrived!" [ALL]
+SETSW [SWITCH 19] 0
+SETSW [SWITCH 1] 0
+JMP 4

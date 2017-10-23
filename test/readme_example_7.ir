@@ -1,0 +1,20 @@
+EVNT [SWITCH 19] 2
+ACCUM Player1 Minerals 0 10
+BRING Player1 AllUnits TestLocation 0 1
+EVNT [SWITCH 20] 2
+ACCUM Player2 Minerals 0 10
+BRING Player2 AllUnits TestLocation 0 1
+EVNT [SWITCH 21] 2
+ACCUM Player3 Minerals 0 10
+BRING Player3 AllUnits TestLocation 0 1
+EVNT [SWITCH 22] 2
+ACCUM Player4 Minerals 0 10
+BRING Player4 AllUnits TestLocation 0 1
+EVNT [SWITCH 23] 2
+ACCUM Player5 Minerals 0 10
+BRING Player5 AllUnits TestLocation 0 1
+EVNT [SWITCH 24] 2
+ACCUM Player6 Minerals 0 10
+BRING Player6 AllUnits TestLocation 0 1
+CHKPLAYERS
+JMP 19
