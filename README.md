@@ -521,13 +521,6 @@ bring(Player2, AtLeast, 1, AllUnits, BuyMarines) => {
   print("You purchased a marine, take good care of it.");
 }
 
-accumulate(Player3, AtLeast, 10, Minerals),
-bring(Player3, AtLeast, 1, AllUnits, BuyMarines) => {
-  take_resource(Player3, Minerals, 10);
-  spawn(TerranMarine, Player3, 1, BuyMarines);
-  print("You purchased a marine, take good care of it.");
-}
-
 ... etc for all human players in your map ...
 ```
 
@@ -616,7 +609,7 @@ At the moment control returns back to the start of `main()` if for some reason y
 
 You can add multi-line strings in the code with `"""` e.g.
 
-```
+```c
 set_mission_objectives("""My multi-line string
 This is a second line
 This is a third line""");
@@ -626,7 +619,7 @@ This is a third line""");
 
 Put your sounds in .wav format in the same folder as your source .scx map file. For example if you have `my_sound.wav` you can play it with
 
-```
+```c
 play_sound("my_sound.wav");
 ```
 
@@ -694,7 +687,7 @@ You can pass this file to the compiler with the `--reg` option e.g.
 langums.exe --src my_map.scx --lang my_map.l --dst my_map_final.scx --reg my_registers.txt
 ```
 
-A sample file with the default mappings [is available here](https://github.com/LangUMS/langums/blob/master/misc/registermap.txt?raw=true).
+A sample file with the default mappings [is available here](https://github.com/LangUMS/langums/blob/master/registermap.txt?raw=true).
 [Here you can find](https://github.com/LangUMS/langums#unit) a list of all unit types.
 
 #### Use set_deaths(), add_deaths() and remove_deaths() built-in functions
@@ -709,7 +702,7 @@ will set the death counter for Player5's marines to the value of variable `foo`.
 
 ## Using the experimental debugger
 
-Since recently LangUMS features an experimental debugger which allows you to place breakpoints and watch variables in your code while the game is running. To use it you must have Visual Studio Code and [the LangUMS extension](https://marketplace.visualstudio.com/items?itemName=langums.langums) installed. To launch a debugging session open the workspace folder where your source files are and pick the `LangUMS Debugger` from the list of available debuggers. If this is the first time you're launching a debugging session you'll be asked to configure your `launch.json` file.
+LangUMS features an (experimental) debugger which allows you to place breakpoints and watch variables in your code while the game is running. To use it you must have Visual Studio Code and [the LangUMS extension](https://marketplace.visualstudio.com/items?itemName=langums.langums) installed. To launch a debugging session open the workspace folder where your source files are and pick the `LangUMS Debugger` from the list of available debuggers. If this is the first time you're launching a debugging session you'll be asked to configure your `launch.json` file.
 
 ```
 {
@@ -747,12 +740,29 @@ git submodules update
 
 ### Compiling the code
 
-A Visual Studio 2015 project (compatible with VS2017) is provided in the [langums/](https://github.com/LangUMS/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no external dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
+A Visual Studio 2015 project (compatible with VS2017) is provided in the [langums/](https://github.com/LangUMS/langums/tree/master/langums) folder which is preconfigured and you just need to run it. However you should be able to get it working with any modern C++ compiler. The code has no third-party dependencies and is written in portable C++. You will need a compiler with support for `std::experimental::filesystem`. Contributions of a Makefile as well as support for other build systems are welcome.
+
+### Tests
+
+LangUMS is tested using a tool called `test-runner.exe`. It compares the IR and binary output of the compiler to previously known good versions.
+Running the test suite is done with:
+
+```
+test-runner.exe --tests test/
+```
+
+This will compile each `.l` file in the `test/` folder by running `langums.exe` on it. The resulting IR and binary outputs will be compared to the known good versions contained in the `.ir` and `.sha256` files in the test folder. The `.ir` files contain human-readable text representation of the compiler IR output while the `.sha256` files contain the hashes of the resulting `.scx` files. Any mismatch between the current compiled map and the predefined values is reported by the test runner on the command-line as well as in `test-runner.log`.
+
+When adding a test or changing any of the existing ones you will need to regenerate the comparison files by running:
+
+```
+test-runner.exe --tests test/ --init
+```
 
 ### Parts of LangUMS
 
 #### Frontend
-- [CHK library](https://github.com/LangUMS/langums/tree/master/src/libchk)
+- [CHK library](https://github.com/LangUMS/libchk)
 - [Preprocessor](https://github.com/LangUMS/langums/blob/master/src/parser/preprocessor.cpp)
 - [Parser](https://github.com/LangUMS/langums/blob/master/src/parser/parser.cpp)
 - [AST](https://github.com/LangUMS/langums/blob/master/src/ast/ast.h)
