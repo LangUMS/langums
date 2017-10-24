@@ -3,6 +3,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <functional>
+#include <iterator>
 
 #include "../ast/ast.h"
 #include "ir_exceptions.h"
@@ -24,56 +26,32 @@ namespace Langums
                 return HasGlobalAlias(name, index);
             }
 
-            auto it = m_Aliases.find(fn);
-            if (it == m_Aliases.end())
+            auto localAliases = m_Aliases.find(fn);
+            if (localAliases == m_Aliases.end())
             {
                 return HasGlobalAlias(name, index);
             }
 
-            auto it2 = (*it).second.find(name);
-            if (it2 == (*it).second.end())
+            auto registerList = (*localAliases).second.find(name);
+            if (registerList == (*localAliases).second.end())
             {
                 return HasGlobalAlias(name, index);
             }
 
-            auto& registers = (*it2).second;
-            if (index >= registers.size())
-            {
-                if (registers.size() == 1)
-                {
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            auto& registers = (*registerList).second;
+            return index < registers.size();
         }
 
         bool HasGlobalAlias(const std::string& name, unsigned int index) const
         {
-            auto it = m_GlobalAliases.find(name);
-            if (it == m_GlobalAliases.end())
+            auto registerList = m_GlobalAliases.find(name);
+            if (registerList == m_GlobalAliases.end())
             {
                 return false;
             }
 
-            auto& registers = (*it).second;
-            if (index >= registers.size())
-            {
-                if (registers.size() == 1)
-                {
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            auto& registers = (*registerList).second;
+            return index < registers.size();
         }
 
         int GetAlias(const std::string& name, unsigned int index, IASTNode* node) const
@@ -84,19 +62,19 @@ namespace Langums
                 return GetGlobalAlias(name, index);
             }
 
-            auto it = m_Aliases.find(fn);
-            if (it == m_Aliases.end())
+            auto localAliases = m_Aliases.find(fn);
+            if (localAliases == m_Aliases.end())
             {
                 return GetGlobalAlias(name, index);
             }
 
-            auto it2 = (*it).second.find(name);
-            if (it2 == (*it).second.end())
+            auto registerList = (*localAliases).second.find(name);
+            if (registerList == (*localAliases).second.end())
             {
                 return GetGlobalAlias(name, index);
             }
 
-            auto& registers = (*it2).second;
+            auto& registers = (*registerList).second;
             if (index >= registers.size())
             {
                 if (registers.size() == 1)
@@ -114,13 +92,13 @@ namespace Langums
 
         int GetGlobalAlias(const std::string& name, unsigned int index) const
         {
-            auto it = m_GlobalAliases.find(name);
-            if (it == m_GlobalAliases.end())
+            auto registerList = m_GlobalAliases.find(name);
+            if (registerList == m_GlobalAliases.end())
             {
                 throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), nullptr);
             }
 
-            auto& registers = (*it).second;
+            auto& registers = (*registerList).second;
             if (index >= registers.size())
             {
                 if (registers.size() == 1)
@@ -142,36 +120,18 @@ namespace Langums
             if (fn == nullptr)
             {
                 auto& registers = m_GlobalAliases[name];
-
-                for (auto& id : registers)
-                {
-                    m_FreeIds.push_back(id);
-                }
-
-                registers.clear();
-
-                for (auto i = 0u; i < count; i++)
-                {
-                    registers.push_back(GetNextFreeId());
-                }
-
+                std::copy(registers.begin(), registers.end(), std::back_inserter(m_FreeIds));
+                registers.resize(count);
+                std::generate(registers.begin(), registers.end(), std::bind(&RegisterAliases::GetNextFreeId, this));
                 return;
             }
 
-            auto& fnAliases = m_Aliases[fn];
-            auto& registers = fnAliases[name];
+            auto& localAliases = m_Aliases[fn];
+            auto& registers = localAliases[name];
 
-            for (auto& id : registers)
-            {
-                m_FreeIds.push_back(id);
-            }
-
-            registers.clear();
-
-            for (auto i = 0u; i < count; i++)
-            {
-                registers.push_back(GetNextFreeId());
-            }
+            std::copy(registers.begin(), registers.end(), std::back_inserter(m_FreeIds));
+            registers.resize(count);
+            std::generate(registers.begin(), registers.end(), std::bind(&RegisterAliases::GetNextFreeId, this));
         }
 
         void Deallocate(const std::string& name, IASTNode* node)
@@ -180,23 +140,16 @@ namespace Langums
             if (fn == nullptr)
             {
                 auto& registers = m_GlobalAliases[name];
-                for (auto id : registers)
-                {
-                    m_FreeIds.push_back(id);
-                }
-
+                std::copy(registers.begin(), registers.end(), std::back_inserter(m_FreeIds));
                 m_GlobalAliases.erase(name);
                 return;
             }
 
-            auto& fnAliases = m_Aliases[fn];
-            auto& registers = fnAliases[name];
-            for (auto id : registers)
-            {
-                m_FreeIds.push_back(id);
-            }
+            auto& localAliases = m_Aliases[fn];
+            auto& registers = localAliases[name];
 
-            fnAliases.erase(name);
+            std::copy(registers.begin(), registers.end(), std::back_inserter(m_FreeIds));
+            localAliases.erase(name);
         }
 
         const std::unordered_map<std::string, std::vector<unsigned int>>& GetAliases(IASTNode* node) const
@@ -207,13 +160,13 @@ namespace Langums
                 return m_GlobalAliases;
             }
 
-            auto it = m_Aliases.find(fn);
-            if (it == m_Aliases.end())
+            auto localAliases = m_Aliases.find(fn);
+            if (localAliases == m_Aliases.end())
             {
                 return m_DummyEmptyAliases;
             }
 
-            return (*it).second;
+            return (*localAliases).second;
         }
 
         private:

@@ -2707,10 +2707,6 @@ namespace Langums
                 EmitInstruction(new IRJmpInstruction(startIndex, true), instructions, fn, aliases);
             }
         }
-        else if (instructions.back()->GetType() != IRInstructionType::Push)
-        {
-            //EmitInstruction(new IRPushInstruction(0, true), instructions);
-        }
 
         m_DebugStackFrames.pop_back();
 
