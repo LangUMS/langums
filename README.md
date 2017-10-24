@@ -259,7 +259,7 @@ Notes:
 
 * Arguments named `Expression` may either be numeric constants e.g. `42` or expressions like `x * 3`.
 * Text arguments must be passed in `"` quotes e.g. `"This is some text"`.
-* Location arguments may be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` needs to be in quotes.
+* Location arguments may be passed without quotes if they do not contain spaces e.g. `MyLocation`, but `"My Location"` has to be in quotes.
 * The special value `AnyLocation` may be passed to `Location` type arguments.
 * The special value `All` may be passed to `Quantity` and `QuantityExpression` arguments involving unity quantities e.g. `kill(Player1, TerranMarine, All)`.
 
@@ -271,11 +271,11 @@ Notes:
 | kill([Unit](#unit), [Player](#player), Expression, optional: Location)                           | Kills units at an optional location.                 |
 | remove([Unit](#unit), [Player](#player), Expression, optional: Location)                         | Removes units at an optional location.               |
 | move([Unit](#unit), [Player](#player), Expression, SrcLocation, DstLocation)                     | Moves units from one location to another.            |
-| order([Unit](#unit), [Player](#player), [Order](#order), SrcLocation, DstLocation)               | Orders a units to move, attack or patrol.            |
+| order([Unit](#unit), [Player](#player), [Order](#order), SrcLocation, DstLocation)               | Orders units to move, attack or patrol.              |
 | modify([Unit](#unit), [Player](#player), Expression, [UnitMod](#unitmod), ModQuantity, Location) | Modifies a unit's HP, SP, energy or hangar count.    |
 | give([Unit](#unit), [SrcPlayer](#player), [DstPlayer](#player), Expression, Location)            | Gives units to another player.                       |
-| set_doodad([Player](#player), [Unit](#unit), [State](#state), Location)                          | Sets/ toggles doodad [State](#state).                |
-| set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Sets/ toggles invincibility for units at location.   |
+| set_doodad([Player](#player), [Unit](#unit), [State](#state), Location)                          | Toggles a doodad's [state](#state).                  |
+| set_invincibility([Player](#player), [Unit](#unit), [State](#state), Location)                   | Toggles invincibility for units at location.         |
 | run_ai_script([Player](#player), [AIScript](#aiscript), optional: Location)                      | Runs an AI script.                                   |
 
 ### UI functions
