@@ -6,7 +6,7 @@
 
 #include "../ast/ast.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class TemplateInstantiatorException : public std::exception

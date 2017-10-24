@@ -1,10 +1,10 @@
 #ifndef __LOG_H
 #define __LOG_H
 
-#define LOG(s) ::Langums::Log::Instance()->LogMessage(s)
-#define LOG_F(s, ...) ::Langums::Log::Instance()->LogMessage(SafePrintf(s, __VA_ARGS__))
-#define LOG_DEINIT() ::Langums::Log::Instance()->Destroy()
-#define LOG_EXITERR(s, ...) LOG_F(s, __VA_ARGS__); ::Langums::Log::Instance()->Destroy()
+#define LOG(s) ::LangUMS::Log::Instance()->LogMessage(s)
+#define LOG_F(s, ...) ::LangUMS::Log::Instance()->LogMessage(SafePrintf(s, __VA_ARGS__))
+#define LOG_DEINIT() ::LangUMS::Log::Instance()->Destroy()
+#define LOG_EXITERR(s, ...) LOG_F(s, __VA_ARGS__); ::LangUMS::Log::Instance()->Destroy()
 
 #include <mutex>
 #include <thread>
@@ -16,7 +16,7 @@
 
 #include "stringutil.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class LogInterfaceException : public std::exception

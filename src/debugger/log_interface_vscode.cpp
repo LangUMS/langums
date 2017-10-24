@@ -6,7 +6,7 @@
 
 #include "log_interface_vscode.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     using namespace rapidjson;

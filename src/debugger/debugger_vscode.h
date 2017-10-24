@@ -9,7 +9,7 @@
 #include "log_interface_vscode.h"
 #include "debugger_protocol.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class DebuggerVSCode

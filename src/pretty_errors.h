@@ -15,7 +15,7 @@
 #include "compiler/ir.h"
 #include "compiler/compiler.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     inline std::vector<std::string> Split(const std::string& src)

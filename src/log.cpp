@@ -1,6 +1,6 @@
 #include "log.h"
 
-namespace Langums
+namespace LangUMS
 {
     
     std::unique_ptr<Log> Log::m_Instance = nullptr;

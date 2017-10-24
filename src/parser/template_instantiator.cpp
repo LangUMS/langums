@@ -3,7 +3,7 @@
 #include "template_instantiator.h"
 #include "parser.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     void TemplateInstantiator::Process(const std::unique_ptr<IASTNode>& unit)

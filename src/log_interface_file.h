@@ -8,7 +8,7 @@
 
 #define LOG_ADD_FILE_IFACE(PATH) Log::Instance()->AddInterface(std::unique_ptr<ILogInterface>(new LogInterfaceFile(PATH)))
 
-namespace Langums
+namespace LangUMS
 {
 
     class LogInterfaceFile : public ILogInterface

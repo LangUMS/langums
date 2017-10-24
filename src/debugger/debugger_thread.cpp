@@ -8,7 +8,7 @@
 
 #define DEATH_TABLE_OFFSET 0x87A8AC
 
-namespace Langums
+namespace LangUMS
 {
 
     DebuggerThread::DebuggerThread(const std::string& processName) : m_ProcessName(processName)

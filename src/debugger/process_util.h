@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace Langums
+namespace LangUMS
 {
 
     namespace Process

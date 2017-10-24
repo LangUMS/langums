@@ -11,7 +11,7 @@
 #include "../ast/ast.h"
 #include "debugger_thread.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class Debugger

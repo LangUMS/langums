@@ -7,7 +7,7 @@
 
 #include "preprocessor.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     std::string Preprocessor::Process(const std::string& input)

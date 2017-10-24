@@ -12,7 +12,7 @@
 #include "reg_table.h"
 #include "debugger_cmds.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     enum class DebuggerThreadState

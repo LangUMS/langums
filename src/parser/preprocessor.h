@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace Langums
+namespace LangUMS
 {
 
     class PreprocessorException : public std::exception

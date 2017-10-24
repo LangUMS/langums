@@ -4,7 +4,7 @@
 #include <vector>
 #include "triggerbuilder.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class RegistermapParserException : public std::exception

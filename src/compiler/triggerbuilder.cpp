@@ -1,7 +1,7 @@
 #include "triggerbuilder.h"
 #include "compiler.h"
 
-namespace Langums
+namespace LangUMS
 {
     unsigned int g_RegistersOwnerPlayer = 7;
     std::vector<RegisterDef> g_RegisterMap;

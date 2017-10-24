@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace Langums
+namespace LangUMS
 {
 
     typedef void* HANDLE;

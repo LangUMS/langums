@@ -10,7 +10,7 @@
 #include "hashutil.h"
 #include "fileutil.h"
 
-using namespace Langums;
+using namespace LangUMS;
 using namespace std::experimental;
 
 // using system() is bad. TODO: portable wrapper for CreateProcess

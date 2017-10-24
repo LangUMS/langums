@@ -4,7 +4,7 @@
 #include "debugger_cli.h"
 #include "../pretty_errors.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     bool DebuggerCli::Repl()

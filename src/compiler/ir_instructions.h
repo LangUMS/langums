@@ -5,7 +5,7 @@
 
 #include "ir_utility.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     enum class IRInstructionType

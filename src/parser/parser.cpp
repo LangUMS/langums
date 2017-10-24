@@ -2,7 +2,7 @@
 #include "preprocessor.h"
 #include "template_instantiator.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     std::unique_ptr<IASTNode> Parser::Parse(const std::string& input)

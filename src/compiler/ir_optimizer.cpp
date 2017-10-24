@@ -1,6 +1,6 @@
 #include "ir_optimizer.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     std::vector<std::unique_ptr<IIRInstruction>> IROptimizer::Process(std::vector<std::unique_ptr<IIRInstruction>> instructions)

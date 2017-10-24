@@ -7,7 +7,7 @@
 #define UNIT_COUNT 228 
 
 
-namespace Langums
+namespace LangUMS
 {
 
     class RegTable

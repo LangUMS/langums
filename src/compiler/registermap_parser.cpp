@@ -5,7 +5,7 @@
 #include "../libchk/src/enums.h"
 #include "registermap_parser.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     std::vector<RegisterDef> RegistermapParser::Parse(const std::string& input)

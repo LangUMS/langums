@@ -1,7 +1,7 @@
 #ifndef __LANGUMS_DEBUGGER_CMDS_H
 #define __LANGUMS_DEBUGGER_CMDS_H
 
-namespace Langums
+namespace LangUMS
 {
 
     enum class DebuggerCmdType

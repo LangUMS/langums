@@ -29,7 +29,7 @@
 
 #define VERSION "v0.1.6"
 
-using namespace Langums;
+using namespace LangUMS;
 using namespace CHK;
 using namespace std::experimental;
 

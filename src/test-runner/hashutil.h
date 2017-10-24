@@ -7,7 +7,7 @@
 
 #include "keccak.h"
 
-namespace Langums
+namespace LangUMS
 {
     bool GetFileHash(const std::string& path, std::string& outHash)
     {

@@ -4,7 +4,7 @@
 #include "../log.h"
 #include "compiler.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     using namespace CHK;

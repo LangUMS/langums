@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-namespace Langums
+namespace LangUMS
 {
 
     static std::string SafePrintf(const char *s)

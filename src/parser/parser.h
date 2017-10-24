@@ -10,7 +10,7 @@
 #include "../log.h"
 #include "../ast/ast.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     enum class TokenType

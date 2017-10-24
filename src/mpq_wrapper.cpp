@@ -5,7 +5,7 @@
 #include "stringutil.h"
 #include "mpq_wrapper.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     MPQWrapper::MPQWrapper(const std::string& path, bool readOnly) :

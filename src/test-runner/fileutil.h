@@ -5,7 +5,7 @@
 #include <fstream>
 #include <vector>
 
-namespace Langums
+namespace LangUMS
 {
 
     bool ReadTextFile(const std::string& path, std::string& outContents)

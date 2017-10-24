@@ -6,7 +6,7 @@
 #include "ir.h"
 #include "ir_optimizer.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     bool IRCompiler::Compile(const std::shared_ptr<IASTNode>& ast)

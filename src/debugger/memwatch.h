@@ -7,7 +7,7 @@
 #include "process_util.h"
 #include "../log.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     struct MemorySnapshot

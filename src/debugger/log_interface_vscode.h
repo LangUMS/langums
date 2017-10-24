@@ -3,7 +3,7 @@
 
 #include "../log.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class LogInterfaceVSCode : public ILogInterface

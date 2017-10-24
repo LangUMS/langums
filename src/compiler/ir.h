@@ -16,9 +16,9 @@
 #include "ir_constants.h"
 #include "ir_instructions.h"
 #include "ir_exceptions.h"
-#include "reg_aliases.h"
+#include "register_aliases.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     using namespace CHK;

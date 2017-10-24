@@ -17,7 +17,7 @@ typedef LONG (NTAPI *NtResumeProcess)(IN HANDLE ProcessHandle);
 auto g_SuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
 auto g_ResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
 
-namespace Langums
+namespace LangUMS
 {
 
     using namespace Process;

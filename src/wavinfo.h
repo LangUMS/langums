@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace Langums
+namespace LangUMS
 {
 
     class WAVInfo

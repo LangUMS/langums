@@ -3,7 +3,7 @@
 
 #include "ir.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     struct StackFrame

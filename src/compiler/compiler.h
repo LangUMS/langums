@@ -11,7 +11,7 @@
 
 #define MAX_TRIGGERS_COUNT 16384
 
-namespace Langums
+namespace LangUMS
 {
 
     class CompilerException : public std::exception

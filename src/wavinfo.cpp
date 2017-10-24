@@ -3,7 +3,7 @@
 
 #include "wavinfo.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     struct WAVHeader

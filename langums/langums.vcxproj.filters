@@ -844,6 +844,9 @@
     <ClCompile Include="..\src\debugger\log_interface_vscode.cpp">
       <Filter>debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\compiler\register_aliases.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">
@@ -1062,9 +1065,6 @@
     <ClInclude Include="..\src\debugger\debugger_vscode.h">
       <Filter>debugger</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\compiler\reg_aliases.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\compiler\ir_exceptions.h">
       <Filter>compiler</Filter>
     </ClInclude>
@@ -1190,6 +1190,9 @@
     </ClInclude>
     <ClInclude Include="..\src\log_interface_file.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\compiler\register_aliases.h">
+      <Filter>compiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -8,7 +8,7 @@
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/writer.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     using namespace rapidjson;

@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace Langums
+namespace LangUMS
 {
 
     enum class OperatorType

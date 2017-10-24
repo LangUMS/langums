@@ -3,7 +3,7 @@
 
 #include "process_util.h"
 
-namespace Langums
+namespace LangUMS
 {
     using namespace Process;
 

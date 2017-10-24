@@ -79,6 +79,7 @@
     <ClCompile Include="..\src\compiler\ir.cpp" />
     <ClCompile Include="..\src\compiler\ir_optimizer.cpp" />
     <ClCompile Include="..\src\compiler\registermap_parser.cpp" />
+    <ClCompile Include="..\src\compiler\register_aliases.cpp" />
     <ClCompile Include="..\src\compiler\triggerbuilder.cpp" />
     <ClCompile Include="..\src\debugger\debugger.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -351,7 +352,7 @@
     <ClInclude Include="..\src\compiler\ir_instructions.h" />
     <ClInclude Include="..\src\compiler\ir_optimizer.h" />
     <ClInclude Include="..\src\compiler\registermap_parser.h" />
-    <ClInclude Include="..\src\compiler\reg_aliases.h" />
+    <ClInclude Include="..\src\compiler\register_aliases.h" />
     <ClInclude Include="..\src\compiler\triggerbuilder.h" />
     <ClInclude Include="..\src\cxxopts.h" />
     <ClInclude Include="..\src\debugger\debugger.h" />

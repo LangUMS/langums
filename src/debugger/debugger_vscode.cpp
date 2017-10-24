@@ -10,7 +10,7 @@
 
 #include "debugger_vscode.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     DebuggerVSCode::~DebuggerVSCode()

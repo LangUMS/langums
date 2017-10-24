@@ -3,7 +3,7 @@
 
 #include "debugger.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     class DebuggerCli

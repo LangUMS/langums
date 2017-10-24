@@ -1,7 +1,7 @@
 #ifndef __LANGUMS_IRCONSTANTS_H
 #define __LANGUMS_IRCONSTANTS_H
 
-namespace Langums
+namespace LangUMS
 {
 
     enum ReservedRegisters

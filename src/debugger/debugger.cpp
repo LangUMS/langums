@@ -19,7 +19,7 @@
 #define GAME_SPEED_OFFSET 0x006509C4
 #define SCENARIO_FILENAME "staredit\\scenario.chk"
 
-namespace Langums
+namespace LangUMS
 {
 
     Debugger::Debugger(const std::vector<std::unique_ptr<IIRInstruction>>& instructions, const std::string& source, const std::shared_ptr<IASTNode>& ast) :

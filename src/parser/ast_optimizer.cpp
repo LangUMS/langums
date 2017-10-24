@@ -1,6 +1,6 @@
 #include "ast_optimizer.h"
 
-namespace Langums
+namespace LangUMS
 {
 
     std::shared_ptr<IASTNode> ASTOptimizer::Process(std::shared_ptr<IASTNode> ast)
@@ -14,7 +14,6 @@ namespace Langums
 
             auto newChild = CalculateConstantExpressions(child);
             newChild = ConcatenateStrings(newChild);
-            newChild = InlineFunctionArgumentLiterals(newChild);
 
             m_Root->SetChild(i, newChild);
         }
@@ -93,11 +92,6 @@ namespace Langums
             return std::shared_ptr<IASTNode>(new ASTStringLiteral(result, node->GetCharIndex()));
         }
 
-        return node;
-    }
-
-    std::shared_ptr<IASTNode> ASTOptimizer::InlineFunctionArgumentLiterals(const std::shared_ptr<IASTNode>& node)
-    {
         return node;
     }
 
