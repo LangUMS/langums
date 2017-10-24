@@ -1,17 +1,8 @@
 #ifndef __LANGUMS_IRUTILITY_H
 #define __LANGUMS_IRUTILITY_H
 
-#include "ir.h"
-
 namespace LangUMS
 {
-
-    struct StackFrame
-    {
-        std::string m_FunctionName;
-        std::vector<std::pair<unsigned int, std::string>> m_Variables;
-        IASTNode* m_ASTNode = nullptr;
-    };
 
     inline std::string RegisterIdToString(unsigned int regId)
     {
@@ -49,6 +40,21 @@ namespace LangUMS
         }
 
         return SafePrintf("[SWITCH %]", switchId);
+    }
+
+    inline ASTFunctionDeclaration* FindFunctionDeclarationForNode(IASTNode* node)
+    {
+        while (node != nullptr)
+        {
+            if (node->GetType() == ASTNodeType::FunctionDeclaration)
+            {
+                return (ASTFunctionDeclaration*)node;
+            }
+
+            node = node->GetParent();
+        }
+
+        return nullptr;
     }
 
 }

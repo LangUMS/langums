@@ -97,6 +97,7 @@
     <ClCompile Include="..\src\parser\parser.cpp" />
     <ClCompile Include="..\src\parser\preprocessor.cpp" />
     <ClCompile Include="..\src\parser\template_instantiator.cpp" />
+    <ClCompile Include="..\src\pretty_errors.cpp" />
     <ClCompile Include="..\src\stormlib\adpcm\adpcm.cpp" />
     <ClCompile Include="..\src\stormlib\bzip2\blocksort.c" />
     <ClCompile Include="..\src\stormlib\bzip2\bzlib.c" />

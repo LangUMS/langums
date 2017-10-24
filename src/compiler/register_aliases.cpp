@@ -3,10 +3,13 @@
 #include <algorithm>
 
 #include "../stringutil.h"
-#include "register_aliases.h"
+#include "../ast/ast.h"
 
 #include "ir_constants.h"
 #include "ir_exceptions.h"
+#include "ir_utility.h"
+
+#include "register_aliases.h"
 
 namespace LangUMS
 {
@@ -25,13 +28,13 @@ namespace LangUMS
             return HasGlobalAlias(name, index);
         }
 
-        auto registerList = (*localAliases).second.find(name);
-        if (registerList == (*localAliases).second.end())
+        auto registerList = localAliases->second.find(name);
+        if (registerList == localAliases->second.end())
         {
             return HasGlobalAlias(name, index);
         }
 
-        auto& registers = (*registerList).second;
+        auto& registers = registerList->second;
         return index < registers.size();
     }
 
@@ -43,7 +46,7 @@ namespace LangUMS
             return false;
         }
 
-        auto& registers = (*registerList).second;
+        auto& registers = registerList->second;
         return index < registers.size();
     }
 
@@ -61,13 +64,13 @@ namespace LangUMS
             return GetGlobalAlias(name, index);
         }
 
-        auto registerList = (*localAliases).second.find(name);
-        if (registerList == (*localAliases).second.end())
+        auto registerList = localAliases->second.find(name);
+        if (registerList == localAliases->second.end())
         {
             return GetGlobalAlias(name, index);
         }
 
-        auto& registers = (*registerList).second;
+        auto& registers = registerList->second;
         if (index >= registers.size())
         {
             if (registers.size() == 1)
@@ -91,7 +94,7 @@ namespace LangUMS
             throw IRCompilerException(SafePrintf("Invalid register name \"%\"", name), nullptr);
         }
 
-        auto& registers = (*registerList).second;
+        auto& registers = registerList->second;
         if (index >= registers.size())
         {
             if (registers.size() == 1)
@@ -159,7 +162,7 @@ namespace LangUMS
             return m_DummyEmptyAliases;
         }
 
-        return (*localAliases).second;
+        return localAliases->second;
     }
 
     unsigned int RegisterAliases::GetNextFreeId()
@@ -172,21 +175,6 @@ namespace LangUMS
         }
 
         return m_NextFreeId++;
-    }
-
-    ASTFunctionDeclaration* RegisterAliases::FindFunctionDeclarationForNode(IASTNode* node) const
-    {
-        while (node != nullptr)
-        {
-            if (node->GetType() == ASTNodeType::FunctionDeclaration)
-            {
-                return (ASTFunctionDeclaration*)node;
-            }
-
-            node = node->GetParent();
-        }
-
-        return nullptr;
     }
 
 }

@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
     }
     catch (const ParserException& ex)
     {
-        PrintParserError(parser.GetSourceBuffer(), ex);
+        PrintParserException(parser.GetSourceBuffer(), ex);
         LOG_EXITERR("");
         return 1;
     }

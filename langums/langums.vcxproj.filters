@@ -847,6 +847,9 @@
     <ClCompile Include="..\src\compiler\register_aliases.cpp">
       <Filter>compiler</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\pretty_errors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cxxopts.h">

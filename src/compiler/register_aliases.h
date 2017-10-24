@@ -4,10 +4,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "../ast/ast.h"
-
 namespace LangUMS
 {
+
+    class IASTNode;
+    class ASTFunctionDeclaration;
 
     class RegisterAliases
     {
@@ -22,7 +23,6 @@ namespace LangUMS
 
         private:
         unsigned int GetNextFreeId();
-        ASTFunctionDeclaration* FindFunctionDeclarationForNode(IASTNode* node) const;
 
         std::unordered_map<ASTFunctionDeclaration*, std::unordered_map<std::string, std::vector<unsigned int>>> m_Aliases;
         std::unordered_map<std::string, std::vector<unsigned int>> m_GlobalAliases;

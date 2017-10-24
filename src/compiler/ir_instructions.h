@@ -102,6 +102,13 @@ namespace LangUMS
         UnitProp
     };
 
+    struct StackFrame
+    {
+        std::string m_FunctionName;
+        std::vector<std::pair<unsigned int, std::string>> m_Variables;
+        IASTNode* m_ASTNode = nullptr;
+    };
+
     using namespace CHK;
 
     class IIRInstruction
