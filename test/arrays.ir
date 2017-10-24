@@ -23,7 +23,7 @@ MSG "(foo[1] * 2) == 84" [ALL]
 CHKPLAYERS
 SETSW [SWITCH 1] 1
 JSNS [SWITCH 19] +4
-INCDEATHS Player2 TerranMarine 1
+DECDEATHS Player2 TerranMarine 1
 INC r8
 INC r9
 SETSW [SWITCH 19] 0

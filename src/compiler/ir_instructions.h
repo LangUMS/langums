@@ -2157,10 +2157,10 @@ namespace Langums
         {
             if (m_IsValueLiteral)
             {
-                return SafePrintf ("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegisterId);
+                return SafePrintf ("DECDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], m_RegisterId);
             }
 
-            return SafePrintf ("INCDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString (m_RegisterId));
+            return SafePrintf ("DECDEATHS % % %", CHK::PlayersByName[m_PlayerId], CHK::UnitsByName[m_UnitId], RegisterIdToString (m_RegisterId));
         }
 
         private:

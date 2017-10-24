@@ -146,6 +146,8 @@ fn main() {
 }
 ```
 
+Note that all function arguments are passed by value.
+
 You can also have static arrays. At the moment arrays can only be indexed with constants.
 
 ```c

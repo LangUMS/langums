@@ -13,8 +13,9 @@ namespace Langums
     {
         m_Instructions.clear();
         m_FunctionDeclarations.clear();
-        m_GlobalAliases = RegisterAliases();
         m_WavFilenames.clear();
+
+        auto aliases = RegisterAliases();
 
         if (ast->GetType() != ASTNodeType::Unit)
         {
@@ -42,13 +43,13 @@ namespace Langums
                 auto variable = (ASTVariableDeclaration*)node.get();
                 auto& name = variable->GetName();
 
-                if (m_GlobalAliases.HasAlias(name, 0))
+                if (aliases.HasAlias(name, 0, node.get()))
                 {
                     throw IRCompilerException(SafePrintf("Duplicate global variable declaration \"%\"", name), node.get());
                 }
 
                 auto arraySize = variable->GetArraySize();
-                m_GlobalAliases.Allocate(name, arraySize);
+                aliases.Allocate(name, arraySize, node.get());
 
                 auto& expression = variable->GetExpression();
 
@@ -64,8 +65,8 @@ namespace Langums
 
                     for (auto i = 0u; i < arraySize; i++)
                     {
-                        auto regId = m_GlobalAliases.GetAlias(name, i, expression.get());
-                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), m_GlobalAliases);
+                        auto regId = aliases.GetAlias(name, i, expression.get());
+                        EmitInstruction(new IRSetRegInstruction(regId, value), m_Instructions, expression.get(), aliases);
                     }
                 }
             }
@@ -100,14 +101,14 @@ namespace Langums
                 m_UnitProperties.insert(std::make_pair(name, nextUnitSlot++));
 
                 auto propsCount = unitProps->GetPropertiesCount();
-                EmitInstruction(new IRUnitInstruction(propsCount), m_Instructions, node.get(), m_GlobalAliases);
+                EmitInstruction(new IRUnitInstruction(propsCount), m_Instructions, node.get(), aliases);
 
                 for (auto i = 0u; i < propsCount; i++)
                 {
                     auto unitProp = (ASTUnitProperty*)unitProps->GetProperty(i).get();
                     auto propType = ParseUnitPropType(unitProp->GetName(), unitProp);
 
-                    EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions, unitProp, m_GlobalAliases);
+                    EmitInstruction(new IRUnitPropInstruction(propType, unitProp->GetValue()), m_Instructions, unitProp, aliases);
                 }
             }
         }
@@ -138,7 +139,7 @@ namespace Langums
                     throw IRCompilerException("Maximum event conditions reached (63 conditions per event)", node.get());
                 }
 
-                EmitInstruction(new IREventInstruction(nextSwitchId++, conditionsCount), m_Instructions, node.get(), m_GlobalAliases);
+                EmitInstruction(new IREventInstruction(nextSwitchId++, conditionsCount), m_Instructions, node.get(), aliases);
 
                 for (auto i = 0u; i < conditionsCount; i++)
                 {
@@ -153,7 +154,7 @@ namespace Langums
                         if (arg0->GetType() == ASTNodeType::Identifier)
                         {
                             auto identifier = (ASTIdentifier*)arg0.get();
-                            regId = m_GlobalAliases.GetAlias(identifier->GetName(), 0, identifier);
+                            regId = aliases.GetAlias(identifier->GetName(), 0, identifier);
                         }
                         else if (arg0->GetType() == ASTNodeType::ArrayExpression)
                         {
@@ -165,7 +166,7 @@ namespace Langums
                             }
 
                             auto arrayIndex = (ASTNumberLiteral*)index.get();
-                            regId = m_GlobalAliases.GetAlias(arrayExpression->GetIdentifier(), arrayIndex->GetValue(), arrayExpression);
+                            regId = aliases.GetAlias(arrayExpression->GetIdentifier(), arrayIndex->GetValue(), arrayExpression);
                         }
                         else
                         {
@@ -175,7 +176,7 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
 
-                        EmitInstruction(new IRRegCondInstruction(regId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRRegCondInstruction(regId, comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "bring")
                     {
@@ -185,7 +186,7 @@ namespace Langums
                         auto unitId = ParseUnitTypeArgument(condition->GetArgument(3), name, 3);
                         auto locationName = ParseLocationArgument(condition->GetArgument(4), name, 4);
 
-                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRBringCondInstruction(playerId, unitId, locationName, comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "commands" || name == "killed" || name == "deaths")
                     {
@@ -196,15 +197,15 @@ namespace Langums
 
                         if (name == "commands")
                         {
-                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRCmdCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, aliases);
                         }
                         else if (name == "killed")
                         {
-                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRKillCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, aliases);
                         }
                         else if (name == "deaths")
                         {
-                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRDeathCondInstruction(playerId, unitId, comparison, quantity), m_Instructions, condition, aliases);
                         }
                     }
                     else if (name == "commands_least" || name == "commands_most")
@@ -221,11 +222,11 @@ namespace Langums
 
                         if (name == "commands_least")
                         {
-                            EmitInstruction(new IRCmdLeastCondInstruction(playerId, unitId, locationName), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRCmdLeastCondInstruction(playerId, unitId, locationName), m_Instructions, condition, aliases);
                         }
                         else if (name == "commands_most")
                         {
-                            EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRCmdMostCondInstruction(playerId, unitId, locationName), m_Instructions, condition, aliases);
                         }
                     }
                     else if (name == "killed_least" || name == "killed_most")
@@ -235,11 +236,11 @@ namespace Langums
 
                         if (name == "killed_least")
                         {
-                            EmitInstruction(new IRKillLeastCondInstruction(playerId, unitId), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRKillLeastCondInstruction(playerId, unitId), m_Instructions, condition, aliases);
                         }
                         else if (name == "killed_most")
                         {
-                            EmitInstruction(new IRKillMostCondInstruction(playerId, unitId), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRKillMostCondInstruction(playerId, unitId), m_Instructions, condition, aliases);
                         }
                     }
                     else if (name == "accumulate")
@@ -249,7 +250,7 @@ namespace Langums
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
                         auto resType = ParseResourceTypeArgument(condition->GetArgument(3), name, 3);
 
-                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRAccumCondInstruction(playerId, resType, comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "least_resources" || name == "most_resources")
                     {
@@ -258,11 +259,11 @@ namespace Langums
 
                         if (name == "least_resources")
                         {
-                            EmitInstruction(new IRLeastResCondInstruction(playerId, resType), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRLeastResCondInstruction(playerId, resType), m_Instructions, condition, aliases);
                         }
                         else if (name == "most_resources")
                         {
-                            EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRMostResCondInstruction(playerId, resType), m_Instructions, condition, aliases);
                         }
                     }
                     else if (name == "score")
@@ -272,7 +273,7 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(2), name, 2);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(3), name, 3);
 
-                        EmitInstruction(new IRScoreCondInstruction(playerId, scoreType, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRScoreCondInstruction(playerId, scoreType, comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "lowest_score" || name == "highest_score")
                     {
@@ -281,11 +282,11 @@ namespace Langums
 
                         if (name == "lowest_score")
                         {
-                            EmitInstruction(new IRLowScoreCondInstruction(playerId, scoreType), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRLowScoreCondInstruction(playerId, scoreType), m_Instructions, condition, aliases);
                         }
                         else if (name == "highest_score")
                         {
-                            EmitInstruction(new IRHiScoreCondInstruction(playerId, scoreType), m_Instructions, condition, m_GlobalAliases);
+                            EmitInstruction(new IRHiScoreCondInstruction(playerId, scoreType), m_Instructions, condition, aliases);
                         }
                     }
                     else if (name == "elapsed_time")
@@ -293,14 +294,14 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRTimeCondInstruction(comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "countdown")
                     {
                         auto comparison = ParseComparisonArgument(condition->GetArgument(0), name, 0);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(1), name, 1);
 
-                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IRCountdownCondInstruction(comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else if (name == "opponents")
                     {
@@ -308,7 +309,7 @@ namespace Langums
                         auto comparison = ParseComparisonArgument(condition->GetArgument(1), name, 1);
                         auto quantity = ParseQuantityArgument(condition->GetArgument(2), name, 2);
 
-                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity), m_Instructions, condition, m_GlobalAliases);
+                        EmitInstruction(new IROpponentsCondInstruction(playerId, comparison, quantity), m_Instructions, condition, aliases);
                     }
                     else
                     {
@@ -318,10 +319,10 @@ namespace Langums
             }
         }
 
-        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, m_GlobalAliases);
+        EmitInstruction(new IRChkPlayers(), m_Instructions, nullptr, aliases);
 
         auto main = m_FunctionDeclarations["main"];
-        EmitFunction(main, m_Instructions, m_GlobalAliases);
+        EmitFunction(main, m_Instructions, aliases);
         return true;
     }
 
@@ -361,9 +362,9 @@ namespace Langums
 
         for (auto& frame : stackFrames)
         {
-            for (auto& global : m_GlobalAliases.GetAliases())
+            for (auto& global : aliases.GetAliases(node))
             {
-                auto regId = m_GlobalAliases.GetAlias(global.first, 0, node);
+                auto regId = aliases.GetAlias(global.first, 0, node);
                 frame->m_Variables.push_back(std::make_pair(regId, global.first));
             }
         }
@@ -384,7 +385,7 @@ namespace Langums
 
         if (fnName == "poll_events")
         {
-            EmitInstruction(new IRChkPlayers(), instructions, nullptr, m_GlobalAliases);
+            EmitInstruction(new IRChkPlayers(), instructions, nullptr, aliases);
             EmitInstruction(new IRSetSwInstruction(Switch_EventsMutex, true), instructions, fnCall, aliases);
 
             auto nextSwitchId = (int)Switch_ReservedEnd;
@@ -410,7 +411,7 @@ namespace Langums
                 }
 
                 std::vector<std::unique_ptr<IIRInstruction>> bodyInstructions;
-                EmitBlockStatement((ASTBlockStatement*)body.get(), bodyInstructions, m_GlobalAliases);
+                EmitBlockStatement((ASTBlockStatement*)body.get(), bodyInstructions, aliases);
 
                 for (auto i = 0u; i < bodyInstructions.size(); i++)
                 {
@@ -426,14 +427,14 @@ namespace Langums
                 }
 
                 auto switchId = nextSwitchId++;
-                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), instructions, node.get(), m_GlobalAliases);
+                EmitInstruction(new IRJmpIfSwNotSetInstruction(switchId, bodyInstructions.size() + 1), instructions, node.get(), aliases);
 
                 for (auto& instruction : bodyInstructions)
                 {
                     instructions.push_back(std::move(instruction));
                 }
 
-                EmitInstruction(new IRSetSwInstruction(switchId, false), instructions, node.get(), m_GlobalAliases);
+                EmitInstruction(new IRSetSwInstruction(switchId, false), instructions, node.get(), aliases);
 
                 m_DebugStackFrames.pop_back();
             }
@@ -2154,7 +2155,7 @@ namespace Langums
                 auto variableDeclaration = (ASTVariableDeclaration*)statement.get();
 
                 auto& name = variableDeclaration->GetName();
-                aliases.Allocate(name, variableDeclaration->GetArraySize());
+                aliases.Allocate(name, variableDeclaration->GetArraySize(), statement.get());
                 auto regId = aliases.GetAlias(name, 0, variableDeclaration);
                 m_DebugStackFrames.back()->m_Variables.push_back(std::make_pair(regId, name));
 
@@ -2180,7 +2181,7 @@ namespace Langums
                         variableDeclaration->GetName()), expression.get());
                 }
 
-                aliases.Allocate(variableDeclaration->GetName(), 1);
+                aliases.Allocate(variableDeclaration->GetName(), 1, statement.get());
                 auto regId = RegisterNameToIndex(variableDeclaration->GetName(), 0, aliases, expression.get());
                 if (expression->GetType() == ASTNodeType::NumberLiteral)
                 {
@@ -2634,13 +2635,13 @@ namespace Langums
 
         for (auto& name : localVariables)
         {
-            aliases.Deallocate(name);
+            aliases.Deallocate(name, blockStatement);
         }
 
         return startIndex;
     }
 
-    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases)
+    unsigned int IRCompiler::EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases)
     {
         auto frame = std::make_shared<StackFrame>();
         frame->m_ASTNode = fn;
@@ -2662,7 +2663,7 @@ namespace Langums
         for (auto i = 0u; i < argsCount; i++)
         {
             auto& argName = args[i];
-            aliases.Allocate(argName, 1);
+            aliases.Allocate(argName, 1, fn);
             auto regId = aliases.GetAlias(argName, 0, fn);
 
             frame->m_Variables.push_back(std::make_pair(regId, argName));
@@ -2691,7 +2692,7 @@ namespace Langums
         for (auto i = 0u; i < argsCount; i++)
         {
             auto& argName = args[i];
-            aliases.Deallocate(argName);
+            aliases.Deallocate(argName, fn);
         }
 
         if (instructions.size() == 0)

@@ -50,7 +50,7 @@ namespace Langums
         void EmitPostfixExpression(ASTUnaryExpression* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases, bool pushToStack);
         void EmitExpression(IASTNode* expression, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
         unsigned int EmitBlockStatement(ASTBlockStatement* blockStatement, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
-        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases aliases);
+        unsigned int EmitFunction(ASTFunctionDeclaration* fn, std::vector<std::unique_ptr<IIRInstruction>>& instructions, RegisterAliases& aliases);
 
         bool IsRegisterName(const std::string& name, RegisterAliases& aliases, IASTNode* node) const;
         int RegisterNameToIndex(const std::string& name, unsigned int arrayIndex, RegisterAliases& aliases, IASTNode* node) const;
@@ -82,8 +82,6 @@ namespace Langums
         std::unordered_map<std::string, ASTFunctionDeclaration*> m_FunctionDeclarations;
         std::unordered_map<ASTFunctionDeclaration*, unsigned int> m_FunctionIndices;
         std::unordered_map<std::string, unsigned int> m_UnitProperties;
-
-        RegisterAliases m_GlobalAliases;
 
         unsigned int m_EventCount = 0;
         std::set<std::string> m_WavFilenames;

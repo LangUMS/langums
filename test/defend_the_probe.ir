@@ -594,19 +594,19 @@ SPAWN Player6 TerranSCV 1 MapCenter
 MOVE Player6 AllUnits 100 BuySCV BuySCVReturn
 SETSW [SWITCH 71] 0
 JSNS [SWITCH 72] +3
-INCDEATHS Player8 ZergZergling 2
+DECDEATHS Player8 ZergZergling 2
 INCRSRC AllPlayers Minerals 1
 SETSW [SWITCH 72] 0
 JSNS [SWITCH 73] +3
-INCDEATHS Player8 ZergHydralisk 1
+DECDEATHS Player8 ZergHydralisk 1
 INCRSRC AllPlayers Minerals 3
 SETSW [SWITCH 73] 0
 JSNS [SWITCH 74] +3
-INCDEATHS Player8 ZergUltralisk 1
+DECDEATHS Player8 ZergUltralisk 1
 INCRSRC AllPlayers Minerals 4
 SETSW [SWITCH 74] 0
 JSNS [SWITCH 75] +3
-INCDEATHS Player8 ZergInfestedTerran 3
+DECDEATHS Player8 ZergInfestedTerran 3
 INCRSRC AllPlayers Minerals 2
 SETSW [SWITCH 75] 0
 JSNS [SWITCH 76] +105
@@ -663,8 +663,8 @@ PING AllPlayers MapCenter
 MSG "A probe has spawned in the center and is heading for a cargo beacon, protect it!" [ALL]
 WAIT 500
 RND256
-POP r10
-JLE r10 65 +4
+POP r11
+JLE r11 65 +4
 PUSH 0
 JMP +3
 POP
@@ -673,7 +673,7 @@ JEQ [STACK 0] 0 +4
 PING AllPlayers ProbeTarget1
 ORDER Player7 ProtossProbe Move MapCenter ProbeTarget1
 JMP +21
-JLE r10 130 +4
+JLE r11 130 +4
 PUSH 0
 JMP +3
 POP
@@ -682,7 +682,7 @@ JEQ [STACK 0] 0 +4
 PING AllPlayers ProbeTarget2
 ORDER Player7 ProtossProbe Move MapCenter ProbeTarget2
 JMP +12
-JLE r10 195 +4
+JLE r11 195 +4
 PUSH 0
 JMP +3
 POP
