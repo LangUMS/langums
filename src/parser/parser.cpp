@@ -23,6 +23,7 @@ namespace LangUMS
         if (c == '(')
         {
             Next();
+            Whitespace();
             ExpressionToken token;
             token.m_Type = TokenType::LeftParenthesis;
             return token;
@@ -31,6 +32,7 @@ namespace LangUMS
         if (c == ')')
         {
             Next();
+            Whitespace();
             ExpressionToken token;
             token.m_Type = TokenType::RightParenthesis;
             return token;
@@ -39,6 +41,7 @@ namespace LangUMS
         if (c == '[')
         {
             Next();
+            Whitespace();
             ExpressionToken token;
             token.m_Type = TokenType::LeftSquareBracket;
             return token;
@@ -47,6 +50,7 @@ namespace LangUMS
         if (c == ']')
         {
             Next();
+            Whitespace();
             ExpressionToken token;
             token.m_Type = TokenType::RightSquareBracket;
             return token;
@@ -88,7 +92,6 @@ namespace LangUMS
         token.m_Type = TokenType::Identifier;
         token.m_Value = Identifier();
 
-        Whitespace();
         if (Peek() == '(')
         {
             token.m_Type = TokenType::FunctionName;
@@ -109,6 +112,7 @@ namespace LangUMS
         while (!EndOfStream())
         {
             Whitespace();
+
             if (EndOfStream())
             {
                 break;
@@ -251,7 +255,6 @@ namespace LangUMS
             }
 
             auto token = Token();
-            Whitespace();
 
             switch (token.m_Type)
             {
@@ -324,7 +327,6 @@ namespace LangUMS
                 {
                     insideFunctionCall++;
 
-                    Whitespace();
                     if (Peek() != ')')
                     {
                         stack.back().m_NumberValue++;
@@ -395,9 +397,7 @@ namespace LangUMS
                 token.m_Type = TokenType::ArrayOperator;
                 output.push_back(token);
 
-                Whitespace();
                 Symbol(']');
-                Whitespace();
             }
             else if (token.m_Type == TokenType::RightSquareBracket)
             {
@@ -525,16 +525,12 @@ namespace LangUMS
 
     std::unique_ptr<IASTNode> Parser::ExpressionStatement()
     {
-        Whitespace();
-
         auto identifier = Identifier();
-        Whitespace();
 
         std::unique_ptr<IASTNode> arrayIndex = nullptr;
         if (Peek() == '[')
         {
             Symbol('[');
-            Whitespace();
 
             if (std::isdigit(Peek()))
             {
@@ -545,9 +541,7 @@ namespace LangUMS
                 arrayIndex = std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar));
             }
 
-            Whitespace();
             Symbol(']');
-            Whitespace();
         }
 
         OperatorType op;
@@ -567,8 +561,6 @@ namespace LangUMS
             throw new ParserException(m_CurrentChar, "Invalid expression statement");
         }
 
-        Whitespace();
-
         auto unaryExpression = new ASTUnaryExpression(op, m_CurrentChar);
 
         if (arrayIndex == nullptr)
@@ -587,8 +579,6 @@ namespace LangUMS
 
     std::unique_ptr<IASTNode> Parser::AssignmentExpression()
     {
-        Whitespace();
-
         auto assignmentExpression = new ASTAssignmentExpression(m_CurrentChar);
 
         auto i = 0;
@@ -601,9 +591,7 @@ namespace LangUMS
         if (c == '[')
         {
             auto identifier = Identifier();
-            Whitespace();
             Symbol('[');
-            Whitespace();
 
             auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
 
@@ -616,7 +604,6 @@ namespace LangUMS
                 arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
             }
 
-            Whitespace();
             Symbol(']');
 
             assignmentExpression->AddChild(std::unique_ptr<IASTNode>(arrayExpression));
@@ -626,9 +613,7 @@ namespace LangUMS
             assignmentExpression->AddChild(std::unique_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
         }
 
-        Whitespace();
         Symbol('=');
-        Whitespace();
         assignmentExpression->AddChild(Expression());
 
         return std::unique_ptr<IASTNode>(assignmentExpression);
@@ -637,11 +622,8 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::VariableDeclaration()
     {
         Keyword("var");
-        Whitespace();
 
         auto name = Identifier();
-
-        Whitespace();
 
         auto arraySize = 1;
         std::unique_ptr<IASTNode> assignmentExpression;
@@ -649,13 +631,11 @@ namespace LangUMS
         if (Peek() == '=')
         {
             Symbol('=');
-            Whitespace();
             assignmentExpression = Expression();
         }
         else if (Peek() == '[')
         {
             Symbol('[');
-            Whitespace();
 
             arraySize = NumberLiteral();
             if (arraySize <= 0)
@@ -663,7 +643,6 @@ namespace LangUMS
                 throw ParserException(m_CurrentChar, SafePrintf("Invalid array size %", arraySize));
             }
 
-            Whitespace();
             Symbol(']');
         }
 
@@ -680,13 +659,11 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::ReturnStatement()
     {
         Keyword("return");
-        Whitespace();
         auto returnStatement = new ASTReturnStatement(m_CurrentChar);
 
         if (Peek() != ';')
         {
             returnStatement->AddChild(Expression());
-            Whitespace();
         }
 
         return std::unique_ptr<IASTNode>(returnStatement);
@@ -696,20 +673,15 @@ namespace LangUMS
     {
         std::unique_ptr<IASTNode> statement = nullptr;
 
-        Whitespace();
-
         if (PeekKeyword("for"))
         {
-            statement = RepeatTemplate();
-            Whitespace();
-            return statement;
+            return RepeatTemplate();
         }
 
         if (PeekKeyword("var"))
         {
             statement = VariableDeclaration();
             Symbol(';');
-            Whitespace();
             return statement;
         }
 
@@ -717,7 +689,6 @@ namespace LangUMS
         {
             statement = ReturnStatement();
             Symbol(';');
-            Whitespace();
             return statement;
         }
 
@@ -761,12 +732,9 @@ namespace LangUMS
             throw ParserException(m_CurrentChar, "Invalid statement");
         }
 
-        Whitespace();
-
         if (requiresSemicolon)
         {
             Symbol(';');
-            Whitespace();
         }
 
         return statement;
@@ -774,13 +742,10 @@ namespace LangUMS
 
     std::unique_ptr<IASTNode> Parser::BlockStatement()
     {
-        Whitespace();
         Symbol('{');
 
         auto blockStatement = new ASTBlockStatement(m_CurrentChar);
         
-        Whitespace();
-
         while (true)
         {
             auto c = Peek();
@@ -800,13 +765,10 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::IfStatement()
     {
         Keyword("if");
-        Whitespace();
 
         auto ifStatement = new ASTIfStatement(m_CurrentChar);
         ifStatement->AddChild(Expression());
-        Whitespace();
         ifStatement->AddChild(BlockStatement());
-        Whitespace();
 
         if (PeekKeyword("else"))
         {
@@ -820,11 +782,9 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::WhileStatement()
     {
         Keyword("while");
-        Whitespace();
 
         auto whileStatement = new ASTWhileStatement(m_CurrentChar);
         whileStatement->AddChild(Expression());
-        Whitespace();
         whileStatement->AddChild(BlockStatement());
 
         return std::unique_ptr<IASTNode>(whileStatement);
@@ -832,14 +792,11 @@ namespace LangUMS
 
     std::unique_ptr<IASTNode> Parser::TemplateFunction()
     {
-        Whitespace();
         Keyword("fn");
-        Whitespace();
 
         auto functionName = Identifier();
 
         Symbol('<');
-        Whitespace();
 
         std::vector<std::string> templateArgs;
 
@@ -852,20 +809,16 @@ namespace LangUMS
             }
 
             templateArgs.push_back(Identifier());
-            Whitespace();
 
             c = Peek();
             if (c == ',')
             {
                 Next();
-                Whitespace();
             }
         }
 
         Symbol('>');
-        Whitespace();
         Symbol('(');
-        Whitespace();
 
         std::vector<std::string> args;
 
@@ -878,37 +831,29 @@ namespace LangUMS
             }
 
             args.push_back(Identifier());
-            Whitespace();
 
             c = Peek();
             if (c == ',')
             {
                 Next();
-                Whitespace();
             }
         }
 
-        Whitespace();
         Symbol(')');
-        Whitespace();
 
         auto templateDeclaration = new ASTTemplateFunction(functionName, args, templateArgs, m_CurrentChar);
         templateDeclaration->AddChild(BlockStatement());
-        Whitespace();
 
         return std::unique_ptr<IASTNode>(templateDeclaration);
     }
 
     std::unique_ptr<IASTNode> Parser::FunctionDeclaration()
     {
-        Whitespace();
         Keyword("fn");
-        Whitespace();
 
         auto functionName = Identifier();
 
         Symbol('(');
-        Whitespace();
 
         std::vector<std::string> args;
 
@@ -921,23 +866,18 @@ namespace LangUMS
             }
 
             args.push_back(Identifier());
-            Whitespace();
 
             c = Peek();
             if (c == ',')
             {
                 Next();
-                Whitespace();
             }
         }
 
-        Whitespace();
         Symbol(')');
-        Whitespace();
 
         auto functionDeclaration = new ASTFunctionDeclaration(functionName, args, m_CurrentChar);
         functionDeclaration->AddChild(BlockStatement());
-        Whitespace();
 
         return std::unique_ptr<IASTNode>(functionDeclaration);
     }
@@ -945,11 +885,8 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::GlobalVariableDeclaration()
     {
         Keyword("global");
-        Whitespace();
 
         auto name = Identifier();
-
-        Whitespace();
 
         auto arraySize = 1;
         std::unique_ptr<IASTNode> assignmentExpression;
@@ -957,13 +894,11 @@ namespace LangUMS
         if (Peek() == '=')
         {
             Symbol('=');
-            Whitespace();
             assignmentExpression = Expression();
         }
         else if (Peek() == '[')
         {
             Symbol('[');
-            Whitespace();
 
             arraySize = NumberLiteral();
             if (arraySize <= 0)
@@ -971,7 +906,6 @@ namespace LangUMS
                 throw ParserException(m_CurrentChar, SafePrintf("Invalid array size %", arraySize));
             }
 
-            Whitespace();
             Symbol(']');
         }
 
@@ -981,8 +915,6 @@ namespace LangUMS
         {
             variableDeclaration->AddChild(std::move(assignmentExpression));
         }
-       
-        Whitespace();
 
         Symbol(';');
 
@@ -994,9 +926,7 @@ namespace LangUMS
         auto conditionName = Identifier();
         auto condition = new ASTEventCondition(conditionName, m_CurrentChar);
 
-        Whitespace();
         Symbol('(');
-        Whitespace();
 
         auto c = Peek();
         while (c != ')')
@@ -1012,16 +942,12 @@ namespace LangUMS
             else
             {
                 auto identifier = Identifier();
-                Whitespace();
 
                 if (Peek() == '[')
                 {
                     Symbol('[');
-                    Whitespace();
                     auto arrayIndex = NumberLiteral();
-                    Whitespace();
                     Symbol(']');
-                    Whitespace();
 
                     auto arrayExpression = new ASTArrayExpression(identifier, m_CurrentChar);
                     arrayExpression->AddChild(std::unique_ptr<IASTNode>(new ASTNumberLiteral(arrayIndex, m_CurrentChar)));
@@ -1032,8 +958,6 @@ namespace LangUMS
                     condition->AddChild(std::shared_ptr<IASTNode>(new ASTIdentifier(identifier, m_CurrentChar)));
                 }
             }
-            
-            Whitespace();
 
             c = Peek();
             if (c == ')')
@@ -1042,7 +966,6 @@ namespace LangUMS
             }
 
             Symbol(',');
-            Whitespace();
             c = Peek();
         }
 
@@ -1056,40 +979,31 @@ namespace LangUMS
         auto eventDeclaration = new ASTEventDeclaration(m_CurrentChar);
 
         eventDeclaration->AddChild(EventCondition());
-        Whitespace();
 
         auto c = Peek();
         while (c == ',')
         {
             Next();
-            Whitespace();
             eventDeclaration->AddChild(EventCondition());
-            Whitespace();
             c = Peek();
         }
 
-        Whitespace();
         Keyword("=>");
-        Whitespace();
 
         eventDeclaration->AddChild(BlockStatement());
-
         return std::unique_ptr<IASTNode>(eventDeclaration);
     }
     
     std::unique_ptr<IASTNode> Parser::UnitScopeRepeatTemplate()
     {
         Keyword("for");
-        Whitespace();
         Symbol('<');
-        Whitespace();
 
         std::vector<std::string> iterators;
 
         while (true)
         {
             iterators.push_back(Identifier());
-            Whitespace();
 
             if (Peek() == '>')
             {
@@ -1097,22 +1011,17 @@ namespace LangUMS
             }
 
             Symbol(',');
-            Whitespace();
         }
 
-        Whitespace();
         Symbol('>');
-        Whitespace();
 
         Keyword("in");
-        Whitespace();
 
         auto repeatTemplate = new ASTRepeatTemplate(iterators, m_CurrentChar);
 
         for (auto i = 0u; i < iterators.size(); i++)
         {
             Symbol('(');
-            Whitespace();
 
             auto c = Peek();
             while (c != ')')
@@ -1130,34 +1039,27 @@ namespace LangUMS
                     repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
                 }
 
-                Whitespace();
                 c = Peek();
                 if (c == ',')
                 {
                     Symbol(',');
-                    Whitespace();
                 }
             }
 
-            Whitespace();
             Symbol(')');
-            Whitespace();
 
             if (i != iterators.size() - 1)
             {
                 Symbol(',');
-                Whitespace();
                 c = Peek();
             }
         }
 
         Symbol('{');
-        Whitespace();
 
         while (Peek() != '}')
         {
             repeatTemplate->AddChild(EventDeclaration());
-            Whitespace();
 
             if (Peek() == '}')
             {
@@ -1166,7 +1068,6 @@ namespace LangUMS
         }
 
         Symbol('}');
-        Whitespace();
 
         return std::unique_ptr<IASTNode>(repeatTemplate);
     }
@@ -1174,16 +1075,13 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::RepeatTemplate()
     {
         Keyword("for");
-        Whitespace();
         Symbol('<');
-        Whitespace();
 
         std::vector<std::string> iterators;
 
         while (true)
         {
             iterators.push_back(Identifier());
-            Whitespace();
             
             if (Peek() == '>')
             {
@@ -1191,22 +1089,16 @@ namespace LangUMS
             }
             
             Symbol(',');
-            Whitespace();
         }
 
-        Whitespace();
         Symbol('>');
-        Whitespace();
-
         Keyword("in");
-        Whitespace();
 
         auto repeatTemplate = new ASTRepeatTemplate(iterators, m_CurrentChar);
 
         for (auto i = 0u; i < iterators.size(); i++)
         {
             Symbol('(');
-            Whitespace();
 
             auto c = Peek();
             while (c != ')')
@@ -1224,60 +1116,48 @@ namespace LangUMS
                     repeatTemplate->AddListItem(iterators[i], std::shared_ptr<IASTNode>(new ASTIdentifier(Identifier(), m_CurrentChar)));
                 }
 
-                Whitespace();
                 c = Peek();
                 if (c == ',')
                 {
                     Symbol(',');
-                    Whitespace();
                     c = Peek();
                 }
             }
             
             Symbol(')');
-            Whitespace();
 
             if (i != iterators.size() - 1)
             {
                 Symbol(',');
-                Whitespace();
             }
         }
 
         repeatTemplate->AddChild(BlockStatement());
         
-        Whitespace();
         return std::unique_ptr<IASTNode>(repeatTemplate);
     }
 
     std::unique_ptr<IASTNode> Parser::UnitProperties()
     {
         Keyword("unit");
-        Whitespace();
 
         auto name = Identifier();
 
-        Whitespace();
         Symbol('{');
-        Whitespace();
 
         auto unitProperties = new ASTUnitProperties(name, m_CurrentChar);
 
         unitProperties->AddChild(UnitProperty());
-        Whitespace();
 
         auto c = Peek();
         while (c == ',')
         {
             Next();
-            Whitespace();
             unitProperties->AddChild(UnitProperty());
-            Whitespace();
             c = Peek();
         }
 
         Symbol('}');
-        Whitespace();
 
         return std::unique_ptr<IASTNode>(unitProperties);
     }
@@ -1285,9 +1165,7 @@ namespace LangUMS
     std::unique_ptr<IASTNode> Parser::UnitProperty()
     {
         auto name = Identifier();
-        Whitespace();
         Symbol('=');
-        Whitespace();
 
         auto c = Peek();
 
@@ -1334,6 +1212,8 @@ namespace LangUMS
             throw ParserException(m_CurrentChar, SafePrintf("Invalid identifier \"%\"", identifier));
         }
 
+        Whitespace();
+
         return identifier;
     }
 
@@ -1370,6 +1250,8 @@ namespace LangUMS
             s.push_back(Next());
         }
 
+        Whitespace();
+
         if (!isHex)
         {
             return std::atoi(s.c_str());
@@ -1404,7 +1286,7 @@ namespace LangUMS
 
             while (!PeekKeyword("\"\"\""))
             {
-                value.push_back(Next());
+                value.push_back(Next(false));
             }
 
             Keyword("\"\"\"");
@@ -1413,15 +1295,15 @@ namespace LangUMS
         {
             while (c != '"')
             {
-                value.push_back(Next());
-                c = Peek();
+                value.push_back(Next(false));
+                c = Peek(0, false);
                 if (c == '\n')
                 {
                     throw ParserException(m_CurrentChar, "Invalid string value, expected '\"'");
                 }
             }
 
-            Next();
+            Next(false);
         }
 
         std::string processed;
@@ -1463,6 +1345,8 @@ namespace LangUMS
                 processed.push_back(c);
             }
         }
+
+        Whitespace();
 
         return processed;
     }

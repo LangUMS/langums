@@ -121,6 +121,8 @@ namespace LangUMS
             {
                 throw ParserException(m_CurrentChar, SafePrintf("Syntax error. Expected \"%\".", symbol));
             }
+
+            Whitespace();
         }
 
         inline bool PeekKeyword(const std::string& keyword)
@@ -153,6 +155,8 @@ namespace LangUMS
 
                 i++;
             }
+
+            Whitespace();
         }
 
         inline void Whitespace()
@@ -162,9 +166,9 @@ namespace LangUMS
                 return;
             }
 
-            while (std::isspace(Peek()))
+            while (std::isspace(Peek(0, false)))
             {
-                Next();
+                Next(false);
 
                 if (EndOfStream())
                 {
@@ -173,22 +177,32 @@ namespace LangUMS
             }
         }
 
-        inline char Peek(int chars = 0)
+        inline char Peek(int chars = 0, bool ignoreWhitespace = true)
         {
-            auto index = m_CurrentChar + chars;
-            if (index >= m_Buffer.size())
+            auto index = m_CurrentChar;
+            while (ignoreWhitespace && std::isspace(m_Buffer[index]))
+            {
+                index++;
+            }
+ 
+            if (index + chars >= m_Buffer.size())
             {
                 throw ParserException(index, "Unexpected end of input");
             }
 
-            return m_Buffer[index];
+            return m_Buffer[index + chars];
         }
 
-        inline char Next()
+        inline char Next(bool ignoreWhitespace = true)
         {
             if (m_CurrentChar >= m_Buffer.size())
             {
                 throw ParserException(m_CurrentChar, "Unexpected end of input");
+            }
+
+            while (ignoreWhitespace && std::isspace(m_Buffer[m_CurrentChar])) 
+            {
+                m_CurrentChar++;
             }
 
             return m_Buffer[m_CurrentChar++];

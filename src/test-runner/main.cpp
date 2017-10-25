@@ -187,13 +187,17 @@ int main(int argc, char* argv[])
         {
             LOG_F("(!) IR mismatch for \"%\"", testName);
 
-            LOG_F("*** EXPECTED ***");
-            LOG_F("%", expectedIR);
-            LOG_F("****************");
+            auto lines = Split(ir);
+            auto expectedLines = Split(expectedIR);
 
-            LOG_F("*** ACTUAL ***");
-            LOG_F("%", ir);
-            LOG_F("**************");
+            for (auto i = 0u; i < std::min(lines.size(), expectedLines.size()); i++)
+            {
+                if (lines[i] != expectedLines[i])
+                {
+                    LOG_F(">>> %", expectedLines[i]);
+                    LOG_F("<<< %", lines[i]);
+                }
+            }
 
             failed.push_back(testName);
             continue;

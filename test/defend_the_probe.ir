@@ -209,7 +209,7 @@ JEQ [STACK 0] 0 +3
 SPAWN Player6 HeroJimRaynorMarine 1 MapCenter 
 SETDOODAD Player6 AllUnits DisableClick 5
 CNTRVIEW AllPlayers MapCenter
-SETOBJ - Don't let the probes die until they deliver the cargo.' - You can buy units at the beacons. - Upgrade your units with gas you get from deliveries.    [ALL]
+SETOBJ - Don't let the probes die until they deliver the cargo.' - You can buy units at the beacons. - Upgrade your units with gas you get from deliveries. [ALL]
 LDRBOARD "deliveries left to make" Points [GOAL 32]
 LDRBOARDCPU 5
 WAIT 4000
